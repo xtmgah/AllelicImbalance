@@ -368,7 +368,8 @@ getAlleleCounts<-function(BamList, GRvariants, strand="nonStranded", return.type
 		#fill array
 		nstr <- strsplit(as.character(nuclpiles),"")
 		for(k in 1:length(GRvariants)){
-			ar1[k,j,] <- c(sum(nstr[[k]]%in%"A"),sum(nstr[[k]]%in%"C"),sum(nstr[[k]]%in%"G"),sum(nstr[[k]]%in%"T"),NA)			}
+			ar1[k,j,] <- c(sum(nstr[[k]]%in%"A"),sum(nstr[[k]]%in%"C"),sum(nstr[[k]]%in%"G"),sum(nstr[[k]]%in%"T"),0) #del will always be 0. Could have set it to NA, but then it makes problem further  down in the chain of functions...			
+		}
 
 		
 	}

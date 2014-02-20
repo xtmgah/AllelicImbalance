@@ -16,7 +16,8 @@ importFrom(GenomicRanges, seqnames)
 importFrom(GenomicRanges, "seqnames<-")
 importFrom(GenomicRanges, seqlevels)
 importFrom(GenomicRanges, "seqlevels<-")
-
+importFrom(GenomicAlignments, pileLettersAt)
+importFrom(GenomicAlignments, cigar)
 
 
 importFrom(IRanges, Rle)

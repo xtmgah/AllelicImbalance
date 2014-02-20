@@ -34,6 +34,9 @@ getAlleleCounts(BamList, GRvariants, strand, return.type="list", verbose=TRUE)}
 	data(reads)
 	data(GRvariants)
 
+	#set seqlevels in reads equal to seqlevels in GRvariants
+	seqlevels(reads) <- "17"
+
 	#get counts at the three positions specified in GRvariants
 	alleleCount <- getAlleleCounts(BamList=reads,GRvariants,
 		strand="nonStranded")
