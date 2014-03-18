@@ -928,7 +928,7 @@ getGenesFromAnnotation <- function(OrgDb, GR, leftFlank=0,rightFlank=0, getUCSC=
 
 
 
-getGenesVector <- function(OrgDb, leftFlank=0, rightFlank=0, GR,verbose=FALSE){
+getGenesVector <- function(OrgDb, GR, leftFlank=0, rightFlank=0, verbose=FALSE){
 	if(verbose){cat("start gene extraction\n")}
 	GenesInRegion <- getGenesFromAnnotation(OrgDb, GR, leftFlank=leftFlank,rightFlank=rightFlank,verbose=FALSE)	
 
@@ -1040,10 +1040,10 @@ getExonsFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FAL
 }
 
 
-getExonsVector <- function(TxDb, GR,verbose=FALSE){
+getExonsVector <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE){
 	if(verbose){cat("start exon extraction\n")}
 
-	ExonsInRegion <- getExonsFromAnnotation(TxDb, GR,leftFlank=0,rightFlank=0,verbose=verbose)
+	ExonsInRegion <- getExonsFromAnnotation(TxDb, GR,leftFlank,rightFlank,verbose=verbose)
 
 	seqlevels(GR) <- seqlevels(ExonsInRegion)
 
@@ -1123,10 +1123,10 @@ getTranscriptsFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbo
 	TxInRegion
 }
 
-getTranscriptsVector <- function(TxDb, GR,verbose=FALSE){
+getTranscriptsVector <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE){
 	if(verbose){cat("start transcript extraction\n")}
 
-	TxInRegion <- getTranscriptsFromAnnotation(TxDb, GR,leftFlank=0,rightFlank=0)
+	TxInRegion <- getTranscriptsFromAnnotation(TxDb, GR,leftFlank,rightFlank)
 
 	seqlevels(GR) <- seqlevels(TxInRegion)
 
@@ -1143,7 +1143,7 @@ getTranscriptsVector <- function(TxDb, GR,verbose=FALSE){
 
 }
 
-getCDSFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=1000,verbose=FALSE) {
+getCDSFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE) {
 	#CDS are the coding regions that do not only code for proteins, but other also other types like RNA.
 
 	#checks
@@ -1207,10 +1207,10 @@ getCDSFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=1000,verbose=FA
 
 
 
-getCDSVector <- function(TxDb, GR,verbose=FALSE){
+getCDSVector <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE){
 	if(verbose){cat("start CDS extraction\n")}
 
-	CDSInRegion <- getCDSFromAnnotation(TxDb, GR,leftFlank=0,rightFlank=0)
+	CDSInRegion <- getCDSFromAnnotation(TxDb, GR,leftFlank,rightFlank)
 
 	seqlevels(GR) <- seqlevels(CDSInRegion)
 
@@ -1249,29 +1249,29 @@ getAnnotationDataFrame <- function(GR,strand="+",annotationType=NULL,OrgDb=NULL,
 	#extract annotation
 	if(!is.null(OrgDb)){
 		if("gene"%in%annotationType){
-			gene <- getGenesVector(OrgDb=OrgDb, GR, verbose=verbose)
+			gene <- getGenesVector(OrgDb=OrgDb, GR=GR, verbose=verbose)
 			df[["symbol"]] <- gene
 		}
 		if(is.null(annotationType)){
-			gene <- getGenesVector(OrgDb=OrgDb, GR, verbose=verbose)
+			gene <- getGenesVector(OrgDb=OrgDb, GR=GR, verbose=verbose)
 			df[["symbol"]] <- gene
 		}
 	}
 	if(!is.null(TxDb)){
 		if("exon"%in%annotationType){
-			df[["exon_id"]] <-getExonsVector(TxDb=TxDb,GR, verbose=verbose)
+			df[["exon_id"]] <-getExonsVector(TxDb=TxDb,GR=GR, verbose=verbose)
 		}
 		if("transcript"%in%annotationType){
-			df[["tx_id"]] <- getTranscriptsVector(TxDb=TxDb,GR, verbose=verbose)
+			df[["tx_id"]] <- getTranscriptsVector(TxDb=TxDb,GR=GR, verbose=verbose)
 		}
 		if("cds"%in%annotationType){
-			df[["cds_id"]] <- getCDSVector(TxDb=TxDb,GR, verbose=verbose)
+			df[["cds_id"]] <- getCDSVector(TxDb=TxDb,GR=GR, verbose=verbose)
 		}
 
 		if(is.null(annotationType)) {
-			df[["exon_id"]] <-getExonsVector(TxDb=TxDb,GR, verbose=verbose)
-			df[["tx_id"]] <- getTranscriptsVector(TxDb=TxDb,GR, verbose=verbose)
-			df[["cds_id"]] <- getCDSVector(TxDb=TxDb,GR, verbose=verbose)
+			df[["exon_id"]] <-getExonsVector(TxDb=TxDb,GR=GR, verbose=verbose)
+			df[["tx_id"]] <- getTranscriptsVector(TxDb=TxDb,GR=GR, verbose=verbose)
+			df[["cds_id"]] <- getCDSVector(TxDb=TxDb,GR=GR, verbose=verbose)
 		}
 	}
 	df

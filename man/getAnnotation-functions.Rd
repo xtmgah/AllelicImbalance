@@ -29,10 +29,10 @@
   getCDSFromAnnotation(TxDb,GR,leftFlank=0,rightFlank=0,
     verbose=FALSE)
 
-  getGenesVector(OrgDb, GR,verbose=FALSE)
-  getExonsVector(TxDb, GR,verbose=FALSE)
-  getTranscriptsVector(TxDb, GR,verbose=FALSE)
-  getCDSVector(TxDb, GR,verbose=FALSE)
+  getGenesVector(OrgDb, GR, leftFlank=0, rightFlank=0, verbose=FALSE)
+  getExonsVector(TxDb, GR,leftFlank=0,rightFlank=0, verbose=FALSE)
+  getTranscriptsVector(TxDb, GR,leftFlank=0,rightFlank=0, verbose=FALSE)
+  getCDSVector(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE)
 
   getAnnotationDataFrame(GR,strand="+",annotationType=NULL,
     OrgDb=NULL, TxDb=NULL,verbose=FALSE)
