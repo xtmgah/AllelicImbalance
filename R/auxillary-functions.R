@@ -1451,4 +1451,11 @@ getSnpIdFromLocation <- function(GR, SNPloc, return.vector=FALSE, verbose=TRUE) 
 
 }
 
+#Deprecated functions
+getAlleleCount <- function()
+{
+	    .Deprecated("getAlleleCounts")
+    ## use new function, or remainder of myOldFunc
+}
+
 
