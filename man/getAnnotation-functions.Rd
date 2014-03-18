@@ -20,13 +20,13 @@
 }
 
 \usage{
-	getGenesFromAnnotation(OrgDb,GR,leftFlank=1000,rightFlank=1000,
+	getGenesFromAnnotation(OrgDb,GR,leftFlank=0,rightFlank=0,
     getUCSC=FALSE,verbose=FALSE)
-  getExonsFromAnnotation(TxDb,GR,leftFlank=1000,rightFlank=1000,
+  getExonsFromAnnotation(TxDb,GR,leftFlank=0,rightFlank=0,
       verbose=FALSE)
-  getTranscriptsFromAnnotation(TxDb,GR,leftFlank=1000,
-      rightFlank=1000,verbose=FALSE)
-  getCDSFromAnnotation(TxDb,GR,leftFlank=1000,rightFlank=1000,
+  getTranscriptsFromAnnotation(TxDb,GR,leftFlank=0,
+      rightFlank=0,verbose=FALSE)
+  getCDSFromAnnotation(TxDb,GR,leftFlank=0,rightFlank=0,
     verbose=FALSE)
 
   getGenesVector(OrgDb, GR,verbose=FALSE)
