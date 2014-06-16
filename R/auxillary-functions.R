@@ -1459,3 +1459,156 @@ getAlleleCount <- function()
 }
 
 
+#the draft of the function giving us a fastq file for all samples to detect mapbias
+
+makeMapBiasReads <- function(x, reads=100, refPath, read.length=100, PE=FALSE, insert.size=140, insert.sd=1){
+
+	#tmp ref file
+
+
+	#the output will be a GRanges or GrangesList  with reads
+
+	# x is of ASEset class
+	# reads are the numeber of simulated reads for each variant
+	# ref is the reference genome used
+
+	#require
+	require(Rsamtools)
+
+	#no junctions(if junctions we need txdb)
+	searchArea.ref <- rowData(x) + read.length-1
+
+	#make FaFile
+	fl <- FaFile("hg19.fa")
+
+	#check if the index file is present otherwise tell the user to use the indexFa(FaFile("pathToReference")) command
+	if(list.files(, pattern=paste("*",ref,".fai",sep="")){
+		indexFa(FaFile("pathToReference"))
+	}
+	#IMPORTANT! The  index command only needs to be executed once
+	#indexFa(fl) #creates a new file as index in the same directory but with extension *.fai 
+
+	#open,scan,close file
+	open(fl)
+	ref <- scanFa(fl,param=rowData(x))
+	seq <- scanFa(fl,param=searchArea.ref)
+	close(fl)
+	
+
+
+	#do it for one sample at the time
+	if(PE=FALSE){
+		#for each snp find all neighbouring snps to that one (all within read size)
+		#and which of these are different from the ref genome?
+		for(i in 1:nrow(x)){
+			hits <- findOverlaps(rowData(x)[i]+read.length, rowData(x))				
+			#here we need the functionality to store the genotype information for each 
+		       	#snp. So while doing that, I might already plan to include all genotypes and their ranges in a slot that. It would be some kind of transposed colData table. In the end the genotypes for RNA-seqenced allele we can store in an assay	
+			(x)
+		}
+	}
+}
+
+
+inferSnp <- function(x,strand="nonStranded",biallelic.only=TRUE){
+
+	if(biallelic.only==FALSE){stop("biallelic.only=FALSE is not supported yet")}
+
+	l <- lapply(alleleCounts(x,strand=strand), function(x){
+			ap <- apply(x,2,sum)
+			char <- names(sort(ap,decreasing=TRUE))[1:2]
+		 	char	
+		}
+	)
+	mat <- as.matrix(t(as.data.frame(l)))
+	colnames(mat) <- c("allele1","allele2")
+	mat
+}
+
+
+
+
+#infer genotypes function
+inferGenotypes <- function(x, min.allele.fraction=0.05, min.infer.count=10,return.type="list", biallelic.only=TRUE){
+
+	if(biallelic.only==FALSE){stop("'biallelic.only=FALSE' is not supported yet")}
+
+	if(sum(c("countsPlus","countsMinus") %in% names(assays(x)))==2){
+		snps.plus <- inferSnp(x,strand="+")	
+		snps.minus <- inferSnp(x,strand="-")	
+		#merge counts.plus and counts.minu
+		x2 <- x
+		assays(x2)$countsPlus <- assays(x)$countsPlus + assays(x)$countsMinus
+		counts <- alleleCounts(x2,strand="+")
+
+	}else if("countsNonStranded" %in%  names(assays(x))){
+		snps.plus <- inferSnp(x,strand="nonStranded")
+		counts <- alleleCounts(x,strand="nonStranded")
+
+	}else{stop("there is no count data")}
+
+	genotypes.inferred <- array(NA,dim=c(3,20,2),dimnames=list(rownames(x),colnames(x),c("allele1","allele2")))
+	for(i in 1:nrow(x)){
+		mat <- counts[[i]]
+		mat.sel <- mat[ ,colnames(mat) %in% snps.plus[i,]]
+
+		#all zeros	
+		TF.zero <- mat.sel==0 
+
+		#all that have zero for one allele are clear homozygotes	
+		TF.zero.one.c1 <- (TF.zero[,1] & !TF.zero[,2]) 
+		TF.zero.one.c2 <- (!TF.zero[,1] & TF.zero[,2])
+		#check samples with no counts at all. Treat them as unknown
+		TF.zero.both <- TF.zero[,1]&TF.zero[,2]
+		#check which samples that have too few reads to be inferred. Treat them as unknown
+		TF.counts.few <- apply(mat.sel,1,sum) < min.infer.count
+
+		#which are homozyotes allele 1 and 2
+		TF.hom.c1 <- TF.zero.one.c2 & !TF.zero.both & !TF.counts.few
+		TF.hom.c2 <- TF.zero.one.c1 & !TF.zero.both & !TF.counts.few
+
+		#which are heterozygotes
+		TF.het <-  !TF.zero.one.c2  & !TF.zero.one.c1 & !TF.zero.both & !TF.counts.few
+		
+		#check the ratio for the het, and if too low then it is a homozygote anyway
+		fraction.c1 <- mat.sel[TF.het,1]/(mat.sel[TF.het,1]+mat.sel[TF.het,2])
+		fraction.c2 <- mat.sel[TF.het,2]/(mat.sel[TF.het,2]+mat.sel[TF.het,1])
+
+		TF.fraction.failed.c1 <- fraction.c1 < min.allele.fraction 
+		TF.fraction.failed.c2 <- fraction.c2 < min.allele.fraction 
+
+		#give the failed samples the homozygote type instead	
+		TF.hom.c1[TF.het][TF.fraction.failed.c1] <- TRUE	
+		TF.hom.c2[TF.het][TF.fraction.failed.c2] <- TRUE	
+
+		#set the failed het samples to FALSE
+		if(!sum(TF.fraction.failed.c1|TF.fraction.failed.c2)==0){
+			TF.het[TF.fraction.failed.c1|TF.fraction.failed.c2] <- FALSE
+		}
+
+		#set NAs (if not set)
+		genotypes.inferred[i,TF.zero.both,] <-  NA
+		genotypes.inferred[i,TF.zero.one.c1,1] <-  NA
+		genotypes.inferred[i,TF.zero.one.c2,2] <-  NA
+		
+		#store genotypes in array	
+		genotypes.inferred[i, TF.het, ] <- matrix(colnames(mat.sel),ncol=2,nrow=sum(TF.het),byrow=TRUE)
+		genotypes.inferred[i, TF.hom.c1, ] <- colnames(mat.sel)[1]
+		genotypes.inferred[i, TF.hom.c2, ] <- colnames(mat.sel)[2]
+
+	}
+
+	#check return.type argument	
+	if(return.type=="list"){
+		list.inferred.genotypes <- list()
+		for(i in 1:nrow(genotypes.inferred)){
+			mat <- genotypes.inferred[i,,]
+			list.inferred.genotypes[[i]] <- mat
+		}
+		names(list.inferred.genotypes) <- rownames(x)
+		list.inferred.genotypes
+	}else if(return.type=="array"){
+		genotypes.inferred
+	}else{cat("return.type unknown\n Nothing will be returned from function!")}
+}
+

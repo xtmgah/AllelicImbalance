@@ -1,7 +1,6 @@
 
 setMethod("binom.test", signature(x = "ASEset", n="ANY"), function(x,n="nonStranded") 
 	{
-
 		strand <- n
 
 		#checks
