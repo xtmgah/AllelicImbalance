@@ -111,7 +111,7 @@ setMethod("fraction",
 			
 			#calculating percentage and ylim and setting no-count samples to colour grey90
 			fraction <- tmp[,majorAllele] / (tmp[,majorAllele] + tmp[,minorAllele])
-			fraction[is.nan(fraction)]<-1
+			#fraction[is.nan(fraction)]<-1
 			fractionList[[i]] <- fraction
 		}
 		names(fractionList) <- rownames(x)	
