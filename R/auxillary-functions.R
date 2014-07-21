@@ -351,8 +351,8 @@ getAlleleCounts<-function(BamList, GRvariants, strand="nonStranded", return.type
 	if(sum(grepl("chr",seqnames(GRvariants)))>0) { snpNames <- paste(seqnames(GRvariants),"_",start(GRvariants),sep="")
 	}else{snpNames <- paste("chr",seqnames(GRvariants),"_",start(GRvariants),sep="")}
 	
-	dimnames= list(snpNames,names(BamList),c("A","C","G","T","del"))
-	ar1 <- array(NA,c(length(GRvariants),length(BamList),5),dimnames=dimnames) #empty array that handles only four nucleotides + one del columns
+	dimnames= list(snpNames,names(BamList),c("A","C","G","T"))
+	ar1 <- array(NA,c(length(GRvariants),length(BamList),4),dimnames=dimnames) #empty array that handles only four nucleotides + one del columns
 	
 	#use strand choice to only get reads from that strand
 	if(!strand=="nonStranded"){BamList <- GAlignmentsList(mapply(function(x,y){x[y]},BamList,strand(BamList)==strand))}
@@ -368,7 +368,7 @@ getAlleleCounts<-function(BamList, GRvariants, strand="nonStranded", return.type
 		#fill array
 		nstr <- strsplit(as.character(nuclpiles),"")
 		for(k in 1:length(GRvariants)){
-			ar1[k,j,] <- c(sum(nstr[[k]]%in%"A"),sum(nstr[[k]]%in%"C"),sum(nstr[[k]]%in%"G"),sum(nstr[[k]]%in%"T"),0) #del will always be 0. Could have set it to NA, but then it makes problem further  down in the chain of functions...			
+			ar1[k,j,] <- c(sum(nstr[[k]]%in%"A"),sum(nstr[[k]]%in%"C"),sum(nstr[[k]]%in%"G"),sum(nstr[[k]]%in%"T")) #del will always be 0. Could have set it to NA, but then it makes problem further  down in the chain of functions...			
 		}
 
 		
@@ -1289,7 +1289,7 @@ getDefaultMapBiasExpMean <- function(alleleCountList){
 		}
 	)
 
-	MapBiasExpMean <- matrix(unlist(l),byrow=TRUE,nrow=length(alleleCountList),ncol=5,dimnames=list(c(names(alleleCountList)),colnames(alleleCountList[[1]]))) # alleleCountList[[1]] assumes that in each list the colnames are the same.
+	MapBiasExpMean <- matrix(unlist(l),byrow=TRUE,nrow=length(alleleCountList),ncol=4,dimnames=list(c(names(alleleCountList)),colnames(alleleCountList[[1]]))) # alleleCountList[[1]] assumes that in each list the colnames are the same.
 	MapBiasExpMean
 }
 
@@ -1297,7 +1297,7 @@ getDefaultMapBiasExpMean3D <- function(alleleCountList){
 
 	MapBiasExpMean <- getDefaultMapBiasExpMean(alleleCountList)
 	#make 3D array	
-	MapBiasExpMean3D <- array(NA,c(length(alleleCountList),length(unlist(unique(lapply(alleleCountList,rownames)))),5)) #empty array
+	MapBiasExpMean3D <- array(NA,c(length(alleleCountList),length(unlist(unique(lapply(alleleCountList,rownames)))),4)) #empty array
 	for(i in 1:length(unlist(unique(lapply(alleleCountList,rownames))))) {
 		MapBiasExpMean3D[,i,] <- MapBiasExpMean
 	}
