@@ -2,6 +2,7 @@
 setGeneric("alleleCounts", function(x,strand="nonStranded") {standardGeneric("alleleCounts")})
 setGeneric("mapBias", function(x) {standardGeneric("mapBias")})
 setGeneric("fraction", function(x, strand="nonStranded", verbose=FALSE) {standardGeneric("fraction")})
+setGeneric("arank", function(x, ret="names", strand="nonStranded", ... ) {standardGeneric("arank")})
 
 #visuals
 setGeneric("barplot")

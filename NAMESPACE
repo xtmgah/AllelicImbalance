@@ -134,6 +134,7 @@ exportMethods(
  alleleCounts,  
  mapBias, 
  fraction,
+ arank,
 
  #ennobler
  #getAnnotation,
