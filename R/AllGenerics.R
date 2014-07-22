@@ -6,6 +6,11 @@ setGeneric("arank", function(x, ret="names", strand="nonStranded", ... ) {standa
 
 #visuals
 setGeneric("barplot")
+setGeneric("glocationplot", function(x,
+		type="fraction",
+		strand="nonStranded")
+		{standardGeneric("glocationplot")})
+				     	
 setGeneric("locationplot", function(x,
 		type="fraction",
 		strand="nonStranded",

@@ -126,7 +126,9 @@ export(
  realCigarPositions,
  realCigarPositionsList,
  getAreaFromGeneNames,
- getSnpIdFromLocation
+ getSnpIdFromLocation,
+ barplot.lattice.counts,
+ barplot.lattice.fraction
 ) 
 
 exportMethods(
@@ -145,8 +147,8 @@ exportMethods(
 
  #plots
  barplot,
- locationplot
- 
+ locationplot,
+ glocationplot
 )
 
 

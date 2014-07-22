@@ -1458,4 +1458,78 @@ getAlleleCount <- function()
     ## use new function, or remainder of myOldFunc
 }
 
+barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
+#afraction 
+#arank
+
+	a.r <- arank[[identifier]][1:2]	
+	a.f <- afraction[,identifier]
+	a.f2 <- 1-a.f
+	values <- vector()
+	for (i in 1:length(a.f)){values <- c(values,a.f[i],a.f2[i])}
+	allele <- rep(a.r,length(a.f))
+
+	#sample <- names(a.f)
+	sample <- vector()
+	for (i in 1:length(a.f)){sample <- c(sample,names(a.f)[i],names(a.f)[i])}
+	df <- data.frame(values=values,sample=sample,allele=allele)
+
+	TFna <- is.na(df$values)
+	df$values[TFna] <- 0 # 0.5 + 0.5 -> 1
+	na <-rep("no",length(values)) 
+	na[TFna] <- "yes"
+	df <- cbind(df,na)
+
+	my_cols <- c("green", "red")
+
+	#replace empty counts allele types as "low count"
+	#allele[TFna] <- "low count"
+
+	b <- barchart(values~sample,
+	 #horiz=FALSE,
+ 	 group=allele,
+	 data=df,
+	 col = my_cols,
+       	 origin=0,
+	 #auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
+	 stack=TRUE,
+	 scales = list(rot=c(90,0)),
+	 #box.ratio=2,
+	 #abbreviate=TRUE
+	)
+	b
+
+}
+###
+#Counts
+###
+
+
+barplot.lattice.counts <- function(identifier, arank, acounts, ...){
+	
+
+	a.r <- arank[[identifier]][1:2]	
+	a.c <- acounts[[identifier]][,a.r,drop=FALSE]
+
+	values <- as.vector(a.c)
+	allele <- rep(colnames(a.c),nrow(a.c))
+
+	sample <- vector()
+	for (i in 1:nrow(a.c)){sample <- c(sample,rownames(a.c)[i],rownames(a.c)[i])}
+	df <- data.frame(values=values,sample=sample,allele=allele)
+	
+	b <- barchart(values~sample,
+	 horiz=FALSE,
+	 origin=0,
+	 group=allele,
+	 data=df,
+	 auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
+	 stack=FALSE,
+	 scales = list(rot=c(90,0)),
+	 box.ratio=2,
+	 abbreviate=TRUE
+	)
+	b
+
+}
 
