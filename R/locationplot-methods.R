@@ -214,3 +214,21 @@ setMethod("locationplot", signature(x = "ASEset"),
 	}
 )
 
+# Gviz locationplot
+setMethod("glocationplot", signature(x = "ASEset"), 
+	function(x,
+		type="fraction",
+		strand="nonStranded"
+	){
+
+		#make deTrack the fraction
+		deTrack <- ASEDAnnotationTrack(x,type,strand)
+		#plot
+		plotTracks(deTrack)
+
+	}
+)
+
+
+
+

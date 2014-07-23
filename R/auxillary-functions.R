@@ -1458,6 +1458,147 @@ getAlleleCount <- function()
     ## use new function, or remainder of myOldFunc
 }
 
+barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
+#afraction 
+#arank
+
+	a.r <- arank[[identifier]][1:2]	
+	a.f <- afraction[,identifier]
+	a.f2 <- 1-a.f
+	values <- vector()
+	for (i in 1:length(a.f)){values <- c(values,a.f[i],a.f2[i])}
+	allele <- rep(a.r,length(a.f))
+
+	#sample <- names(a.f)
+	sample <- vector()
+	for (i in 1:length(a.f)){sample <- c(sample,names(a.f)[i],names(a.f)[i])}
+	df <- data.frame(values=values,sample=sample,allele=allele)
+
+	TFna <- is.na(df$values)
+	df$values[TFna] <- 0 # 0.5 + 0.5 -> 1
+	na <-rep("no",length(values)) 
+	na[TFna] <- "yes"
+	df <- cbind(df,na)
+
+	my_cols <- c("green", "red")
+
+	#replace empty counts allele types as "low count"
+	#allele[TFna] <- "low count"
+
+	b <- barchart(values~sample,
+	 #horiz=FALSE,
+ 	 group=allele,
+	 data=df,
+	 col = my_cols,
+       	 origin=0,
+	 #auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
+	 stack=TRUE,
+	 scales = list(rot=c(90,0)),
+	 #box.ratio=2,
+	 #abbreviate=TRUE
+	)
+	b
+
+}
+###
+#Counts
+###
+
+
+barplot.lattice.counts <- function(identifier, arank, acounts, ...){
+	
+
+	a.r <- arank[[identifier]][1:2]	
+	a.c <- acounts[[identifier]][,a.r,drop=FALSE]
+
+	values <- as.vector(a.c)
+	allele <- rep(colnames(a.c),nrow(a.c))
+
+	sample <- vector()
+	for (i in 1:nrow(a.c)){sample <- c(sample,rownames(a.c)[i],rownames(a.c)[i])}
+	df <- data.frame(values=values,sample=sample,allele=allele)
+	
+	b <- barchart(values~sample,
+	 horiz=FALSE,
+	 origin=0,
+	 group=allele,
+	 data=df,
+	 auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
+	 stack=FALSE,
+	 scales = list(rot=c(90,0)),
+	 box.ratio=2,
+	 abbreviate=TRUE
+	)
+	b
+}
+
+coverageMatrixListFromGAL <- function(BamList,start=NULL,end=NULL,strand=NULL,ignore.empty.bam=TRUE){
+
+	#If having common start and end points for all gviz track objects the matrix will start on the specific start regardless if there are reads in the bamList or not. 
+	
+	#TODO, to conveniently access data without loading into memory, the bam file should be read again by using the argument BamPath. 
+
+	GAL <- BamList
+
+	#Could be good with a check that the matrix is not longer than
+	#CNTNAP2 - 2300000bp long which is the  longest gene
+	#But will wait with that.
+	pstrand=FALSE
+	mstrand=FALSE
+	if(!is.null(strand)){
+		if(strand=="+"){pstrand=TRUE}
+		else if(strand=="-"){mstrand=TRUE}
+		else{stop("strand has to be '+' or '-' if not NULL\n")}
+	}
+
+	if(!length(seqlevels(GAL))==1){stop("can only be one seq level\n")}
+
+	#get start and end before filtering on strand, will make things easier downstream.
+	suppressWarnings(bamStart <- min(min(start(GAL))))
+	suppressWarnings(bamEnd <- max(max(end(GAL))))
+	bamWidth <- bamEnd-bamStart+1
+
+	if(is.null(start) | is.null(end)){
+		start <- bamStart
+		end <- bamEnd
+		width <- bamWidth
+	}
+
+	if(pstrand){GALp <- GAL[strand(GAL)=="+"]}
+	if(mstrand){GALm <- GAL[strand(GAL)=="-"]}
+
+	if(pstrand){matP <- matrix(0,ncol=(width),nrow=length(GAL))}
+	if(mstrand){matM <- matrix(0,ncol=(width),nrow=length(GAL))}
+	if(pstrand){rownames(matP) <- names(GAL)}
+	if(mstrand){rownames(matM) <- names(GAL)}
+	##################################################
+
+	covVecFromGA <- function(GA){
+			mcols(GA) <- NULL
+			one <- unlist(grglist(GA))
+			covRle <- coverage(one)[[1]]
+			cov <- as.integer(window(covRle,start,end))
+			cov
+	}
+
+	if(pstrand){for(i in 1:length(GALp)){matP[i,]<- covVecFromGA(GALp[[i]])}}
+	if(mstrand){for(i in 1:length(GALm)){matM[i,]<- covVecFromGA(GALm[[i]])}}
+	
+	#make mat from matP or matM
+	if(pstrand){mat <- matP }
+	if(mstrand){mat <- matM }
+
+	#store in a list
+	if(!is.null(strand)){
+		retList <- list(mat,start,end)
+	}else{stop("strand must be present")}
+	#set name on list
+	if(!is.null(strand)){
+		names(retList) <- c("mat","start","end")
+	}else{stop("strand must be present")}
+	
+	retList
+}
 
 #the draft of the function giving us a fastq file for all samples to detect mapbias
 

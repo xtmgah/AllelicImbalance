@@ -129,6 +129,9 @@ export(
  getSnpIdFromLocation,
  inferGenotypes,
  inferSnp
+ barplot.lattice.counts,
+ barplot.lattice.fraction,
+ coverageMatrixListFromGAL
 ) 
 
 exportMethods(
@@ -144,11 +147,16 @@ exportMethods(
  #test-methods
  chisq.test, 
  binom.test,
+ 
+ #gviz tracks
+ ASEDAnnotationTrack,
+ CoverageDataTrack,
 
  #plots
  barplot,
- locationplot
- 
+ lbarplot,
+ locationplot,
+ glocationplot
 )
 
 
