@@ -1,12 +1,16 @@
 setMethod("ASEDAnnotationTrack",
     signature(x = "ASEset"),
     function (x,
+	        genome,
 		type="fraction",
-		strand="nonStranded"
+		strand="nonStranded",
+		GR=rowData(x),
+		...
 	){
 
 		ASEset <- x
-		ranges <- rowData(ASEset)
+		#ranges <- rowData(ASEset)
+		ranges <- GR
 		#strand <- "+"
 		if(strand=="nonStranded"){
 			strand(ranges) <- "*" 
@@ -47,8 +51,8 @@ setMethod("ASEDAnnotationTrack",
 		assign("type", type , envir = AllelicImbalance.extra)
 
 		#plot the fraction
-		deTrack <- AnnotationTrack(range = ranges, genome = "hg19",
-			chromosome = 17, id = rownames(ASEset), name = paste("Gviz locationplot",type ),
+		deTrack <- AnnotationTrack(range = ranges, genome = genome,
+			id = rownames(ASEset), name = paste("Gviz locationplot",type ),
 			stacking = "squish", fun = details)
 		deTrack
 	}

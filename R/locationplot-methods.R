@@ -222,7 +222,7 @@ setMethod("glocationplot", signature(x = "ASEset"),
 	){
 
 		#make deTrack the fraction
-		deTrack <- ASEDAnnotationTrack(x,type,strand)
+		deTrack <- ASEDAnnotationTrack(x, genome="hg19",type,strand)
 		#plot
 		plotTracks(deTrack)
 

@@ -5,7 +5,7 @@ setGeneric("fraction", function(x, strand="nonStranded", verbose=FALSE) {standar
 setGeneric("arank", function(x, ret="names", strand="nonStranded", ... ) {standardGeneric("arank")})
 
 #gviz track
-setGeneric("ASEDAnnotationTrack", function(x, type="fraction", strand="nonStranded", ... ) {standardGeneric("ASEDAnnotationTrack")})
+setGeneric("ASEDAnnotationTrack", function(x, genome ,type="fraction", strand="nonStranded", GR=rowData(x),  ... ) {standardGeneric("ASEDAnnotationTrack")})
 setGeneric("CoverageDataTrack", function(x, BamList=NULL, strand=NULL, start=NULL, end=NULL, genome="hg19",verbose=TRUE, ... ) {standardGeneric("CoverageDataTrack")})
 
 #visuals
