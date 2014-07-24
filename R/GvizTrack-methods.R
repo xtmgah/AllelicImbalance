@@ -2,9 +2,9 @@ setMethod("ASEDAnnotationTrack",
     signature(x = "ASEset"),
     function (x,
 	        genome,
+		GR=rowData(x),
 		type="fraction",
 		strand="nonStranded",
-		GR=rowData(x),
 		...
 	){
 
