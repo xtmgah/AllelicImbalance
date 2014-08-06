@@ -58,7 +58,7 @@ setMethod("locationplot", signature(x = "ASEset"),
 		
 		#check if annotation is present, and if it is, then check if it is the right class.
 		if(!is.null(OrgDb)){if(!class(OrgDb)%in%c("OrgDb"))stop(paste("if given, annotation should be of class OrgDb, not",class(OrgDb)))}
-		if(!is.null(TxDb)){if(!class(TxDb)%in%c("TranscriptDb"))stop(paste("if given, annotation should be of class TranscriptDb, not",class(TxDb)))}
+		if(!is.null(TxDb)){if(!class(TxDb)%in%c("TxDb"))stop(paste("if given, annotation should be of class TxDb, not",class(TxDb)))}
 		
 		#check verbose argument is a logical with length 1
 		if(class(verbose) != "logical")stop(paste("verbose should be of class logical, not",class(verbose)))
@@ -128,7 +128,7 @@ setMethod("locationplot", signature(x = "ASEset"),
 
 		#check OrgDb
 		if(!is.null(OrgDb)){if(!class(OrgDb)=="OrgDb"){stop("class of OrgDb has to be an OrgDb class")}}
-		if(!is.null(TxDb)){if(!class(TxDb)=="TranscriptDb"){stop("class of TxDb has to be a TranscriptDb class")}}
+		if(!is.null(TxDb)){if(!class(TxDb)=="TxDb"){stop("class of TxDb has to be a TxDb class")}}
 			
 
 
@@ -168,8 +168,6 @@ setMethod("locationplot", signature(x = "ASEset"),
 			#calculate on-plot position and barplot size (for evenly spaced barplots)
 			sizeHere <- c((xlim[2] - xlim[1]) / nrow(x), 1)	
 			lowerLeftCorner <- c(xlim[1] + (i-1)*sizeHere[1],0)
-			
-			#give some space in between graphs
 			sizeHere <- sizeHere*size
 
 			#do bar plots
@@ -218,17 +216,52 @@ setMethod("locationplot", signature(x = "ASEset"),
 setMethod("glocationplot", signature(x = "ASEset"), 
 	function(x,
 		type="fraction",
-		strand="nonStranded"
+		strand="nonStranded",
+		BamGAL=NULL,
+		...
 	){
+		#change to "*"
+		#if(strand=="nonStranded"){strand <- "*"} not possile as long as nonStranded is an option
+
+		#check genome
+		if(is.null(genome(x)) | is.na(genome(x))){
+			stop(paste("genome have be set for object x", "e.g. genome(x) <- \"hg19\" "))	
+		}
+
+		#check seqnames has length=0
+		if(!(length(seqlevels(x))==1)){stop("This function can only use objects with one seqlevel")}
+
+		if(sum(strand=="+"| strand=="-")==0){
+			stop("strand must be plus or minus at the moment")
+		}
+		if(!nrow(x)==1){
+			
+			GR <- GRanges(seqnames=seqlevels(x),ranges=IRanges(start=min(start(x)),end=max(end(x))),strand=strand, genome=genome(x))
+		
+		}
 
 		#make deTrack the fraction
-		deTrack <- ASEDAnnotationTrack(x,type,strand)
-		#plot
-		plotTracks(deTrack)
+		deTrack <- ASEDAnnotationTrack(x, GR=GR, type,strand)
 
+		if(!is.null(BamGAL)){
+			seqlevels(BamGAL) <- seqlevels(x)
+			start <- min(start(x))
+			end <- max(end(x))
+		
+			covTracks <- CoverageDataTrack(x,BamList=BamGAL,strand="+") 
+				
+			lst <- c(deTrack,covTracks)
+			parts <- 0.5/length(covTracks)
+			sizes <- c(0.5,rep(parts,length(covTracks)))
+		}else{lst <- c(deTrack)}
+
+
+		if(!is.null(BamGAL)){
+			plotTracks(lst, from=start, to=end,sizes=sizes, col.line = NULL, showId = FALSE, main="mainText", cex.main=1, title.width=1, type="histogram")
+		}else{
+			#plot
+			plotTracks(deTrack)
+		}
 	}
 )
-
-
-
 

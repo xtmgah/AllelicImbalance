@@ -128,7 +128,7 @@ impBamGAL <- function(UserDir,searchArea,XStag=FALSE,verbose=TRUE){
 	}
 	
 	#Loop through, open scanBam, store in GRList and then close each object in the BamFileList object.
-	BamGAL<-GAlignmentsList()
+	BamGAL<- list()
 	i <- 1
 	for(bamName in names(bamFilesList)) {
 		#Description
@@ -144,6 +144,8 @@ impBamGAL <- function(UserDir,searchArea,XStag=FALSE,verbose=TRUE){
 		close(bf)
 		i <- i +1
 	}
+	BamGAL <- GAlignmentsList(BamGAL)
+
 	return(BamGAL)
 }
 
@@ -973,7 +975,7 @@ getGenesVector <- function(OrgDb, GR, leftFlank=0, rightFlank=0, verbose=FALSE){
 getExonsFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE) {
 	
 	#checks
-	if(class(TxDb)!="TranscriptDb")stop(paste("GR must of class TranscriptDb, not",class(TxDb)))
+	if(class(TxDb)!="TxDb")stop(paste("GR must of class TxDb, not",class(TxDb)))
 	
 	if(class(GR)!="GRanges")stop(paste("GR must of class GRanges, not",class(GR)))
 		
@@ -1064,7 +1066,7 @@ getExonsVector <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE){
 getTranscriptsFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE) {
 	
 	#checks
-	if(class(TxDb)!="TranscriptDb")stop(paste("GR must of class TranscriptDb, not",class(TxDb)))
+	if(class(TxDb)!="TxDb")stop(paste("GR must of class TxDb, not",class(TxDb)))
 	
 	if(class(GR)!="GRanges")stop(paste("GR must of class GRanges, not",class(GR)))
 	
@@ -1147,7 +1149,7 @@ getCDSFromAnnotation <- function(TxDb, GR,leftFlank=0,rightFlank=0,verbose=FALSE
 	#CDS are the coding regions that do not only code for proteins, but other also other types like RNA.
 
 	#checks
-	if(class(TxDb)!="TranscriptDb")stop(paste("GR must of class TranscriptDb, not",class(TxDb)))
+	if(class(TxDb)!="TxDb")stop(paste("GR must of class TxDb, not",class(TxDb)))
 	
 	if(class(GR)!="GRanges")stop(paste("GR must of class GRanges, not",class(GR)))
 	
@@ -1532,7 +1534,7 @@ barplot.lattice.counts <- function(identifier, arank, acounts, ...){
 	b
 }
 
-coverageMatrixListFromGAL <- function(BamList,start=NULL,end=NULL,strand=NULL,ignore.empty.bam=TRUE){
+coverageMatrixListFromGAL <- function(BamList,strand=NULL,ignore.empty.bam.row=TRUE){
 
 	#If having common start and end points for all gviz track objects the matrix will start on the specific start regardless if there are reads in the bamList or not. 
 	
@@ -1558,11 +1560,11 @@ coverageMatrixListFromGAL <- function(BamList,start=NULL,end=NULL,strand=NULL,ig
 	suppressWarnings(bamEnd <- max(max(end(GAL))))
 	bamWidth <- bamEnd-bamStart+1
 
-	if(is.null(start) | is.null(end)){
+	#if(is.null(start) | is.null(end)){
 		start <- bamStart
 		end <- bamEnd
 		width <- bamWidth
-	}
+	#}
 
 	if(pstrand){GALp <- GAL[strand(GAL)=="+"]}
 	if(mstrand){GALm <- GAL[strand(GAL)=="-"]}
