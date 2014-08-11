@@ -1515,7 +1515,7 @@ barplot.lattice.counts <- function(identifier, arank, acounts, ...){
 	a.r <- arank[[identifier]][1:2]	
 	a.c <- acounts[[identifier]][,a.r,drop=FALSE]
 
-	values <- as.vector(a.c)
+	values <- as.vector(t(a.c))
 	allele <- rep(colnames(a.c),nrow(a.c))
 
 	sample <- vector()
