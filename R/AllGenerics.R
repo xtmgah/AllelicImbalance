@@ -20,6 +20,8 @@ setGeneric("glocationplot", function(x,
 		type="fraction",
 		strand="nonStranded",
 		BamGAL=NULL,
+		GenomeAxisTrack=FALSE,
+		verbose=FALSE,
 	   	...)
 		{standardGeneric("glocationplot")})
 				     	
