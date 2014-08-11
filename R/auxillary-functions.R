@@ -1460,9 +1460,10 @@ getAlleleCount <- function()
     ## use new function, or remainder of myOldFunc
 }
 
-barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
+barplot.lattice.fraction <- function(identifier,afraction,arank, main, ... ){
 #afraction 
 #arank
+
 
 	a.r <- arank[[identifier]][1:2]	
 	a.f <- afraction[,identifier]
@@ -1498,6 +1499,7 @@ barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
 	 #auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
 	 stack=TRUE,
 	 scales = list(rot=c(90,0)),
+	 main=main
 	 #box.ratio=2,
 	 #abbreviate=TRUE
 	)
@@ -1509,7 +1511,7 @@ barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
 ###
 
 
-barplot.lattice.counts <- function(identifier, arank, acounts, ...){
+barplot.lattice.counts <- function(identifier, arank, acounts, main, ...){
 	
 
 	a.r <- arank[[identifier]][1:2]	
@@ -1535,7 +1537,8 @@ barplot.lattice.counts <- function(identifier, arank, acounts, ...){
 	 stack=FALSE,
 	 scales = list(rot=c(90,0)),
 	 box.ratio=2,
-	 abbreviate=TRUE
+	 abbreviate=TRUE,
+	 main=main
 	)
 	b
 }
