@@ -1482,6 +1482,8 @@ barplot.lattice.fraction <- function(identifier,afraction,arank, ... ){
 	na[TFna] <- "yes"
 	df <- cbind(df,na)
 
+	df$sample <- factor(df$sample,levels=rownames(df))
+
 	my_cols <- c("green", "red")
 
 	#replace empty counts allele types as "low count"
@@ -1519,7 +1521,11 @@ barplot.lattice.counts <- function(identifier, arank, acounts, ...){
 	sample <- vector()
 	for (i in 1:nrow(a.c)){sample <- c(sample,rownames(a.c)[i],rownames(a.c)[i])}
 	df <- data.frame(values=values,sample=sample,allele=allele)
-	
+
+	#to get right order in barchart
+	df$sample <- factor(df$sample,levels=rownames(df))
+	#df$values[is.na(df$values)] <- 0 #doesnt work
+
 	b <- barchart(values~sample,
 	 horiz=FALSE,
 	 origin=0,
