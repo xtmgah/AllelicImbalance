@@ -897,6 +897,7 @@ setMethod("lbarplot",signature(x = "ASEset"),
 		function(x,
 				type="count",
 				strand="nonStranded",
+				mainVec=vector(),
 				...
 		)
 		{
@@ -916,17 +917,17 @@ setMethod("lbarplot",signature(x = "ASEset"),
 		arank <-  arank(ASEset,strand=strand)
 		afraction <- fraction(ASEset, strand=strand)
 
-		main="test"
-
 		for(name in rownames(ASEset)) {
 
-
 			if(type == "fraction"){
-				b <- barplot.lattice.fraction(identifier=name,afraction, arank, main, ... ) 
-
+				b <- barplot.lattice.fraction(identifier=name,afraction, arank, mainVec, ... ) 
 			}else if(type == "count"){
-				b <- barplot.lattice.counts(identifier=name, arank, acounts, main, ...) 
+				b <- barplot.lattice.counts(identifier=name, arank, acounts, mainVec, ...) 
 			}else{stop("type has to be fraction or count")}
 		}
 		b
 })
+
+
+
+
