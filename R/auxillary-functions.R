@@ -1473,7 +1473,7 @@ barplotLatticeFraction <- function(identifier,afraction,arank, amainVec, ... ){
 
 	#sample <- names(a.f)
 	sample <- vector()
-	for (i in 1:length(a.f)){sample <- c(sample,names(a.f)[i],names(a.f)[i])}
+	for (i in 1:length(a.f)){sample <- c(sample,rownames(afraction)[i],rownames(afraction)[i])}
 	df <- data.frame(values=values,sample=sample,allele=allele)
 
 	TFna <- is.na(df$values)
