@@ -1460,7 +1460,7 @@ getAlleleCount <- function()
     ## use new function, or remainder of myOldFunc
 }
 
-barplot.lattice.fraction <- function(identifier,afraction,arank, amainVec, ... ){
+barplotLatticeFraction <- function(identifier,afraction,arank, amainVec, ... ){
 #afraction 
 #arank
 
@@ -1510,7 +1510,7 @@ barplot.lattice.fraction <- function(identifier,afraction,arank, amainVec, ... )
 ###
 
 
-barplot.lattice.counts <- function(identifier, acounts, arank, amainVec, ...){
+barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...){
 	
 
 	a.m <- amainVec[identifier]

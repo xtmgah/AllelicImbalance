@@ -45,12 +45,12 @@ setMethod("ASEDAnnotationTrack",
 			amainVec <- get("amainVec",envir=AllelicImbalance.extra)
 
 			if(type == "fraction"){
-				print(barplot.lattice.fraction(identifier,afraction, arank,amainVec, ... ), 
+				print(barplotLatticeFraction(identifier,afraction, arank,amainVec, ... ), 
 				newpage = FALSE,
 				prefix = "plot")
 
 			}else if(type == "count"){
-				print(barplot.lattice.counts(identifier, acounts, arank, amainVec, ...), 
+				print(barplotLatticeCounts(identifier, acounts, arank, amainVec, ...), 
 				newpage = FALSE,
 				prefix = "plot")
 			}

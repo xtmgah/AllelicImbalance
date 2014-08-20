@@ -1,7 +1,7 @@
 \name{barplot-lattice}
 \alias{barplot-lattice}
-\alias{barplot.lattice.counts}
-\alias{barplot.lattice.fraction}
+\alias{barplotLatticeCounts}
+\alias{barplotLatticeFraction}
 
 
 \title{lattice barplot inner functions for ASEset objects}
@@ -9,7 +9,7 @@
 	Generates lattice barplots for ASEset objects. Two levels of plotting detail are provided: a detailed barplot of read counts by allele useful for fewer samples and SNPs, and a less detailed barplot of the fraction of imbalance, useful for more samples and SNPs. 
 }
 \usage{
-  barplot.lattice.fraction(
+  barplotLatticeFraction(
 	identifier, 
 	afraction,
 	arank,
@@ -17,7 +17,7 @@
 	... 
 	)
 
-  barplot.lattice.counts(
+  barplotLatticeCounts(
 	identifier,
 	acounts,
 	arank,
@@ -56,12 +56,12 @@
 	acounts <-  alleleCounts(a,strand=strand)
 	arank <-  arank(a,strand=strand)
 	afraction <- fraction(a, strand=strand)
-	mainVec <- rep("",nrow(x))
+	amainVec <- rep("",nrow(a))
 
 	name <- rownames(a)[1]
 
-	barplot.lattice.fraction(identifier=name, afraction, arank, amainVec) 
-	barplot.lattice.counts(identifier=name,  acounts, arank, amainVec) 
+	barplotLatticeFraction(identifier=name, afraction, arank, amainVec) 
+	barplotLatticeCounts(identifier=name,  acounts, arank, amainVec) 
 
 }
 \keyword{barplot}

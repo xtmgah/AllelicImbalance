@@ -130,8 +130,8 @@ export(
  realCigarPositionsList,
  getAreaFromGeneNames,
  getSnpIdFromLocation,
- barplot.lattice.counts,
- barplot.lattice.fraction,
+ barplotLatticeCounts,
+ barplotLatticeFraction,
  coverageMatrixListFromGAL
 ) 
 
