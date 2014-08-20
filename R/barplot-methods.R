@@ -896,6 +896,7 @@ setMethod("lbarplot",signature(x = "ASEset"),
 			type="count",
 			strand="+",
 			mainVec=rep("",nrow(x)),
+			verbose=FALSE,
 			...
 		)
 		{

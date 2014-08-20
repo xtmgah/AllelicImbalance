@@ -13,10 +13,12 @@
 \alias{alleleCounts}
 \alias{mapBias}
 \alias{fraction}
+\alias{arank}
 
 \alias{alleleCounts,ASEset-method}
 \alias{mapBias,ASEset-method}
 \alias{fraction,ASEset-method}
+\alias{arank,ASEset-method}
 
 
 \title{ASEset objects}
@@ -58,6 +60,10 @@ Object that holds allele counts, genomic positions and map-bias for a set of SNP
 		\item{}{
 		\code{fraction(x, strand="nonStranded")}:
 		Get SNP allele fraction matrix. strand options are "nonStranded", "+","-" or"*".
+		}
+		\item{}{
+		\code{arank(x)}:
+		Get SNP allele rank.
 		}
 	}
 }
