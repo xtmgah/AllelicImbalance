@@ -26,7 +26,7 @@ setMethod("alleleCounts",
 			mat <- assays(x)[[el]][i,,]
 			if(class(mat)=="integer"){
 				mat <- t(as.matrix(mat))
-				rownames(mat) <- colnames(x)
+				#rownames(mat) <- colnames(x)
 			}
 			if(class(mat)=="numeric"){
 					mat <- t(mat)
