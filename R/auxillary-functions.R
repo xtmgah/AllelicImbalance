@@ -1380,19 +1380,19 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ... )
 	}
 
  	 b <- barchart(values~sample,
-	 #horiz=FALSE,
- 	 group=allele,
-	 data=df,
-	 col = my_cols,
-	 origin=0,
-	 #auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
-	 stack=TRUE,
-	 scales = scales,
-	 main=amainVec,
-	 ylab=gargs$ylab,
-	 xlab=gargs$xlab
-	 #box.ratio=2,
-	 #abbreviate=TRUE
+		 #horiz=FALSE,
+		 group=allele,
+		 data=df,
+		 col = my_cols,
+		 origin=0,
+		 #auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
+		 stack=TRUE,
+		 scales = scales,
+		 main=amainVec,
+		 ylab=gargs$ylab,
+		 xlab=gargs$xlab
+		 #box.ratio=2,
+		 #abbreviate=TRUE
 	)
 
 	b
@@ -1402,6 +1402,7 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ... )
 #' @rdname barplot-lattice-support
 barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...){
 	
+	gargs <- list(...)
 
 	a.m <- amainVec[identifier]
 	a.r <- arank[[identifier]][1:2]	
@@ -1418,6 +1419,25 @@ barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...){
 	df$sample <- factor(df$sample,levels=unique(df$sample))
 	#df$values[is.na(df$values)] <- 0 #doesnt work
 
+	#set default values 
+	scales = list(rot=c(90,0))
+	gargs$deAnnoPlot <- FALSE
+
+	#potentially override default settings with trellis settings
+	if(gargs$deAnnoPlot){
+
+		trellis.par.set(
+			 layout.widths = list(
+			 left.padding = 0,
+			 axis.left = 0,
+			 ylab.axis.padding =0,
+			 right.padding = 0,
+			 axis.right = 0
+		))
+
+		scales = list(y=list(at=NULL,labels=NULL),rot=c(90,0))
+	}
+
 	b <- barchart(values~sample,
 	 horiz=FALSE,
 	 origin=0,
@@ -1425,11 +1445,14 @@ barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...){
 	 data=df,
 	 auto.key=list(points = FALSE, rectangles = TRUE,space="top",size=2,cex=0.8),
 	 stack=FALSE,
-	 scales = list(rot=c(90,0)),
+	 scales = scales,
+	 ylab=gargs$ylab,
+	 xlab=gargs$xlab,
 	 box.ratio=2,
 	 abbreviate=TRUE,
 	 main=amainVec
 	)
+
 	b
 }
 
