@@ -4,8 +4,8 @@
 \alias{initialize-ASEset}
 \title{Initialize ASEset}
 \usage{
-ASEsetFromCountList(rowData, countListPlus = NULL, countListMinus = NULL,
-  countListUnknown = NULL, colData = NULL, mapBiasExpMean = NULL,
+ASEsetFromCountList(rowData, countListUnknown = NULL, countListPlus = NULL,
+  countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL,
   verbose = FALSE, ...)
 }
 \arguments{

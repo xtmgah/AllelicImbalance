@@ -88,8 +88,8 @@ NULL
 
 
 #' @rdname initialize-ASEset
-ASEsetFromCountList <- function(rowData, countListPlus = NULL, 
-    countListMinus = NULL, countListUnknown = NULL, colData = NULL, mapBiasExpMean = NULL, 
+ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus = NULL, 
+    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, 
     verbose = FALSE, ...) {
     
     if (verbose) {
