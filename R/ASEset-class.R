@@ -14,14 +14,17 @@ NULL
 #' object see more details in \code{\link{barplot}} and
 #' \code{\link{locationplot}}.
 #' 
-#' Four different alleleCount options are available. The simples one is the
-#' * option, and is experiments where the strand information is not
+#' Three different alleleCount options are available. The simples one is the
+#' * option, and is for experiments where the strand information is not
 #' known e.g. non-stranded data. The unknown strand could also be for strand 
 #' specific data when the aligner could not find
-#' any strand associated with the read. Then there are an option too add plus
+#' any strand associated with the read, but this should normally not happen, 
+#' and if it does probably having an extremely low mapping quality. 
+#' Then there are an option too add plus
 #' and minus stranded data. When using this, it is essential to make sure that
 #' the RNA-seq experiment under analysis has in fact been created so that
-#' correct strand information was obtained. The most functions will by default have their strand argument set to '*'.
+#' correct strand information was obtained. The most functions will by default 
+#' have their strand argument set to '*'.
 #' 
 #' @name ASEset-class
 #' @rdname ASEset-class
@@ -32,7 +35,8 @@ NULL
 #' @param x ASEset object
 #' @param strand which strand of '+', '-' or '*'
 #' @param verbose makes function more talkative
-#' @param return.type return names or counts
+#' @param return.type return 'names' or 'counts'
+#' @param return.class return 'list' or 'array'
 #' @param ... additional arguments
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
@@ -122,15 +126,15 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",retu
     # check if strand option is present as assay
     if (!(el %in% names(assays(x)))) {
 		#if * is missing sum + and -, if they exist
-		if(el=="countsUnknown"){
-			if(sum(c("countsPlus","countsMinus") %in% names(assays(x)))==2)	{
-				el <- "combine"				
-			}else{
-				stop("neither '+' '-' or '*'strand is present as assay in ASEset object")
-			}	
-		}else{
+		#if(el=="countsUnknown"){
+		#	if(sum(c("countsPlus","countsMinus") %in% names(assays(x)))==2)	{
+		#		el <- "combine"				
+		#	}else{
+		#		stop("neither '+' '-' or '*'strand is present as assay in ASEset object")
+		#	}	
+		#}else{
 			stop("neither '+' '-' or '*'strand is present as assay in ASEset object")
-		}
+		#}
     }
     
     # assume alleleCount information is stored as element 1
