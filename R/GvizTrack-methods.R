@@ -121,41 +121,29 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
     
     details <- function(identifier, ...) {
         
-        # an option to use more print(list(...))
-        
-        type <- get("type", envir = AllelicImbalance.extra)
-        arank <- get("arank", envir = AllelicImbalance.extra)
-        afraction <- get("afraction", envir = AllelicImbalance.extra)
-        acounts <- get("acounts", envir = AllelicImbalance.extra)
-        amainVec <- get("amainVec", envir = AllelicImbalance.extra)
-        # gparam <- get('gpar',envir=AllelicImbalance.extra)
-        
+		if (length(list(...)) == 0) {
+			e <- new.env(hash = TRUE)
+		} else {
+			e <- list2env(list(...))
+		}
+
+		type<- e$type 
         
         if (type == "fraction") {
-            print(barplotLatticeFraction(identifier, afraction, arank, amainVec, 
+            print(barplotLatticeFraction(identifier, 
                 ...), newpage = FALSE, prefix = "plot")
             
         } else if (type == "count") {
-            print(barplotLatticeCounts(identifier, acounts, arank, amainVec, ...), 
-                newpage = FALSE, prefix = "plot")
+            print(barplotLatticeCounts(identifier, 
+                ...), newpage = FALSE, prefix = "plot")
         }
         
     }
     
-    # pick out plot data from ASEset strand='+'
-    AllelicImbalance.extra <- new.env(parent = emptyenv())
-    amainVec <- mainVec
-    
-    assign("acounts", alleleCounts(x, strand = strand), envir = AllelicImbalance.extra)
-    assign("arank", arank(x, strand = strand), envir = AllelicImbalance.extra)
-    assign("afraction", fraction(x, strand = strand), envir = AllelicImbalance.extra)
-    assign("type", type, envir = AllelicImbalance.extra)
-    assign("amainVec", amainVec, envir = AllelicImbalance.extra)
-    
-    
     # plot the fraction
     deTrack <- AnnotationTrack(range = ranges, genome = genome(x), id = rownames(x), 
-        name = trackName, stacking = "squish", fun = details, detailsFunArgs = gpar)
+        name = trackName, stacking = "squish", fun = details, 
+		detailsFunArgs = c(gpar, type=type,amainVec=mainVec, x=x, strand=strand))
     deTrack
 })
 

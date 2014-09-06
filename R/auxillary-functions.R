@@ -1557,8 +1557,10 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ...) 
 }
 
 #' @rdname barplot-lattice-support
-barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...) {
-    
+barplotLatticeCounts <- function(identifier, ...) {
+   
+	#strand opion also comes through the '...'
+
     if (length(list(...)) == 0) {
         e <- new.env(hash = TRUE)
     } else {
@@ -1568,6 +1570,13 @@ barplotLatticeCounts <- function(identifier, acounts, arank, amainVec, ...) {
         e$deAnnoPlot <- FALSE
     }
     
+    strand<-  e$strand
+
+    acounts<-  alleleCounts(e$x, strand = strand)
+    arank<-  arank(e$x, strand = strand)
+    afraction<-  fraction(e$x, strand = strand)
+    amainVec<-  e$amainVec
+
     # prepare data to be plotted
     a.m <- amainVec[identifier]
     a.r <- arank[[identifier]][1:2]

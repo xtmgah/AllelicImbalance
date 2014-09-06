@@ -1346,29 +1346,18 @@ setGeneric("lbarplot", function(x, type = "count", strand = "+", mainVec = rowna
 setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "+", 
     mainVec = rownames(x), verbose = FALSE, ...) {
     
-    # type='count' strand='+' mainVec=rep('',nrow(x))
-    a <- x
-    ranges <- rowData(a)
     
-    
-    acounts <- alleleCounts(a, strand = strand)
-    arank <- arank(a, strand = strand)
-    afraction <- fraction(a, strand = strand)
-    amainVec <- mainVec
-    
-    for (name in rownames(a)) {
-        if (type == "fraction") {
-            b <- barplotLatticeFraction(identifier = name, afraction, arank, amainVec, 
-                ...)
-        } else if (type == "count") {
-            b <- barplotLatticeCounts(identifier = name, acounts, arank, amainVec, 
-                ...)
-        } else {
-            stop("type has to be fraction or count")
-        }
-    }
+	for (name in rownames(x)) {
+		if (type == "fraction") {
+			b <- barplotLatticeFraction(identifier = name, x=x, strand=strand,
+				...)
+		} else if (type == "count") {
+			b <- barplotLatticeCounts(identifier = name, x=x, strand=strand,
+				...)
+		} else {
+			stop("type has to be fraction or count")
+		}
+	}
     b
-    
-    # dev lbarplot(a[1],strand='+',type='fraction',deAnnoPlot=TRUE)
-    
 }) 
+
