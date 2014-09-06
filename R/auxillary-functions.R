@@ -1559,8 +1559,6 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ...) 
 #' @rdname barplot-lattice-support
 barplotLatticeCounts <- function(identifier, ...) {
    
-	#strand opion also comes through the '...'
-
     if (length(list(...)) == 0) {
         e <- new.env(hash = TRUE)
     } else {
@@ -1572,54 +1570,93 @@ barplotLatticeCounts <- function(identifier, ...) {
     
     strand<-  e$strand
 
-    acounts<-  alleleCounts(e$x, strand = strand)
-    arank<-  arank(e$x, strand = strand)
-    afraction<-  fraction(e$x, strand = strand)
-    amainVec<-  e$amainVec
+	makePlotDf <- function(strand){
 
-    # prepare data to be plotted
-    a.m <- amainVec[identifier]
-    a.r <- arank[[identifier]][1:2]
-    a.c <- acounts[[identifier]][, a.r, drop = FALSE]
-    
-    values <- as.vector(t(a.c))
-    allele <- rep(colnames(a.c), nrow(a.c))
-    
-    sample <- vector()
-    for (i in 1:nrow(a.c)) {
-        sample <- c(sample, rownames(a.c)[i], rownames(a.c)[i])
-    }
-    df <- data.frame(values = values, sample = sample, allele = allele)
-    
-    # to get right order in barchart
-    df$sample <- factor(df$sample, levels = unique(df$sample))
-    # df$values[is.na(df$values)] <- 0 #doesnt work
-    
-    ### Grah params set default values
-    parset <- list()
-    scales = list(rot = c(90, 0))
-    
-    if (!exists("ylab", envir = e, inherits = FALSE)) {
-        e$ylab <- ""
-    }
-    if (!exists("xlab", envir = e, inherits = FALSE)) {
-        e$ylab <- ""
-    }
-    
-    # potentially override default settings with trellis settings
-    if (e$deAnnoPlot) {
-        
-        parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
-            right.padding = 0, axis.right = 0))
-        
-        scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
-    }
-    
-    b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
-        auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
-            cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
-        box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = amainVec)
-    
+		acounts<-  alleleCounts(e$x, strand = strand)
+		arank<-  arank(e$x, strand = strand)
+		afraction<-  fraction(e$x, strand = strand)
+		amainVec<-  e$amainVec
+
+		# prepare data to be plotted
+		a.m <- amainVec[identifier]
+		a.r <- arank[[identifier]][1:2]
+		a.c <- acounts[[identifier]][, a.r, drop = FALSE]
+		
+		values <- as.vector(t(a.c))
+		allele <- rep(colnames(a.c), nrow(a.c))
+		
+		sample <- vector()
+		for (i in 1:nrow(a.c)) {
+			sample <- c(sample, rownames(a.c)[i], rownames(a.c)[i])
+		}
+		df <- data.frame(values = values, sample = sample, allele = allele)
+		
+		# to get right order in barchart
+		df$sample <- factor(df$sample, levels = unique(df$sample))
+	
+		df
+	}
+
+	if(strand %in% c("+","-","*")){
+		### Grah params set default values
+		parset <- list()
+		scales = list(rot = c(90, 0))
+		
+		if (!exists("ylab", envir = e, inherits = FALSE)) {
+			e$ylab <- ""
+		}
+		if (!exists("xlab", envir = e, inherits = FALSE)) {
+			e$ylab <- ""
+		}
+		
+		# potentially override default settings with trellis settings
+		if (e$deAnnoPlot) {
+			
+			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
+				right.padding = 0, axis.right = 0))
+			
+			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
+		}
+
+		df <- makePlotDf(strand)
+
+		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
+			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
+				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = amainVec)
+
+		
+
+	}else if(strand=="both"){
+		
+		df <- rbind(makePlotDf("+"),makePlotDf("-"))	
+		### Grah params set default values
+		parset <- list()
+		scales = list(rot = c(90, 0))
+		
+		if (!exists("ylab", envir = e, inherits = FALSE)) {
+			e$ylab <- ""
+		}
+		if (!exists("xlab", envir = e, inherits = FALSE)) {
+			e$ylab <- ""
+		}
+		
+		# potentially override default settings with trellis settings
+		if (e$deAnnoPlot) {
+			
+			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
+				right.padding = 0, axis.right = 0))
+			
+			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
+		}
+		
+		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
+			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
+				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = amainVec)
+	}else {
+		stop("strand must be + - * or both")
+
     b
 }
 
