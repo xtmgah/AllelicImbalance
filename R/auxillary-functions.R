@@ -524,8 +524,6 @@ realCigarPositionsList <- function(RleCigarList) {
 #' data(reads)
 #' data(GRvariants)
 #' 
-#' #set seqlevels in reads equal to seqlevels in GRvariants
-#' seqlevels(reads) <- '17'
 #' 
 #' #get counts at the three positions specified in GRvariants
 #' alleleCount <- getAlleleCounts(BamList=reads,GRvariants,
@@ -568,7 +566,10 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
     if (class(GRvariants) == "GRangesList") {
         GRvariants <- unique(unlist(GRvariants, use.names = FALSE))  #merge BcfGRL to one unique set of Snps
     }
-    
+   
+	#Drop seqlevels in BamList that are not in GRvariants
+	seqlevels(BamList,force=TRUE) <- seqlevels(GRvariants)
+
     # check that seqlevels are the same
     if (!identical(seqlevels(BamList), seqlevels(GRvariants))) {
         stop("!identical(seqlevels(BamList), seqlevels(GRvariants))\n")
