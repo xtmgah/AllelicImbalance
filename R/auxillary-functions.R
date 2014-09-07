@@ -1457,11 +1457,7 @@ getAlleleCount <- function() {
 #' @rdname barplot-lattice-support
 #' @aliases barplot-lattice-support barplotLatticeCounts barplotLatticeFraction
 #' @param identifier, the single snp name to plot
-#' @param afraction the fractions in matrix for each snp
-#' @param arank the ranks for each snp
-#' @param acounts the counts for each snp
-#' @param amainVec, vector for each plots main
-#' @param ... for simpler generics when extending function
+#' @param ... used to pass on variables
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The \code{\link{ASEset}} class which the barplot
 #' function can be called up on.  }
@@ -1469,16 +1465,10 @@ getAlleleCount <- function() {
 #' @examples
 #' 
 #' a <- ASEset
-#' strand <- '+'
-#' acounts <-  alleleCounts(a,strand=strand)
-#' arank <-  arank(a,strand=strand)
-#' afraction <- fraction(a, strand=strand)
-#' amainVec <- rep('',nrow(a))
-#' 
 #' name <- rownames(a)[1]
 #' 
-#' barplotLatticeFraction(identifier=name, afraction, arank, amainVec) 
-#' barplotLatticeCounts(identifier=name,  acounts, arank, amainVec) 
+#' barplotLatticeFraction(identifier=name, x=a, strand="+") 
+#' barplotLatticeCounts(identifier=name,  x=a, strand="+") 
 #' 
 #' @export barplotLatticeFraction
 #' @export barplotLatticeCounts
@@ -1486,18 +1476,24 @@ getAlleleCount <- function() {
 NULL
 
 #' @rdname barplot-lattice-support
-barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ...) {
+barplotLatticeFraction <- function(identifier, ...) {
     
     if (length(list(...)) == 0) {
         e <- new.env(hash = TRUE)
     } else {
         e <- list2env(list(...))
     }
-    
+   
+	#temporarily set this default
+	e$main <- ""
+
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
         e$deAnnoPlot <- FALSE
     }
     
+	#acounts<-  alleleCounts(e$x, strand = strand)
+	arank<-  arank(e$x, strand = e$strand)
+	afraction<-  fraction(e$x, strand = e$strand)
     # prepare data to be plotted
     a.r <- arank[[identifier]][1:2]
     a.f <- afraction[, identifier]
@@ -1538,8 +1534,10 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ...) 
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$ylab <- ""
     }
-    
-    if (e$deAnnoPlot) {
+    #if (!exists("amainVec", envir = e, inherits = FALSE)) {
+    #   e$amainVec <- rownames(x[identifier,])
+    #}
+	    if (e$deAnnoPlot) {
         
         parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
             right.padding = 0, axis.right = 0))
@@ -1549,7 +1547,7 @@ barplotLatticeFraction <- function(identifier, afraction, arank, amainVec, ...) 
     }
     
     b <- barchart(values ~ sample, group = allele, data = df, col = my_cols, origin = 0, 
-        stack = TRUE, scales = scales, main = amainVec, ylab = e$ylab, xlab = e$xlab, 
+        stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
         par.settings = parset)
     
     b
@@ -1568,17 +1566,18 @@ barplotLatticeCounts <- function(identifier, ...) {
         e$deAnnoPlot <- FALSE
     }
     
-    strand<-  e$strand
+	#temporarily set this default
+	e$main <- ""
 
 	makePlotDf <- function(strand){
 
-		acounts<-  alleleCounts(e$x, strand = strand)
-		arank<-  arank(e$x, strand = strand)
-		afraction<-  fraction(e$x, strand = strand)
-		amainVec<-  e$amainVec
+		acounts<-  alleleCounts(e$x, strand = e$strand)
+		arank<-  arank(e$x, strand = e$strand)
+		#afraction<-  fraction(e$x, strand = strand)
+		#amainVec<-  e$amainVec
 
 		# prepare data to be plotted
-		a.m <- amainVec[identifier]
+		#a.m <- amainVec[identifier]
 		a.r <- arank[[identifier]][1:2]
 		a.c <- acounts[[identifier]][, a.r, drop = FALSE]
 		
@@ -1597,7 +1596,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 		df
 	}
 
-	if(strand %in% c("+","-","*")){
+	if(e$strand %in% c("+","-","*")){
 		### Grah params set default values
 		parset <- list()
 		scales = list(rot = c(90, 0))
@@ -1609,6 +1608,9 @@ barplotLatticeCounts <- function(identifier, ...) {
 			e$ylab <- ""
 		}
 		
+		#if (!exists("amainVec", envir = e, inherits = FALSE)) {
+		#   e$amainVec <- rownames(x[identifier,])
+		#}
 		# potentially override default settings with trellis settings
 		if (e$deAnnoPlot) {
 			
@@ -1618,16 +1620,16 @@ barplotLatticeCounts <- function(identifier, ...) {
 			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
 		}
 
-		df <- makePlotDf(strand)
+		df <- makePlotDf(strand=e$strand)
 
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
 			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
 				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
-			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = amainVec)
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
 
 		
 
-	}else if(strand=="both"){
+	}else if(e$strand=="both"){
 		
 		df <- rbind(makePlotDf("+"),makePlotDf("-"))	
 		### Grah params set default values
@@ -1641,6 +1643,10 @@ barplotLatticeCounts <- function(identifier, ...) {
 			e$ylab <- ""
 		}
 		
+		#if (!exists("amainVec", envir = e, inherits = FALSE)) {
+		#   e$amainVec <- rownames(x)
+		#}
+
 		# potentially override default settings with trellis settings
 		if (e$deAnnoPlot) {
 			
@@ -1653,10 +1659,10 @@ barplotLatticeCounts <- function(identifier, ...) {
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
 			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
 				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
-			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = amainVec)
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = main)
 	}else {
 		stop("strand must be + - * or both")
-
+	}
     b
 }
 
@@ -1683,7 +1689,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 #' covMatList <- coverageMatrixListFromGAL(BamList=r, strand='+')
 #' 
 #' @export coverageMatrixListFromGAL
-coverageMatrixListFromGAL <- function(BamList, strand = NULL, ignore.empty.bam.row = TRUE) {
+coverageMatrixListFromGAL <- function(BamList, strand = "*", ignore.empty.bam.row = TRUE) {
     
     # If having common start and end points for all gviz track objects the matrix
     # will start on the specific start regardless if there are reads in the bamList
@@ -1698,11 +1704,18 @@ coverageMatrixListFromGAL <- function(BamList, strand = NULL, ignore.empty.bam.r
     # 2300000bp long which is the longest gene But will wait with that.
     pstrand = FALSE
     mstrand = FALSE
+
     if (!is.null(strand)) {
         if (strand == "+") {
             pstrand = TRUE
         } else if (strand == "-") {
             mstrand = TRUE
+        } else if (strand == "*") {
+            mstrand = TRUE
+            pstrand = TRUE
+        } else if (strand == "both") {
+            mstrand = TRUE
+            pstrand = TRUE
         } else {
             stop("strand has to be '+' or '-' if not NULL\n")
         }
@@ -1765,13 +1778,20 @@ coverageMatrixListFromGAL <- function(BamList, strand = NULL, ignore.empty.bam.r
     }
     
     # make mat from matP or matM
-    if (pstrand) {
+    if (strand=="+") {
         mat <- matP
     }
-    if (mstrand) {
+    if (strand=="-") {
         mat <- matM
     }
+    if (strand=="*") {
+        mat <- matM+matP
+    }
     
+    if (strand=="both") {
+        mat <- list(plus=matP,minus=matM)
+    }
+
     # store in a list
     if (!is.null(strand)) {
         retList <- list(mat, start, end)

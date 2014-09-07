@@ -1338,12 +1338,12 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' 
 #' @exportMethod lbarplot
 
-setGeneric("lbarplot", function(x, type = "count", strand = "+", mainVec = rownames(x), 
+setGeneric("lbarplot", function(x, type = "count", strand = "*", mainVec = rownames(x), 
     verbose = FALSE, ...) {
     standardGeneric("lbarplot")
 })
 
-setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "+", 
+setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "*", 
     mainVec = rownames(x), verbose = FALSE, ...) {
     
     

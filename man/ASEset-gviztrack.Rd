@@ -8,7 +8,7 @@
 \alias{CoverageDataTrack,ASEset-method}
 \title{ASEset-gviztrack ASEset objects}
 \usage{
-ASEDAnnotationTrack(x, GR = rowData(x), type = "fraction", strand = "+",
+ASEDAnnotationTrack(x, GR = rowData(x), type = "fraction", strand = "*",
   mainVec = vector(), trackName = paste("deTrack", type), verbose = TRUE,
   gpar = list(), ...)
 
