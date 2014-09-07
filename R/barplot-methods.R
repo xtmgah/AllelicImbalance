@@ -1323,7 +1323,6 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' @param x An \code{ASEset} object
 #' @param type 'count' or 'fraction'
 #' @param strand four options, '+', '-', 'both' or '*'
-#' @param mainVec text to use as main label
 #' @param verbose Makes function more talkative
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin
@@ -1338,22 +1337,54 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' 
 #' @exportMethod lbarplot
 
-setGeneric("lbarplot", function(x, type = "count", strand = "*", mainVec = rownames(x), 
+setGeneric("lbarplot", function(x, type = "count", strand = "*", 
     verbose = FALSE, ...) {
     standardGeneric("lbarplot")
 })
 
 setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "*", 
-    mainVec = rownames(x), verbose = FALSE, ...) {
-    
-    
-	for (name in rownames(x)) {
+    verbose = FALSE, ...) {
+
+    if (length(list(...)) == 0) {
+        e <- new.env(hash = TRUE)
+    } else {
+        e <- list2env(list(...))
+    }
+
+	print(ls(envir=e))
+
+    if (!exists("mainvec", envir = e, inherits = FALSE)) {
+		e$mainvec <- rep("",nrow(x))
+	}
+    if (!exists("ylab", envir = e, inherits = FALSE)) {
+        e$ylab <- ""
+    }
+    if (!exists("xlab", envir = e, inherits = FALSE)) {
+        e$xlab <- ""
+    }
+
+	print(e$mainvec)
+
+	for (i in 1:nrow(x)) {
+		name <- rownames(x)[i]
 		if (type == "fraction") {
-			b <- barplotLatticeFraction(identifier = name, x=x, strand=strand,
-				...)
+			b <- barplotLatticeFraction(
+				identifier = name, 
+				x=x, 
+				strand=strand, 
+				ids=rownames(x),
+				ylab=e$ylab,
+				xlab=e$xlab,
+				mainvec=e$mainvec)
 		} else if (type == "count") {
-			b <- barplotLatticeCounts(identifier = name, x=x, strand=strand,
-				...)
+			b <- barplotLatticeCounts(
+				identifier = name, 
+				x=x, 
+				strand=strand, 
+				ids=rownames(x),
+				ylab=e$ylab,
+				xlab=e$xlab,
+				mainvec=e$mainvec)
 		} else {
 			stop("type has to be fraction or count")
 		}

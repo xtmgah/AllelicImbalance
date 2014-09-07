@@ -17,14 +17,12 @@ NULL
 #' @param GR genomic range of plotting
 #' @param type 'fraction' or 'count'
 #' @param strand '+','-'. This argument determines which strand is plotted.
-#' @param mainVec vector of text for the main of each plot
 #' @param BamList GAlignmnentsList object of reads from the same genomic region
 #' as the ASEset
 #' @param start start position of reads to be plotted
 #' @param trackName name of track (ASEDAnnotationTrack)
 #' @param trackNameVec names of tracks (CoverageDataTrack)
 #' @param end end position of reads to be plotted
-#' @param gpar graphical parameters for each small plot
 #' @param verbose Setting \code{verbose=TRUE} gives details of procedure during
 #' function run
 #' @param ... arguments passed on to barplot function
@@ -74,14 +72,14 @@ NULL
 
 #' @rdname ASEset-gviztrack
 setGeneric("ASEDAnnotationTrack", function(x, GR = rowData(x), type = "fraction", 
-    strand = "*", mainVec = vector(), trackName = paste("deTrack", type), verbose = TRUE, 
-    gpar = list(), ...) {
+    strand = "*", trackName = paste("deTrack", type), verbose = TRUE, 
+    ...) {
     standardGeneric("ASEDAnnotationTrack")
 })
 
 setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowData(x), 
-    type = "fraction", strand = "*", mainVec = rep("", nrow(x)), trackName = paste("deTrack", 
-        type), verbose = TRUE, gpar = list(), ...) {
+    type = "fraction", strand = "*",  trackName = paste("deTrack", 
+        type), verbose = TRUE, ...) {
     
     # check genome
     if (is.null(genome(x)) | is.na(genome(x))) {
@@ -93,10 +91,6 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         stop("This function can only use objects with one seqlevel")
     }
     
-#    if (sum(strand == "+" | strand == "-") == 0) {
-#        stop("strand must be plus or minus at the moment")
-#    }
-
     if (!nrow(x) == 1) {
 		if(strand %in% c("+","-","*")){
 			GR <- GRanges(seqnames = seqlevels(x), ranges = IRanges(start = min(start(x)), 
@@ -108,20 +102,32 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 			stop("strand has to be +, -, * or 'both'")
 		}
     }
-    
-    # check gpar, set default if not set by user
-    gparDefault <- list(ylab = "", xlab = "", deAnnoPlot = TRUE)
-    gparSet <- names(gparDefault) %in% names(gpar)
-    gpar <- mapply(gparDefault, gparSet, names(gparDefault), FUN = function(x, y, 
-        z, gpar) {
-        if (y) {
-            gpar[[z]]
-        } else {
-            x
-        }
-        
-    }, MoreArgs = list(gpar = gpar))
-    
+
+	#make an environment from ...
+    if (length(list(...)) == 0) {
+        e <- new.env(hash = TRUE)
+    } else {
+        e <- list2env(list(...))
+    }
+
+	#always TRUE
+	e$deAnnoPlot <- TRUE
+	e$x <- x
+	
+	#print(ls(envir=e))
+	#print(e$mainvec)	
+
+    if (!exists("mainvec", envir = e, inherits = FALSE)) {
+		e$mainvec <- rep("",nrow(e$x))
+	}
+
+    if (!exists("ylab", envir = e, inherits = FALSE)) {
+        e$ylab <- ""
+    }
+    if (!exists("xlab", envir = e, inherits = FALSE)) {
+        e$xlab <- ""
+    }
+		
     ranges <- rowData(x)
     
     colnames(x) <- 1:ncol(x)
@@ -129,12 +135,12 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
     details <- function(identifier, ...) {
         
 		if (length(list(...)) == 0) {
-			e <- new.env(hash = TRUE)
+			e2<- new.env(hash = TRUE)
 		} else {
-			e <- list2env(list(...))
+			e2<- list2env(list(...))
 		}
 
-		type<- e$type 
+		type<- e2$type 
         
         if (type == "fraction") {
             print(barplotLatticeFraction(identifier, 
@@ -146,11 +152,20 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         }
         
     }
-    
+
     # plot the fraction
     deTrack <- AnnotationTrack(range = ranges, genome = genome(x), id = rownames(x), 
         name = trackName, stacking = "squish", fun = details, 
-		detailsFunArgs = c(gpar, type=type,amainVec=mainVec, x=x, strand=strand))
+		detailsFunArgs = c(ylab=e$ylab,
+						   xlab=e$xlab,
+						   deAnnoPlot = e$deAnnoPlot,
+						   mainvec=list(list(e$mainvec)),
+						   type=type, 
+						   x=x, 
+						   strand=strand, 
+						   ids=list(list(rownames(x)))
+						)
+		)
     deTrack
 })
 

@@ -1477,20 +1477,37 @@ NULL
 
 #' @rdname barplot-lattice-support
 barplotLatticeFraction <- function(identifier, ...) {
-    
+
     if (length(list(...)) == 0) {
         e <- new.env(hash = TRUE)
     } else {
         e <- list2env(list(...))
     }
-   
-	#temporarily set this default
-	e$main <- ""
+
+	e$ids <- unlist(e$ids)
+
+    if (!exists("mainvec", envir = e, inherits = FALSE)) {
+		e$mainvec <- rep("",nrow(e$x))
+	}
+	if(class(e$mainvec)=="list"){
+		e$mainvec <- unlist(e$mainvec)
+	}
+	print(e$mainvec)	
+    if (!exists("main", envir = e, inherits = FALSE)) {
+		e$main <- e$mainvec[e$ids %in% identifier]
+	}
+	print(e$main)
 
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
         e$deAnnoPlot <- FALSE
     }
     
+    if (!exists("ylab", envir = e, inherits = FALSE)) {
+        e$ylab <- ""
+    }
+    if (!exists("xlab", envir = e, inherits = FALSE)) {
+        e$xlab <- ""
+    }
 	#acounts<-  alleleCounts(e$x, strand = strand)
 	arank<-  arank(e$x, strand = e$strand)
 	afraction<-  fraction(e$x, strand = e$strand)
@@ -1528,12 +1545,6 @@ barplotLatticeFraction <- function(identifier, ...) {
     parset <- list()
     scales = list(rot = c(90, 0))
     
-    if (!exists("ylab", envir = e, inherits = FALSE)) {
-        e$ylab <- ""
-    }
-    if (!exists("xlab", envir = e, inherits = FALSE)) {
-        e$ylab <- ""
-    }
     #if (!exists("amainVec", envir = e, inherits = FALSE)) {
     #   e$amainVec <- rownames(x[identifier,])
     #}
@@ -1562,13 +1573,35 @@ barplotLatticeCounts <- function(identifier, ...) {
     } else {
         e <- list2env(list(...))
     }
+	
+	e$ids <- unlist(e$ids)
+
+    if (!exists("mainvec", envir = e, inherits = FALSE)) {
+		e$mainvec <- rep("",nrow(e$x))
+	}
+	if(class(e$mainvec)=="list"){
+		e$mainvec <- unlist(e$mainvec)
+	}
+	print(e$mainvec)	
+    if (!exists("main", envir = e, inherits = FALSE)) {
+		e$main <- e$mainvec[e$ids %in% identifier]
+	}
+
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
         e$deAnnoPlot <- FALSE
     }
     
-	#temporarily set this default
-	e$main <- ""
+    if (!exists("ylab", envir = e, inherits = FALSE)) {
+        e$ylab <- ""
+    }
+    if (!exists("xlab", envir = e, inherits = FALSE)) {
+        e$xlab <- ""
+    }
 
+	### Grah params set default values
+	parset <- list()
+	scales = list(rot = c(90, 0))
+		
 	makePlotDf <- function(strand){
 
 		acounts<-  alleleCounts(e$x, strand = e$strand)
@@ -1597,62 +1630,27 @@ barplotLatticeCounts <- function(identifier, ...) {
 	}
 
 	if(e$strand %in% c("+","-","*")){
-		### Grah params set default values
-		parset <- list()
-		scales = list(rot = c(90, 0))
-		
-		if (!exists("ylab", envir = e, inherits = FALSE)) {
-			e$ylab <- ""
-		}
-		if (!exists("xlab", envir = e, inherits = FALSE)) {
-			e$ylab <- ""
-		}
-		
-		#if (!exists("amainVec", envir = e, inherits = FALSE)) {
-		#   e$amainVec <- rownames(x[identifier,])
-		#}
-		# potentially override default settings with trellis settings
-		if (e$deAnnoPlot) {
-			
-			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
-				right.padding = 0, axis.right = 0))
-			
-			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
-		}
 
 		df <- makePlotDf(strand=e$strand)
+
+		if (e$deAnnoPlot) {
+			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0,
+				ylab.axis.padding = 0,right.padding = 0, axis.right = 0))
+			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
+		}
 
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
 			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
 				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
 			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
 
-		
-
 	}else if(e$strand=="both"){
 		
 		df <- rbind(makePlotDf("+"),makePlotDf("-"))	
-		### Grah params set default values
-		parset <- list()
-		scales = list(rot = c(90, 0))
-		
-		if (!exists("ylab", envir = e, inherits = FALSE)) {
-			e$ylab <- ""
-		}
-		if (!exists("xlab", envir = e, inherits = FALSE)) {
-			e$ylab <- ""
-		}
-		
-		#if (!exists("amainVec", envir = e, inherits = FALSE)) {
-		#   e$amainVec <- rownames(x)
-		#}
 
-		# potentially override default settings with trellis settings
 		if (e$deAnnoPlot) {
-			
-			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
-				right.padding = 0, axis.right = 0))
-			
+			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0,
+				ylab.axis.padding = 0,right.padding = 0, axis.right = 0))
 			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
 		}
 		

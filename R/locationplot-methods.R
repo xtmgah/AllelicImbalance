@@ -417,10 +417,34 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 		}
     }
     
+	#make an environment from ...
+    if (length(list(...)) == 0) {
+        e <- new.env(hash = TRUE)
+    } else {
+        e <- list2env(list(...))
+    }
+
+	e$x <- x
+
+
+    if (!exists("mainvec", envir = e, inherits = FALSE)) {
+		e$mainvec <- rep("",nrow(e$x))
+	}
+    if (!exists("ylab", envir = e, inherits = FALSE)) {
+        e$ylab <- ""
+    }
+    if (!exists("xlab", envir = e, inherits = FALSE)) {
+        e$xlab <- ""
+    }
     # make deTrack the fraction
     if (verbose) 
         (cat("preparing detailedAnnotationTrack\n"))
-    deTrack <- ASEDAnnotationTrack(x, GR = GR, type, strand, trackName = trackNameDeAn)
+    deTrack <- ASEDAnnotationTrack(x, GR = GR, type, strand, 
+								   trackName = trackNameDeAn,
+								   mainvec=e$mainvec,
+								   ylab=e$ylab,
+								   xlab=e$xlab
+								   )
     lst <- list(deTrack)
     
     if (!is.null(BamGAL)) {
