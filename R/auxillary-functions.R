@@ -1492,11 +1492,9 @@ barplotLatticeFraction <- function(identifier, ...) {
 	if(class(e$mainvec)=="list"){
 		e$mainvec <- unlist(e$mainvec)
 	}
-	print(e$mainvec)	
     if (!exists("main", envir = e, inherits = FALSE)) {
 		e$main <- e$mainvec[e$ids %in% identifier]
 	}
-	print(e$main)
 
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
         e$deAnnoPlot <- FALSE
@@ -1549,9 +1547,26 @@ barplotLatticeFraction <- function(identifier, ...) {
     #   e$amainVec <- rownames(x[identifier,])
     #}
 	    if (e$deAnnoPlot) {
-        
-        parset <- list(layout.widths = list(left.padding = 0, axis.left = 0, ylab.axis.padding = 0, 
-            right.padding = 0, axis.right = 0))
+        parset <- list(
+					   layout.widths = list(
+							left.padding = 0,
+							axis.left = 0,
+							ylab.axis.padding = 0, 
+							right.padding = 0, 
+							axis.right = 0
+							),
+					   layout.heights = list(
+							top.padding = 0.1,
+							between = 0.1,
+							xlab.top= 0.1,
+							axis.top = 0,
+							main=1.1,
+							main.key.padding=1,
+							axis.xlab.padding = 1, 
+							bottom.padding = 1, 
+							axis.bottom = 0.3
+							)
+					   )
         
         scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
         
@@ -1582,7 +1597,6 @@ barplotLatticeCounts <- function(identifier, ...) {
 	if(class(e$mainvec)=="list"){
 		e$mainvec <- unlist(e$mainvec)
 	}
-	print(e$mainvec)	
     if (!exists("main", envir = e, inherits = FALSE)) {
 		e$main <- e$mainvec[e$ids %in% identifier]
 	}
