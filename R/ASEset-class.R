@@ -101,14 +101,17 @@ NULL
 #'
 #' @exportClass ASEset
 #' @exportMethod alleleCounts mapBias fraction arank
-setClass("ASEset", contains = "SummarizedExperiment", representation(variants = "vector"))
+setClass("ASEset", contains = "SummarizedExperiment", 
+	representation(variants = "vector"))
 
 #' @rdname ASEset-class
 setGeneric("alleleCounts", function(x, strand = "*", return.class="list") {
     standardGeneric("alleleCounts")
 })
 
-setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",return.class="list") {
+setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
+	return.class="list") {
+
     if (!sum(strand %in% c("+", "-", "*")) > 0) {
         stop("strand parameter has to be either '+', '-', '*' ")
     }
@@ -120,36 +123,34 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",retu
     } else if (strand == "*") {
         el <- "countsUnknown"
     } else {
-        stop("unknown strand option")
+        stop("not existing strand option")
     }
     
     # check if strand option is present as assay
     if (!(el %in% names(assays(x)))) {
-		#if * is missing sum + and -, if they exist
-		#if(el=="countsUnknown"){
-		#	if(sum(c("countsPlus","countsMinus") %in% names(assays(x)))==2)	{
-		#		el <- "combine"				
-		#	}else{
-		#		stop("neither '+' '-' or '*'strand is present as assay in ASEset object")
-		#	}	
-		#}else{
-			stop("neither '+' '-' or '*'strand is present as assay in ASEset object")
-		#}
+		stop(paste("neither '+' '-' or '*'strand is present as assay in",
+				   " ASEset object"))
     }
     
-    # assume alleleCount information is stored as element 1
-    alleleCountList <- list()
-
-	#extract array
-	if(el=="combine"){
-		ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
-	}else{
-		ar <- assays(x)[[el]]
-	}
-
 	if(return.class=="array"){
+		if(el=="combine"){
+			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
+		}else{
+			ar <- assays(x)[[el]]
+		}
+		#add variant names (preferably this could take place during 
+		# initialization of the ASEset object)
+		dimnames(ar)[[3]]<- x@variants
 		ar
 	}else if(return.class=="list"){
+
+		if(el=="combine"){
+			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
+		}else{
+			ar <- assays(x)[[el]]
+		}
+
+		alleleCountList <- list()
 
 		for (i in 1:nrow(ar)) {
 			mat <- ar[i, , ]
@@ -250,8 +251,9 @@ setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*",
         minorAllele <- colnames(tmp)[order(countsByAllele, decreasing = TRUE)][2]
         majorAndMinorFraction <- sum(countsByAllele[c(majorAllele, minorAllele)])/sum(countsByAllele)
         if (verbose & majorAndMinorFraction < 0.9) {
-            cat(paste("Snp", "was possible tri-allelic, but only two most frequent alleles were plotted. Counts:"), 
-                "\n")
+            cat(paste("Snp", "was possible tri-allelic, but only two most",
+					  "frequent alleles were plotted. Counts:"), 
+					"\n")
             cat(paste(paste(names(countsByAllele), countsByAllele, sep = "="), collapse = ", "), 
                 "\n")
         }
@@ -282,19 +284,38 @@ setGeneric("arank", function(x, return.type = "names", strand = "*", ...) {
     standardGeneric("arank")
 })
 
-setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names", strand = "*", 
-    ...) {
-    acounts <- alleleCounts(x, strand = strand)
-    
-    if (return.type == "names") {
-        arank <- lapply(acounts, function(x) {
-            names(sort(apply(x, 2, sum), decreasing = TRUE))
-        })
-    }
-    if (return.type == "counts") {
-        arank <- lapply(acounts, function(x) {
-            as.numeric(sort(apply(x, 2, sum), decreasing = TRUE))
-        })
-    }
-    arank
+setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names", 
+	return.class = "list", strand = "*", ...) {
+	
+	if(return.class=="matrix"){
+		if (return.type == "names") {
+			ar <- t(apply(apply(alleleCounts(x,
+						strand=strand,return.class="array"),c(1,3),sum),
+					1, function(x){rank(x,ties.method="first")}))
+			mat <- matrix(a@variants[ar],ncol=4, byrow=FALSE,
+						  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4)))
+		}else if (return.type == "rank") {
+			t(apply(apply(alleleCounts(x,
+						strand=strand,return.class="array"),c(1,3),sum),
+					1, function(x){rank(x,ties.method="first")}))
+		}else if (return.type == "counts") {
+			apply(alleleCounts(x,strand=strand,return.class="array"),c(1,3),sum)
+		}else{stop("return.type is not valid")}
+
+	}
+
+	if(return.class=="list"){
+		acounts <- alleleCounts(x, strand = strand)
+		
+		if (return.type == "names") {
+			arank <- lapply(acounts, function(x) {
+				names(sort(apply(x, 2, sum), decreasing = TRUE))
+			})
+		}else if (return.type == "counts") {
+			arank <- lapply(acounts, function(x) {
+				as.numeric(sort(apply(x, 2, sum), decreasing = TRUE))
+			})
+		}else{stop("return.type is not valid")}
+		arank
+	}
 }) 
