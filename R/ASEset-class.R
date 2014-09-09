@@ -35,8 +35,9 @@ NULL
 #' @param x ASEset object
 #' @param strand which strand of '+', '-' or '*'
 #' @param verbose makes function more talkative
-#' @param return.type return 'names' or 'counts'
+#' @param return.type return 'names', rank or 'counts'
 #' @param return.class return 'list' or 'array'
+#' @param sortBy sort the returning object based on 'position' or 'none'
 #' @param ... additional arguments
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
@@ -100,7 +101,7 @@ NULL
 #' 
 #'
 #' @exportClass ASEset
-#' @exportMethod alleleCounts mapBias fraction arank
+#' @exportMethod alleleCounts mapBias fraction arank table
 setClass("ASEset", contains = "SummarizedExperiment", 
 	representation(variants = "vector"))
 
@@ -280,7 +281,8 @@ setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*",
 })
 
 #' @rdname ASEset-class
-setGeneric("arank", function(x, return.type = "names", strand = "*", ...) {
+setGeneric("arank", function(x, return.type = "names", 
+	return.class = "list", strand = "*", ...) {
     standardGeneric("arank")
 })
 
@@ -292,14 +294,14 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 			ar <- t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
 					1, function(x){rank(x,ties.method="first")}))
-			mat <- matrix(a@variants[ar],ncol=4, byrow=FALSE,
-						  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4)))
+			return(matrix(a@variants[ar],ncol=4, byrow=FALSE,
+					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4))))
 		}else if (return.type == "rank") {
-			t(apply(apply(alleleCounts(x,
+			return(t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
-					1, function(x){rank(x,ties.method="first")}))
+					1, function(x){rank(x,ties.method="first")})))
 		}else if (return.type == "counts") {
-			apply(alleleCounts(x,strand=strand,return.class="array"),c(1,3),sum)
+			return(apply(alleleCounts(x,strand=strand,return.class="array"),c(1,3),sum))
 		}else{stop("return.type is not valid")}
 
 	}
@@ -308,14 +310,46 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 		acounts <- alleleCounts(x, strand = strand)
 		
 		if (return.type == "names") {
-			arank <- lapply(acounts, function(x) {
+			lapply(acounts, function(x) {
 				names(sort(apply(x, 2, sum), decreasing = TRUE))
 			})
 		}else if (return.type == "counts") {
-			arank <- lapply(acounts, function(x) {
+			lapply(acounts, function(x) {
 				as.numeric(sort(apply(x, 2, sum), decreasing = TRUE))
 			})
+		}else if (return.type == "rank") {
+			stop("rank for return.class 'list' is not implemented yet")
 		}else{stop("return.type is not valid")}
-		arank
 	}
 }) 
+
+#' @rdname ASEset-class
+setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
+    standardGeneric("table")
+})
+
+setMethod("table", signature(x = "ASEset"), function(x, strand = "*",sortBy="none", ...) {
+	#checks
+	if(!sortBy%in%c("position","none")){
+		stop("sortBy has only one option, that is 'position'")	
+	}
+
+	if(sortBy=="position"){
+		x <- sort(x)
+	}
+
+	df <- data.frame(row.names=rownames(x))
+	df[,c("chromosome","position")] <- c(as.character(seqnames(x)),start(x))
+	df <- cbind(df,as.data.frame(arank(x, return.type="counts",
+				   return.class="matrix",strand=strand)))
+
+	#if only one sample add fraction to table()
+	if(ncol(x)==1){
+		df[,"fraction"] <- as.vector(fraction(x,strand=strand))
+	}
+	df
+
+})	
+
+
+

@@ -11,6 +11,7 @@
 \alias{fraction,ASEset-method}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
+\alias{table}
 \title{ASEset objects}
 \usage{
 alleleCounts(x, strand = "*", return.class = "list")
@@ -19,7 +20,9 @@ mapBias(x)
 
 fraction(x, strand = "*", verbose = FALSE)
 
-arank(x, return.type = "names", strand = "*", ...)
+arank(x, return.type = "names", return.class = "list", strand = "*", ...)
+
+table(x, strand = "*", sortBy = "none", ...)
 }
 \arguments{
 \item{x}{ASEset object}
@@ -28,9 +31,11 @@ arank(x, return.type = "names", strand = "*", ...)
 
 \item{verbose}{makes function more talkative}
 
-\item{return.type}{return 'names' or 'counts'}
+\item{return.type}{return 'names', rank or 'counts'}
 
 \item{return.class}{return 'list' or 'array'}
+
+\item{sortBy}{sort the returning object based on 'position' or 'none'}
 
 \item{...}{additional arguments}
 }
