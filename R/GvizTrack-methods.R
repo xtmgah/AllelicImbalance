@@ -94,7 +94,7 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         stop("This function can only use objects with one seqlevel")
     }
     
-    if (!nrow(x) == 1) {
+    if (!nrow(x) == 0) {
 		if(strand %in% c("+","-","*")){
 			GR <- GRanges(seqnames = seqlevels(x), ranges = IRanges(start = min(start(x)), 
 				end = max(end(x))), strand = strand, genome = genome(x))
@@ -104,7 +104,9 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 		}else{
 			stop("strand has to be +, -, * or 'both'")
 		}
-    }
+	}else{
+		stop("there are no rows in ASEset")
+	}
 
 	#make an environment from ...
     if (length(list(...)) == 0) {
@@ -156,6 +158,9 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         
     }
 
+	print("erste")
+	print(strand)
+
     # plot the fraction
     deTrack <- AnnotationTrack(range = ranges, genome = genome(x), id = rownames(x), 
         name = trackName, stacking = "squish", fun = details, 
@@ -165,7 +170,7 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 						   mainvec=list(list(e$mainvec)),
 						   type=type, 
 						   x=x, 
-						   strand=strand, 
+						   astrand=strand, 
 						   ids=list(list(rownames(x)))
 						)
 		)

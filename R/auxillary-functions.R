@@ -1485,6 +1485,7 @@ barplotLatticeFraction <- function(identifier, ...) {
     }
 
 	e$ids <- unlist(e$ids)
+	e$strand <- e$astrand
 
     if (!exists("mainvec", envir = e, inherits = FALSE)) {
 		e$mainvec <- rep("",nrow(e$x))
@@ -1589,7 +1590,12 @@ barplotLatticeCounts <- function(identifier, ...) {
         e <- list2env(list(...))
     }
 	
+	#use requested strand instead of Gviz ranges strand
+	e$strand <- e$astrand
 	e$ids <- unlist(e$ids)
+    #e$auto.key <- list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
+	#			cex = 0.8)
+
 
     if (!exists("mainvec", envir = e, inherits = FALSE)) {
 		e$mainvec <- rep("",nrow(e$x))
@@ -1657,29 +1663,65 @@ barplotLatticeCounts <- function(identifier, ...) {
 		df <- makePlotDf(strand=e$strand)
 
 		if (e$deAnnoPlot) {
-			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0,
-				ylab.axis.padding = 0,right.padding = 0, axis.right = 0))
-			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
+			e$auto.key <- FALSE
+			parset <- list(
+					   layout.widths = list(
+							left.padding = 0,
+							axis.left = 0,
+							ylab.axis.padding = 0, 
+							right.padding = 0, 
+							axis.right = 0
+							),
+					   layout.heights = list(
+							top.padding = 0.1,
+							between = 0.1,
+							xlab.top= 0.1,
+							axis.top = 0,
+							main=1.1,
+							main.key.padding=1,
+							axis.xlab.padding = 1, 
+							bottom.padding = 1, 
+							axis.bottom = 0.3
+							)
+					   )
+			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0), auto.key = e$auto.key)
 		}
 
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
-			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
-				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
-			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
+			stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main )
 
 	}else if(e$strand=="both"){
 		
 		df <- rbind(makePlotDf(strand="+"),makePlotDf(strand="-"))	
 
 		if (e$deAnnoPlot) {
-			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0,
-				ylab.axis.padding = 0,right.padding = 0, axis.right = 0))
-			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
+			e$auto.key <- FALSE
+			parset <- list(
+					   layout.widths = list(
+							left.padding = 0,
+							axis.left = 0,
+							ylab.axis.padding = 0, 
+							right.padding = 0, 
+							axis.right = 0
+							),
+					   layout.heights = list(
+							top.padding = 0.1,
+							between = 0.1,
+							xlab.top= 0.1,
+							axis.top = 0,
+							main=1.1,
+							main.key.padding=1,
+							axis.xlab.padding = 1, 
+							bottom.padding = 1, 
+							axis.bottom = 0.3
+							)
+					   )
+			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0), auto.key = e$auto.key)
 		}
 		
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
-			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
-				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
+			stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
 			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
 	}else {
 		stop("strand must be + - * or both")

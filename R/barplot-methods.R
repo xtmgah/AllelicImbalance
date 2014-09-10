@@ -1369,7 +1369,7 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 			b <- barplotLatticeFraction(
 				identifier = name, 
 				x=x, 
-				strand=strand, 
+				astrand=strand, 
 				ids=rownames(x),
 				ylab=e$ylab,
 				xlab=e$xlab,
@@ -1378,7 +1378,7 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 			b <- barplotLatticeCounts(
 				identifier = name, 
 				x=x, 
-				strand=strand, 
+				astrand=strand, 
 				ids=rownames(x),
 				ylab=e$ylab,
 				xlab=e$xlab,
