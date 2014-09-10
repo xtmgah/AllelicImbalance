@@ -1351,7 +1351,7 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
         e <- list2env(list(...))
     }
 
-	print(ls(envir=e))
+	#print(ls(envir=e))
 
     if (!exists("mainvec", envir = e, inherits = FALSE)) {
 		e$mainvec <- rep("",nrow(x))
@@ -1362,8 +1362,6 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$xlab <- ""
     }
-
-	print(e$mainvec)
 
 	for (i in 1:nrow(x)) {
 		name <- rownames(x)[i]

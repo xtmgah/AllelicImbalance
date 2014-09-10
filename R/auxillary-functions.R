@@ -1599,6 +1599,12 @@ barplotLatticeCounts <- function(identifier, ...) {
 	}
     if (!exists("main", envir = e, inherits = FALSE)) {
 		e$main <- e$mainvec[e$ids %in% identifier]
+		#print(identifier)
+		#print(e$ids)
+		#print(e$main)
+		#print(e$mainvec[which(e$ids %in% identifier)])
+		#print(e$mainvec)
+		#print(which(e$ids %in% identifier))
 	}
 
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
@@ -1617,9 +1623,8 @@ barplotLatticeCounts <- function(identifier, ...) {
 	scales = list(rot = c(90, 0))
 		
 	makePlotDf <- function(strand){
-
-		acounts<-  alleleCounts(e$x, strand = e$strand)
-		arank<-  arank(e$x, strand = e$strand)
+		acounts<-  alleleCounts(e$x, strand = strand)
+		arank<-  arank(e$x, strand = "*")
 		#afraction<-  fraction(e$x, strand = strand)
 		#amainVec<-  e$amainVec
 
@@ -1634,6 +1639,10 @@ barplotLatticeCounts <- function(identifier, ...) {
 		sample <- vector()
 		for (i in 1:nrow(a.c)) {
 			sample <- c(sample, rownames(a.c)[i], rownames(a.c)[i])
+		}
+
+		if(strand=="-" && e$strand=="both"){
+			values <- -values
 		}
 		df <- data.frame(values = values, sample = sample, allele = allele)
 		
@@ -1660,7 +1669,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 
 	}else if(e$strand=="both"){
 		
-		df <- rbind(makePlotDf("+"),makePlotDf("-"))	
+		df <- rbind(makePlotDf(strand="+"),makePlotDf(strand="-"))	
 
 		if (e$deAnnoPlot) {
 			parset <- list(layout.widths = list(left.padding = 0, axis.left = 0,
@@ -1671,7 +1680,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
 			auto.key = list(points = FALSE, rectangles = TRUE, space = "top", size = 2, 
 				cex = 0.8), stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
-			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = main)
+			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
 	}else {
 		stop("strand must be + - * or both")
 	}

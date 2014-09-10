@@ -384,7 +384,7 @@ setGeneric("glocationplot", function(x, type = "fraction", strand = "*",
 
 setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction", 
     strand = "*", BamGAL = NULL, GenomeAxisTrack = FALSE, trackNameDeAn = paste("deTrack", 
-        type), add = FALSE, verbose = FALSE, ...) {
+        type), TxDb=NULL, add = FALSE, verbose = FALSE, ...) {
     
     # check genome
     if (is.null(genome(x)) | is.na(genome(x))) {
@@ -436,9 +436,11 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$xlab <- ""
     }
-    # make deTrack the fraction
-    if (verbose) 
+
+    # make deTrack 
+    if (verbose) {
         (cat("preparing detailedAnnotationTrack\n"))
+	}
     deTrack <- ASEDAnnotationTrack(x, GR = GR, type, strand, 
 								   trackName = trackNameDeAn,
 								   mainvec=e$mainvec,
@@ -446,36 +448,52 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 								   xlab=e$xlab
 								   )
     lst <- list(deTrack)
-    
+   
+	start <- min(start(GR))
+	end <- max(end(GR))
+
+
     if (!is.null(BamGAL)) {
-        if (verbose) 
+        if (verbose) {
             (cat("preparing coverageDataTrack\n"))
+		}
+
         seqlevels(BamGAL) <- seqlevels(x)
         start <- min(start(x))
         end <- max(end(x))
         
-        covTracks <- CoverageDataTrack(x, BamList = BamGAL, strand = strand)
+        covTracks <- CoverageDataTrack(x, BamList = BamGAL, strand = strand, meanCoverage=TRUE)
         
-        lst <- c(deTrack, covTracks)
-        parts <- 0.5/length(covTracks)
-        sizes <- c(0.5, rep(parts, length(covTracks)))
-    } else {
-        lst <- c(deTrack)
-    }
-    
+
+        lst[[length(lst) + 1]] <- covTracks
+	}
+	if(!is.null(TxDb)){
+        if (verbose) {
+            (cat("preparing transcriptDB track\n"))
+		}
+		txTrack <- GeneRegionTrack(TxDb, 
+		start=start(GR), end=end(GR), 
+		chr=seqlevels(GR))	   
+
+        lst[[length(lst) + 1]] <- txTrack
+	}
+
     if (GenomeAxisTrack) {
-        if (verbose) 
+        if (verbose) {
             (cat("preparing GenomeAxisTrack\n"))
+		}
         axTrack <- GenomeAxisTrack()
         lst[[length(lst) + 1]] <- axTrack
     }
-    
-    if (!is.null(BamGAL)) {
-        plotTracks(lst, from = start, to = end, sizes = sizes, col.line = NULL, showId = FALSE, 
-            main = "mainText", cex.main = 1, title.width = 1, type = "histogram", 
-            add = add)
-    } else {
-        # plot
-        plotTracks(lst, add = add)
-    }
+
+	#set sizes
+	parts <- 0.5/length(covTracks) #need mean coverage
+	#sizes <- c(0.5, rep(parts, length(covTracks)))
+	sizes <- 1
+	# plot
+	plotTracks(lst, from = start, to = end, sizes = sizes, col.line = NULL, showId = FALSE, 
+		title.width = 1, type = "histogram", 
+		add = add)
+
+
 }) 
