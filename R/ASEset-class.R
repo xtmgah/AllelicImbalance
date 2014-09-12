@@ -37,12 +37,22 @@ NULL
 #' @param verbose makes function more talkative
 #' @param return.type return 'names', rank or 'counts'
 #' @param return.class return 'list' or 'array'
-#' @param sortBy sort the returning object based on 'position' or 'none'
 #' @param ... additional arguments
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
 #' strand, as well as mapBias information. All data is stored in a manner
 #' similar to the \code{\link[GenomicRanges]{SummarizedExperiment}} class.
+#' @section Table: table(...)
+#' 
+#' \describe{
+#' Arguments: \item{...}{An \code{ASEset object} that contains the
+#' variants of interest} 
+#'
+#' The generics for table does not easily allow more than one argument
+#' so in respect to the different strand options, \code{table} will
+#' return a SimpleList with length 3, one element for each strand.
+#' }
+#'
 #' @section Constructor: ASEsetFromCountList(rowData, countListNonStranded =
 #' NULL, countListPlus = NULL, countListMinus = NULL, countListUnknown = NULL,
 #' colData = NULL, mapBiasExpMean = array(),verbose=FALSE ...)
@@ -324,30 +334,36 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 }) 
 
 #' @rdname ASEset-class
-setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
-    standardGeneric("table")
-})
+setGeneric("table")
+#setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
+#    standardGeneric("table")
+#})
 
-setMethod("table", signature(x = "ASEset"), function(x, strand = "*",sortBy="none", ...) {
-	#checks
-	if(!sortBy%in%c("position","none")){
-		stop("sortBy has only one option, that is 'position'")	
+setMethod("table", signature(... = "ASEset"), function(...) {
+
+	args <- list(...)
+	if (length(args) > 1)
+	  stop("Only one argument in '...' supported")
+	x <- args[[1L]]
+
+	#because the generis of table is rubbish we have to return a list for each strand
+	retList <- list()
+
+	for(strand in c("+","-","*")){
+		df <- data.frame(row.names=rownames(x))
+		df[,c("chromosome","position")] <- c(as.character(seqnames(x)),start(x))
+		df <- cbind(df,as.data.frame(arank(x, return.type="counts",
+					   return.class="matrix",strand=strand)))
+
+		#if only one sample add fraction to table()
+		if(ncol(x)==1){
+			df[,"fraction"] <- as.vector(fraction(x,strand=strand))
+		}
+
+		retList[[strand]] <- df
+
 	}
-
-	if(sortBy=="position"){
-		x <- sort(x)
-	}
-
-	df <- data.frame(row.names=rownames(x))
-	df[,c("chromosome","position")] <- c(as.character(seqnames(x)),start(x))
-	df <- cbind(df,as.data.frame(arank(x, return.type="counts",
-				   return.class="matrix",strand=strand)))
-
-	#if only one sample add fraction to table()
-	if(ncol(x)==1){
-		df[,"fraction"] <- as.vector(fraction(x,strand=strand))
-	}
-	df
+	return(SimpleList(retList))
 
 })	
 
