@@ -1952,29 +1952,34 @@ makeMapBiasReads <- function(x, reads=100, refPath, read.length=100, PE=FALSE, i
 #' 
 #' @param x ASEset
 #' @param strand strand
-#' @param biallelic.only logical
+#' @param return.type 'biallelic' 'triallelic' 'all'
+# @param return.type.criteria least fraction for classification
 #' @author Jesper R. Gadin
 #' @keywords infer
 #' @examples
 #' 
 #' data(ASEset)
-#' g <- inferSnp(ASEset)
+#' g <- inferBiAllelicSnps(ASEset)
 #' 
-#' @export inferSnp
+#' @export inferBiallelicSnp
 
-inferSnp <- function(x,strand="*",biallelic.only=TRUE){
+inferAlleles <- function(x,strand="*",return.type="all"){
 
-	if(biallelic.only==FALSE){stop("biallelic.only=FALSE is not supported yet")}
+	if(!return.type=="all"){stop("option might be documented but doesnt exist yet")}
 
-	l <- lapply(alleleCounts(x,strand=strand), function(x){
-			ap <- apply(x,2,sum)
-			char <- names(sort(ap,decreasing=TRUE))[1:2]
-		 	char	
-		}
-	)
-	mat <- as.matrix(t(as.data.frame(l)))
-	colnames(mat) <- c("allele1","allele2")
-	mat
+	#l <- lapply(alleleCounts(x,strand=strand), function(x){
+	#		ap <- apply(x,2,sum)
+	#		char <- names(sort(ap,decreasing=TRUE))[1:2]
+	#	 	char	
+	#	}
+	#)
+	
+	to.inv<- arank(x, return.class="matrix", return.type="names")
+	to.inv	
+
+	#mat <- as.matrix(t(as.data.frame(l)))
+	#colnames(mat) <- c("allele1","allele2")
+	#mat
 }
 
 
@@ -2003,15 +2008,15 @@ inferGenotypes <- function(x, min.allele.fraction=0.05, min.infer.count=10,retur
 	if(biallelic.only==FALSE){stop("'biallelic.only=FALSE' is not supported yet")}
 
 	if(sum(c("countsPlus","countsMinus") %in% names(assays(x)))==2){
-		snps.plus <- inferSnp(x,strand="+")	
-		snps.minus <- inferSnp(x,strand="-")	
+		snps.plus <- inferBiallelicSnp(x,strand="+")	
+		snps.minus <- inferBiallelicSnp(x,strand="-")	
 		#merge counts.plus and counts.minu
 		x2 <- x
 		assays(x2)$countsPlus <- assays(x)$countsPlus + assays(x)$countsMinus
 		counts <- alleleCounts(x2,strand="+")
 
 	}else if("countsUnknown" %in%  names(assays(x))){
-		snps.plus <- inferSnp(x,strand="*")
+		snps.plus <- inferBiallelicSnp(x,strand="*")
 		counts <- alleleCounts(x,strand="*")
 
 	}else{stop("there is no count data")}

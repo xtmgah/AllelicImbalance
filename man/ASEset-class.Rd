@@ -9,6 +9,8 @@
 \alias{arank,ASEset-method}
 \alias{fraction}
 \alias{fraction,ASEset-method}
+\alias{frequency}
+\alias{frequency,ASEset-method}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
 \alias{table}
@@ -24,6 +26,8 @@ fraction(x, strand = "*", verbose = FALSE)
 arank(x, return.type = "names", return.class = "list", strand = "*", ...)
 
 table(...)
+
+frequency(x, ...)
 }
 \arguments{
 \item{x}{ASEset object}

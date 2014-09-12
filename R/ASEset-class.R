@@ -29,8 +29,11 @@ NULL
 #' @name ASEset-class
 #' @rdname ASEset-class
 #' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
-#' alleleCounts,ASEset-method mapBias,ASEset-method fraction,ASEset-method
-#' arank,ASEset-method table,ASEset-method
+#' frequency alleleCounts,ASEset-method mapBias,ASEset-method
+#' fraction,ASEset-method arank,ASEset-method table,ASEset-method
+#' frequency,ASEset-method
+#' 
+#' 
 #' @docType class
 #' @param x ASEset object
 #' @param strand which strand of '+', '-' or '*'
@@ -111,7 +114,9 @@ NULL
 #' 
 #'
 #' @exportClass ASEset
-#' @exportMethod alleleCounts mapBias fraction arank table
+#' @exportMethod alleleCounts mapBias fraction arank table frequency
+#' @export frequency
+
 setClass("ASEset", contains = "SummarizedExperiment", 
 	representation(variants = "vector"))
 
@@ -367,5 +372,28 @@ setMethod("table", signature(... = "ASEset"), function(...) {
 
 })	
 
+#' @rdname ASEset-class
+setGeneric("frequency")
 
+setMethod("frequency", signature(x = "ASEset"), function(x, 
+	return.class = "list", strand = "*", ...) {
+
+	ar <- alleleCounts(x, strand=strand, return.class="array")
+	ar <- ar * array(as.vector(1/apply(ar, c(1,2), sum)),dim=dim(ar))
+
+	if(return.class=="array"){
+		return(ar)
+	}else if(return.class=="list"){
+		lst <- list()
+		for (i in 1:nrow(x)){
+			mat <- ar[i,,]
+			dimnames(mat) <- list(colnames(x),x@variants)
+			lst[[i]] <- mat
+		}
+		names(lst) <- rownames(x)
+		lst
+	}else{
+		stop("return.class has to be 'array' or 'list'")
+	}
+})
 
