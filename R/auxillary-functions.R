@@ -1467,8 +1467,8 @@ getAlleleCount <- function() {
 #' a <- ASEset
 #' name <- rownames(a)[1]
 #' 
-#' barplotLatticeFraction(identifier=name, x=a, strand="+") 
-#' barplotLatticeCounts(identifier=name,  x=a, strand="+") 
+#' barplotLatticeFraction(identifier=name, x=a, astrand="+") 
+#' barplotLatticeCounts(identifier=name,  x=a, astrand="+") 
 #' 
 #' @export barplotLatticeFraction
 #' @export barplotLatticeCounts
@@ -1518,14 +1518,14 @@ barplotLatticeFraction <- function(identifier, ...) {
     for (i in 1:length(a.f)) {
         values <- c(values, a.f[i], a.f2[i])
     }
-    allele <- rep(a.r, length(a.f))
+    alleles <- rep(a.r, length(a.f))
     
     # sample <- names(a.f)
     sample <- vector()
     for (i in 1:length(a.f)) {
         sample <- c(sample, rownames(afraction)[i], rownames(afraction)[i])
     }
-    df <- data.frame(values = values, sample = sample, allele = allele)
+    df <- data.frame(values = values, sample = sample, alleles = alleles)
     
     TFna <- is.na(df$values)
     df$values[TFna] <- 0  # 0.5 + 0.5 -> 1
@@ -1573,7 +1573,7 @@ barplotLatticeFraction <- function(identifier, ...) {
         
     }
     
-    b <- barchart(values ~ sample, group = allele, data = df, col = my_cols, origin = 0, 
+    b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
         stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
         par.settings = parset)
     
@@ -1640,7 +1640,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 		a.c <- acounts[[identifier]][, a.r, drop = FALSE]
 		
 		values <- as.vector(t(a.c))
-		allele <- rep(colnames(a.c), nrow(a.c))
+		alleles <- rep(colnames(a.c), nrow(a.c))
 		
 		sample <- vector()
 		for (i in 1:nrow(a.c)) {
@@ -1650,7 +1650,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 		if(strand=="-" && e$strand=="both"){
 			values <- -values
 		}
-		df <- data.frame(values = values, sample = sample, allele = allele)
+		df <- data.frame(values = values, sample = sample, alleles = alleles)
 		
 		# to get right order in barchart
 		df$sample <- factor(df$sample, levels = unique(df$sample))
@@ -1687,7 +1687,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0), auto.key = e$auto.key)
 		}
 
-		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
+		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = alleles, data = df, 
 			stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
 			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main )
 
@@ -1720,7 +1720,7 @@ barplotLatticeCounts <- function(identifier, ...) {
 			scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0), auto.key = e$auto.key)
 		}
 		
-		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = allele, data = df, 
+		b <- barchart(values ~ sample, horiz = FALSE, origin = 0, group = alleles, data = df, 
 			stack = FALSE, scales = scales, ylab = e$ylab, xlab = e$xlab, 
 			box.ratio = 2, abbreviate = TRUE, par.settings = parset, main = e$main)
 	}else {

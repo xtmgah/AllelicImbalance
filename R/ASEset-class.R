@@ -28,9 +28,9 @@ NULL
 #' 
 #' @name ASEset-class
 #' @rdname ASEset-class
-#' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank
+#' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
 #' alleleCounts,ASEset-method mapBias,ASEset-method fraction,ASEset-method
-#' arank,ASEset-method
+#' arank,ASEset-method table,ASEset-method
 #' @docType class
 #' @param x ASEset object
 #' @param strand which strand of '+', '-' or '*'

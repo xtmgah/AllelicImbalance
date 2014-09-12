@@ -12,6 +12,7 @@
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
 \alias{table}
+\alias{table,ASEset-method}
 \title{ASEset objects}
 \usage{
 alleleCounts(x, strand = "*", return.class = "list")
