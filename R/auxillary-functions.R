@@ -1948,38 +1948,69 @@ makeMapBiasReads <- function(x, reads=100, refPath, read.length=100, PE=FALSE, i
 #' 
 #' inference of SNPs
 #' 
-#' Oftern necessary information to link AI to SNPs outside coding region
+#' return.type.criteria is the least fraction needed to classify as bi tri or
+#' quad allelic SNPs. if 'all' then all of bi tri and quad allelic SNPs will use the same
+#' threshold. Everything under the treshold will be regarded as noise. 'all' will return 
+#' a matrix with snps as rows and bi tri and quad will be columns. For 'allmerge' the 
+#' union of bi tri and quad will be returned
 #' 
 #' @param x ASEset
 #' @param strand strand
-#' @param return.type 'biallelic' 'triallelic' 'all'
-# @param return.type.criteria least fraction for classification
+#' @param return.type 'bi' 'tri' 'quad' 'all' 'allmerged'
+#' @param return.type.criteria least fraction to classify (see details)
 #' @author Jesper R. Gadin
 #' @keywords infer
 #' @examples
 #' 
 #' data(ASEset)
-#' g <- inferBiAllelicSnps(ASEset)
+#' g <- inferAlleles(ASEset)
 #' 
-#' @export inferBiallelicSnp
+#' @export inferAlleles
 
-inferAlleles <- function(x,strand="*",return.type="all"){
+inferAlleles <- function(x,strand="*",return.type="all", return.type.criteria=0.1){
 
-	if(!return.type=="all"){stop("option might be documented but doesnt exist yet")}
-
-	#l <- lapply(alleleCounts(x,strand=strand), function(x){
-	#		ap <- apply(x,2,sum)
-	#		char <- names(sort(ap,decreasing=TRUE))[1:2]
-	#	 	char	
-	#	}
-	#)
+	#find SNP types
+	fr <- frequency(x,return.class="array")
 	
-	to.inv<- arank(x, return.class="matrix", return.type="names")
-	to.inv	
+	#apply over alleles
+	alleles <- apply(fr,c(1,2), function(x){
+		sum(x >= return.type.criteria)
+	})
 
-	#mat <- as.matrix(t(as.data.frame(l)))
-	#colnames(mat) <- c("allele1","allele2")
-	#mat
+	#disregard samples with NA
+	alleles[is.na(alleles)] <- 0
+	
+	#apply over samples
+	if(return.type%in% c("all","bi")){
+		tfbi <- apply(alleles,1, function(x){
+			sum(x == 2 ) >= 1
+		})
+	}
+	if(return.type%in% c("all","tri")){
+		tftri <- apply(alleles,1, function(x){
+			sum(x == 3 ) >= 1
+		})
+	}
+	if(return.type%in% c("all","quad")){
+		tfquad <- apply(alleles,1, function(x){
+			sum(x == 4 ) >= 1
+		})
+	}
+	
+	if(return.type=="bi"){
+		tfbi
+	}else if(return.type=="tri"){
+		tftri
+	}else if(return.type=="quad"){
+		tfquad
+	}else if(return.type=="all"){
+		mat <- matrix(c(tfbi, tftri, tfquad), nrow=3,byrow=TRUE,
+			dimnames=list(c("bi","tri","quad"),rownames(x)))
+		t(mat)
+	}else if(return.type=="allmerged"){
+		allmerged <- tfbi | tftri | tfquad
+		allmerged
+	}	
 }
 
 

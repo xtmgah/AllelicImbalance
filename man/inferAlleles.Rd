@@ -3,24 +3,31 @@
 \alias{inferAlleles}
 \title{inference of SNPs of ASEset}
 \usage{
-inferAlleles(x, strand = "*", return.type = "all")
+inferAlleles(x, strand = "*", return.type = "all",
+  return.type.criteria = 0.1)
 }
 \arguments{
 \item{x}{ASEset}
 
 \item{strand}{strand}
 
-\item{return.type}{'biallelic' 'triallelic' 'all'}
+\item{return.type}{'bi' 'tri' 'quad' 'all' 'allmerged'}
+
+\item{return.type.criteria}{least fraction to classify (see details)}
 }
 \description{
 inference of SNPs
 }
 \details{
-Oftern necessary information to link AI to SNPs outside coding region
+return.type.criteria is the least fraction needed to classify as bi tri or
+quad allelic SNPs. if 'all' then all of bi tri and quad allelic SNPs will use the same
+threshold. Everything under the treshold will be regarded as noise. 'all' will return
+a matrix with snps as rows and bi tri and quad will be columns. For 'allmerge' the
+union of bi tri and quad will be returned
 }
 \examples{
 data(ASEset)
-g <- inferBiAllelicSnps(ASEset)
+g <- inferAlleles(ASEset)
 }
 \author{
 Jesper R. Gadin
