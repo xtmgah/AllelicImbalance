@@ -56,6 +56,18 @@ NULL
 #' return a SimpleList with length 3, one element for each strand.
 #' }
 #'
+#' @section Frequency: frequency(x, 
+#' return.class = "list", strand = "*",
+#' threshold.count.sample = 15)
+#' 
+#' \describe{
+#' Arguments: \item{x}{An \code{ASEset object} that contains the
+#' variants of interest} 
+#' 
+#' \item{x}{threshold.count.samples} if sample has fewer counts the function
+#' return NA.
+#'	
+#' }
 #' @section Constructor: ASEsetFromCountList(rowData, countListNonStranded =
 #' NULL, countListPlus = NULL, countListMinus = NULL, countListUnknown = NULL,
 #' colData = NULL, mapBiasExpMean = array(),verbose=FALSE ...)
@@ -309,7 +321,7 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 			ar <- t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
 					1, function(x){rank(x,ties.method="first")}))
-			return(matrix(a@variants[ar],ncol=4, byrow=FALSE,
+			return(matrix(x@variants[ar],ncol=4, byrow=FALSE,
 					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4))))
 		}else if (return.type == "rank") {
 			return(t(apply(apply(alleleCounts(x,
@@ -376,10 +388,19 @@ setMethod("table", signature(... = "ASEset"), function(...) {
 setGeneric("frequency")
 
 setMethod("frequency", signature(x = "ASEset"), function(x, 
-	return.class = "list", strand = "*", ...) {
+	return.class = "list", strand = "*",
+	threshold.count.sample = 15) {
 
 	ar <- alleleCounts(x, strand=strand, return.class="array")
-	ar <- ar * array(as.vector(1/apply(ar, c(1,2), sum)),dim=dim(ar))
+	allele.count.tot <- apply(ar, c(1,2), sum)
+
+	#set allele.count.tot to NaN for all values not passing threshold
+	#this is to indicate that we do not have enough reads to say anything
+	tf <- allele.count.tot  < threshold.count.sample
+	allele.count.tot[tf] <- NaN
+
+	#make frequency array
+	ar <- ar * array(as.vector(1/allele.count.tot),dim=dim(ar))
 
 	if(return.class=="array"){
 		return(ar)

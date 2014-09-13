@@ -86,6 +86,21 @@ return a SimpleList with length 3, one element for each strand.
 }
 }
 
+\section{Frequency}{
+ frequency(x,
+return.class = "list", strand = "*",
+threshold.count.sample = 15)
+
+\describe{
+Arguments: \item{x}{An \code{ASEset object} that contains the
+variants of interest}
+
+\item{x}{threshold.count.samples} if sample has fewer counts the function
+return NA.
+
+}
+}
+
 \section{Constructor}{
  ASEsetFromCountList(rowData, countListNonStranded =
 NULL, countListPlus = NULL, countListMinus = NULL, countListUnknown = NULL,
