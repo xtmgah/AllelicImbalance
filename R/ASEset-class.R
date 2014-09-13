@@ -29,9 +29,9 @@ NULL
 #' @name ASEset-class
 #' @rdname ASEset-class
 #' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
-#' frequency alleleCounts,ASEset-method mapBias,ASEset-method
+#' frequency genotype genotype<- alleleCounts,ASEset-method mapBias,ASEset-method
 #' fraction,ASEset-method arank,ASEset-method table,ASEset-method
-#' frequency,ASEset-method
+#' frequency,ASEset-method genotype,ASEset-method genotype,ASEset-method<-
 #' 
 #' 
 #' @docType class
@@ -40,6 +40,7 @@ NULL
 #' @param verbose makes function more talkative
 #' @param return.type return 'names', rank or 'counts'
 #' @param return.class return 'list' or 'array'
+#' @param value value as replacement
 #' @param ... additional arguments
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
@@ -127,6 +128,7 @@ NULL
 #'
 #' @exportClass ASEset
 #' @exportMethod alleleCounts mapBias fraction arank table frequency
+#' genotype genotype<-
 #' @export frequency
 
 setClass("ASEset", contains = "SummarizedExperiment", 
@@ -416,5 +418,37 @@ setMethod("frequency", signature(x = "ASEset"), function(x,
 	}else{
 		stop("return.class has to be 'array' or 'list'")
 	}
+})
+
+#' @rdname ASEset-class
+setGeneric("genotype", function(x){
+    standardGeneric("genotype")
+})
+
+setMethod("genotype", signature(x = "ASEset"), function(x){
+	
+    if (!("genotype" %in% names(assays(x)))) {
+		stop(paste("genotype matrix is not present as assay in",
+				   " ASEset object, see '?inferGenotypes' "))
+    }
+	assays(x)[["genotype"]]
+})
+#' @rdname ASEset-class
+setGeneric("genotype<-", function(x,value){
+    standardGeneric("genotype<-")
+})
+
+setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
+	
+	#check dimensions
+	if(!nrow(x)==nrow(value)){
+		stop("nrow(x) is not equal to nrow(value)")	
+	}
+	if(!ncol(x)==ncol(value)){
+		stop("ncol(x) is not equal to ncol(value)")	
+	}
+
+	assays(x)[["genotype"]] <- value	
+	x
 })
 

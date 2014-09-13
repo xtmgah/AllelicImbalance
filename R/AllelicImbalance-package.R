@@ -46,11 +46,11 @@
 #' @importFrom IRanges unlist
 #' @importFrom IRanges which
 #' @importFrom IRanges resize
-#' @importFrom IRanges SimpleList
-#' @importFrom IRanges DataFrame
 #' @importFrom IRanges IntervalTree
 #' 
-#' 
+# @importFrom S4Vectors DataFrame
+# @importFrom S4Vectors SimpleList
+#'
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicRanges granges
 #' @importFrom GenomicRanges GRangesList
@@ -81,6 +81,7 @@
 #' @importFrom Rsamtools indexBcf
 #' @importFrom Rsamtools FaFile
 #' @importFrom Rsamtools scanFa
+#' @importFrom Rsamtools scanFaIndex
 #' 
 #' @importClassesFrom GenomicAlignments GAlignments
 #' @importClassesFrom GenomicAlignments GAlignmentPairs
