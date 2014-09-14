@@ -5,6 +5,8 @@
 \alias{ASEset-class}
 \alias{alleleCounts}
 \alias{alleleCounts,ASEset-method}
+\alias{alleleCounts<-}
+\alias{alleleCounts<-,ASEset-method}
 \alias{arank}
 \alias{arank,ASEset-method}
 \alias{fraction}
@@ -17,12 +19,13 @@
 \alias{genotype<-}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
-\alias{mapbiasEffect}
 \alias{table}
 \alias{table,ASEset-method}
 \title{ASEset objects}
 \usage{
 alleleCounts(x, strand = "*", return.class = "list")
+
+alleleCounts(x, strand = "*") <- value
 
 mapBias(x)
 
@@ -37,8 +40,6 @@ frequency(x, ...)
 genotype(x)
 
 genotype(x) <- value
-
-mapbiasEffect(x, strand = "*")
 }
 \arguments{
 \item{x}{ASEset object}
@@ -47,13 +48,13 @@ mapbiasEffect(x, strand = "*")
 
 \item{return.class}{return 'list' or 'array'}
 
+\item{value}{value as replacement}
+
 \item{verbose}{makes function more talkative}
 
 \item{return.type}{return 'names', rank or 'counts'}
 
 \item{...}{additional arguments}
-
-\item{value}{value as replacement}
 }
 \value{
 An object of class ASEset containing location information and allele
@@ -157,6 +158,7 @@ rowData <- GRanges(
   ranges = IRanges(1:5, width = 1, names = head(letters,5)),
   snp = paste('snp',1:5,sep='')
 )
+
 #make example colData
 colData <- DataFrame(Treatment=c('ChIP', 'Input','Input','ChIP'),
  row.names=c('ind1','ind2','ind3','ind4'))

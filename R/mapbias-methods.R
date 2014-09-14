@@ -1,18 +1,17 @@
-#' mapbias effect
+#' reference fraction
 #' 
-#' measures the effect of mapbias over heterozygous SNPs
+#' The fractions for all heterozygote reference alleles
 #' 
-#' The distribution of fractions for the ref allele and the 
-#' alternative are compared
-#' 
-#' @name mapbias
-#' @rdname mapbias
-#' @aliases mapbias,ASEset-method
+#' Neccessary to measure the effect of mapbias over heterozygous SNPs
+#'
+#' @name refFraction
+#' @rdname refFraction
+#' @aliases refFraction,ASEset-method
 #' @docType methods
 #' @param x \code{ASEset} object
 #' @param strand strand option
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @keywords mapbias
+#' @keywords reference fraction
 #' @examples
 #' 
 #' #load example data
@@ -29,31 +28,47 @@
 #'		fasta=system.file('extdata/hg19.chr17.fa', 
 #'		package='AllelicImbalance'))	
 #'
-#' m <- mapbias(a)
+#' rf <- refFraction(a, strand="*")
 #' 
-#' @exportMethod mapbiasEffect
+#' @exportMethod refFraction
 NULL
 
-#' @rdname ASEset-class
-setGeneric("mapbiasEffect", function(x, strand="*"){
-    standardGeneric("mapbiasEffect")
+#' @rdname refFraction
+setGeneric("refFraction", function(x, strand="*" 
+	){
+    standardGeneric("refFraction")
 })
 
-setMethod("mapbiasEffect", signature(x = "ASEset"), function(x, strand="*"){
+setMethod("refFraction", signature(x = "ASEset"), function(x, strand="*"){
 	
 	#check for presence of genotype data
-	if(!("genotype" %in% assays(x))){
-		stop(paste("genotype assay does not exist, add genotypes or infer them",
-			 "eg. '?inferGenotypes'"),sep="")
-	}
+    if (!("genotype" %in% names(assays(x)))) {
+		stop(paste("genotype matrix is not present as assay in",
+				   " ASEset object, see '?inferGenotypes' "))
+    }
 	#check for presence of reference allele
 	if(!("ref" %in% colnames(mcols(x)))){
 		stop("column name 'ref' in mcols(x) is required")
 	}
+
+	#set all snp samples elements not heterozygote to zero
+	acounts <- alleleCounts(x, strand=strand, return.class="array")
+	acounts[array(!hetFilt(x), dim=c(nrow(x), ncol(x), 4))] <- 0
+
+	#replace countmatrix in object x 
+	alleleCounts(x,strand=strand) <- acounts
+
+	#calc frequency
+	fr <- frequency(x,return.class="array")
+
+	#for loop in wait for a more ultimate solution
+	ret <- matrix(NA, ncol=ncol(x), nrow=nrow(x),
+			dimnames=list(rownames(x),colnames(x)))
+	for (i in 1:nrow(x)){
+		ret[i,] <- fr[i, , mcols(x)[i,"ref"] ]
+	}
 	
-
-
-
+	ret
 })
 
 
@@ -69,7 +84,7 @@ setMethod("mapbiasEffect", signature(x = "ASEset"), function(x, strand="*"){
 #' @aliases refAllele,ASEset-method
 #' @docType methods
 #' @param x \code{ASEset} object
-#' @param strand strand option
+#' @param fasta path to fasta file, index should be located in the same folder
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords reference mapbias
 #' @examples

@@ -29,10 +29,11 @@ inference of SNPs
 }
 \details{
 threshold.frequency is the least fraction needed to classify as bi tri or
-quad allelic SNPs. if 'all' then all of bi tri and quad allelic SNPs will use the same
+quad allelic SNPs. If 'all' then all of bi tri and quad allelic SNPs will use the same
 threshold. Everything under the treshold will be regarded as noise. 'all' will return
-
-a matrix with snps as rows and uni bi tri and quad will be columns. #'
+a matrix with snps as rows and uni bi tri and quad will be columns. For this function
+Anything that will return TRUE for tri-allelicwill also return TRUE for uni and bi-allelic
+for the same SNP an Sample.
 }
 \examples{
 data(ASEset)

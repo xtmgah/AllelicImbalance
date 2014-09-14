@@ -10,7 +10,7 @@ refAllele(x, fasta)
 \arguments{
 \item{x}{\code{ASEset} object}
 
-\item{strand}{strand option}
+\item{fasta}{path to fasta file, index should be located in the same folder}
 }
 \description{
 Extract the allele based on SNP location from the reference fasta file
@@ -22,8 +22,9 @@ The alleles will be placed in the rowData() meta column 'ref'
 #load example data
 data(ASEset)
 
-fasta <- system.file('extdata/hg19.subset.fa', package='AllelicImbalance')
-refAllele(ASEset)
+fasta <- system.file('extdata/hg19.chr17.fa', package='AllelicImbalance')
+refAllele(ASEset,fasta=fasta)
+a <- refAllele(ASEset,fasta=fasta)
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen

@@ -32,7 +32,7 @@ NULL
 #' frequency genotype genotype<- alleleCounts,ASEset-method mapBias,ASEset-method
 #' fraction,ASEset-method arank,ASEset-method table,ASEset-method
 #' frequency,ASEset-method genotype,ASEset-method genotype,ASEset-method<-
-#' 
+#' alleleCounts<- alleleCounts<-,ASEset-method
 #' 
 #' @docType class
 #' @param x ASEset object
@@ -116,6 +116,7 @@ NULL
 #'   ranges = IRanges(1:5, width = 1, names = head(letters,5)),
 #'   snp = paste('snp',1:5,sep='')
 #' )
+#'
 #' #make example colData
 #' colData <- DataFrame(Treatment=c('ChIP', 'Input','Input','ChIP'), 
 #'  row.names=c('ind1','ind2','ind3','ind4'))
@@ -124,11 +125,11 @@ NULL
 #' a <- ASEsetFromCountList(rowData, countListPlus=countListPlus, 
 #' colData=colData)
 #' 
-#' 
 #'
 #' @exportClass ASEset
-#' @exportMethod alleleCounts mapBias fraction arank table frequency
-#' genotype genotype<-
+#' @exportMethod alleleCounts alleleCounts<- mapBias fraction arank
+#' table frequency genotype genotype<-
+#' 
 #' @export frequency
 
 setClass("ASEset", contains = "SummarizedExperiment", 
@@ -208,6 +209,38 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 	}
 
     
+})
+
+#' @rdname ASEset-class
+setGeneric("alleleCounts<-", function(x, value, strand = "*") {
+    standardGeneric("alleleCounts<-")
+})
+
+setMethod("alleleCounts<-", signature(x = "ASEset"), function(x,
+	value, strand = "*") {
+
+    if (!sum(strand %in% c("+", "-", "*")) > 0) {
+        stop("strand parameter has to be either '+', '-', '*' ")
+    }
+    
+    if (strand == "+") {
+        el <- "countsPlus"
+    } else if (strand == "-") {
+        el <- "countsMinus"
+    } else if (strand == "*") {
+        el <- "countsUnknown"
+    } else {
+        stop("not existing strand option")
+    }
+    
+	#check that value has the right dimensions
+	if(!all(dim(value)==dim(assays(x)[["countsUnknown"]]))){
+		stop("dimensions in replacement object is not correct")
+	}
+
+	assays(x)[[el]] <- value
+	x
+
 })
 
 #' @rdname ASEset-class
