@@ -6,8 +6,6 @@
 #'
 #' @name refFraction
 #' @rdname refFraction
-#' @aliases refFraction,ASEset-method
-#' @docType methods
 #' @param x \code{ASEset} object
 #' @param strand strand option
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -81,8 +79,6 @@ setMethod("refFraction", signature(x = "ASEset"), function(x, strand="*"){
 #' 
 #' @name refAllele 
 #' @rdname refAllele
-#' @aliases refAllele,ASEset-method
-#' @docType methods
 #' @param x \code{ASEset} object
 #' @param fasta path to fasta file, index should be located in the same folder
 #' @author Jesper R. Gadin, Lasse Folkersen

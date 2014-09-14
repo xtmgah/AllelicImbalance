@@ -7,10 +7,8 @@ NULL
 #' 
 #' These filters are called upon ASEset objects 
 #' 
-#' @name genofilters
-#' @rdname genofilters
-#' @aliases hetFilt hetFilt,ASEset-method 
-#' @docType methods
+#' @name hetFilt
+#' @rdname hetFilt
 #' @param x \code{ASEset} object
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords filter
@@ -24,7 +22,6 @@ NULL
 #' hets <- hetFilt(a) 
 #' 
 #' @exportMethod hetFilt
-NULL
 
 # @rdname genofilters
 setGeneric("hetFilt", function(x){

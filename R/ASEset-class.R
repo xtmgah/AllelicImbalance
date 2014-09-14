@@ -28,13 +28,7 @@ NULL
 #' 
 #' @name ASEset-class
 #' @rdname ASEset-class
-#' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
-#' frequency genotype genotype<- alleleCounts,ASEset-method mapBias,ASEset-method
-#' fraction,ASEset-method arank,ASEset-method table,ASEset-method
-#' frequency,ASEset-method genotype,ASEset-method genotype,ASEset-method<-
-#' alleleCounts<- alleleCounts<-,ASEset-method
 #' 
-#' @docType class
 #' @param x ASEset object
 #' @param strand which strand of '+', '-' or '*'
 #' @param verbose makes function more talkative
@@ -42,6 +36,7 @@ NULL
 #' @param return.class return 'list' or 'array'
 #' @param value value as replacement
 #' @param ... additional arguments
+#'
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
 #' strand, as well as mapBias information. All data is stored in a manner

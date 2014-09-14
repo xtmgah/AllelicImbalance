@@ -3,6 +3,7 @@
 export(ASEsetFromCountList)
 export(barplotLatticeCounts)
 export(barplotLatticeFraction)
+export(chisq.test)
 export(coverageMatrixListFromGAL)
 export(decorateWithExons)
 export(decorateWithGenes)

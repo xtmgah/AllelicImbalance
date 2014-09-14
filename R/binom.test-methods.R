@@ -9,14 +9,14 @@ NULL
 #' 
 #' @name binom.test
 #' @rdname binom.test
-#' @aliases binom.test,ASEset-method
-#' @docType methods
-#' @param x \code{ASEset} object
+# @aliases binom.test,ASEset-method
+# @docType methods
+#' @param x \linkS4class{ASEset} object
 #' @param n strand option
 #' @return \code{binom.test} returns a matrix
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The \code{\link{chisq.test}} which is another test
-#' that can be applied on an \link{ASEset} object.  }
+#' @seealso \itemize{ \item The chisq.test which is another test
+#' that can be applied on an \linkS4class{ASEset} object.  }
 #' @keywords binomial test
 #' @examples
 #' 

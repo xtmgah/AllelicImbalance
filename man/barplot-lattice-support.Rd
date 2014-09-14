@@ -41,7 +41,7 @@ barplotLatticeCounts(identifier=name,  x=a, astrand="+")
 Jesper R. Gadin, Lasse Folkersen
 }
 \seealso{
-\itemize{ \item The \code{\link{ASEset}} class which the barplot
+\itemize{ \item The \linkS4class{ASEset} class which the barplot
 function can be called up on.  }
 }
 \keyword{barplot}

@@ -13,9 +13,8 @@ NULL
 #' sets or both. It is obviously important to make sure that the genome build
 #' used is the same as used in aligning the RNA-seq data.
 #' 
-#' @name ASEset-locationplot
-#' @aliases ASEset-locationplot locationplot locationplot,ASEset-method
-#' @docType methods
+#' @name locationplot
+#' @rdname locationplot
 #' @param x an ASEset object.
 #' @param type 'fraction' or 'count'
 #' @param strand '+','-','*' or 'both'. This argument determines
@@ -39,7 +38,7 @@ NULL
 #' function run
 #' @param ... arguments passed on to barplot function
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the
+#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the
 #' locationplot function can be called up on.  }
 #' @keywords locationplot
 #' @examples
@@ -58,6 +57,7 @@ NULL
 #' 
 #' @exportMethod locationplot
 
+# @rdname locationplot
 setGeneric("locationplot", function(x, type = "fraction", strand = "*", 
     yaxis = TRUE, xaxis = FALSE, xlab = FALSE, ylab = TRUE, legend.colnames = "", 
     size = 0.9, main = NULL, pValue = FALSE, cex.main = 0.7, cex.ylab = 0.6, cex.legend = 0.6, 
@@ -347,9 +347,8 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' packageh. It is obviously important to make sure that the genome build used
 #' is set correctly, e.g. 'hg19'.
 #' 
-#' @name ASEset-glocationplot
-#' @aliases ASEset-glocationplot glocationplot glocationplot,ASEset-method
-#' @docType methods
+#' @name glocationplot
+#' @rdname glocationplot
 #' @param x an ASEset object.
 #' @param type 'fraction' or 'count'
 #' @param strand '+','-','*' or 'both'. This argument determines which strand is
@@ -362,7 +361,7 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' @param verbose Makes function more talkative
 #' @param ... arguments passed on to barplot function
 #' @author Jesper R. Gadin
-#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the
+#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the
 #' glocationplot function can be called up on.  }
 #' @keywords glocationplot
 #' @examples
