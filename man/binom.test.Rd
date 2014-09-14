@@ -14,6 +14,12 @@ binom.test(x, n, p = 0.5, alternative = c("two.sided", "less", "greater"),
 \item{x}{\linkS4class{ASEset} object}
 
 \item{n}{strand option}
+
+\item{p}{NOT USED}
+
+\item{alternative}{NOT USED}
+
+\item{conf.level}{NOT USED}
 }
 \value{
 \code{binom.test} returns a matrix

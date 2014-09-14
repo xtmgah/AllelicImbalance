@@ -10,6 +10,16 @@ chisq.test(x, y = NULL, correct = TRUE, p = rep(1/length(x), length(x)),
 \item{x}{\linkS4class{ASEset} object}
 
 \item{y}{strand option}
+
+\item{correct}{NOT USED}
+
+\item{p}{NOT USED}
+
+\item{rescale.p}{NOT USED}
+
+\item{simulate.p.value}{NOT USED}
+
+\item{B}{NOT USED}
 }
 \value{
 \code{chisq.test} returns a matrix with the chisq.test P-value for
