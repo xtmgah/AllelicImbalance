@@ -10,7 +10,10 @@ NULL
 #' 
 #' @name ASEset-gviztrack
 #' @rdname ASEset-gviztrack
-#' @param x an \linkS4class{ASEset} object.
+#' @aliases ASEset-gviztrack CoverageDataTrack ASEDAnnotationTrack
+#' CoverageDataTrack,ASEset-method ASEDAnnotationTrack,ASEset-method
+#' @docType methods
+#' @param x an ASEset object.
 #' @param GR genomic range of plotting
 #' @param type 'fraction' or 'count'
 #' @param strand '+','-'. This argument determines which strand is plotted.
@@ -25,7 +28,7 @@ NULL
 #' function run
 #' @param ... arguments passed on to barplot function
 #' @author Jesper R. Gadin
-#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the functions
+#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the functions
 #' can be called up on.}
 #' @keywords ASEDAnnotationTrack CoverageDataTrack
 #' @examples

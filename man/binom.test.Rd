@@ -11,7 +11,7 @@ binom.test(x, n, p = 0.5, alternative = c("two.sided", "less", "greater"),
 \S4method{binom.test}{ASEset}(x, n = "*")
 }
 \arguments{
-\item{x}{\linkS4class{ASEset} object}
+\item{x}{\code{ASEset} object}
 
 \item{n}{strand option}
 
@@ -41,8 +41,8 @@ binom.test(ASEset,'*')
 Jesper R. Gadin, Lasse Folkersen
 }
 \seealso{
-\itemize{ \item The chisq.test which is another test
-that can be applied on an \linkS4class{ASEset} object.  }
+\itemize{ \item The \code{\link{chisq.test}} which is another test
+that can be applied on an \link{ASEset} object.  }
 }
 \keyword{binomial}
 \keyword{test}

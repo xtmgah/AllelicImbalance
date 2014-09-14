@@ -19,6 +19,7 @@ NULL
 #' 
 #' @name initialize-ASEset
 #' @rdname initialize-ASEset
+#' @aliases initialize-ASEset ASEsetFromCountList
 #' @param rowData A \code{GenomicRanges object} that contains the variants of
 #' interest
 #' @param countListPlus A \code{list} where each entry is a matrix with allele

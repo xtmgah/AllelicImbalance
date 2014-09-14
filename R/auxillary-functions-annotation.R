@@ -12,7 +12,9 @@ NULL
 #' 
 #' @name annotation-wrappers
 #' @rdname annotation-wrappers
-#'
+#' @aliases getGenesFromAnnotation getGenesVector getExonsFromAnnotation
+#' getTranscriptsFromAnnotation getCDSFromAnnotation getExonsVector
+#' getTranscriptsVector getCDSVector getAnnotationDataFrame
 #' @param OrgDb An \code{OrgDb} object
 #' @param GR A \code{GenomicRanges} object with sample area
 #' @param leftFlank An \code{integer} specifying number of additional

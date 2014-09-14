@@ -22,6 +22,7 @@ NULL
 #' 
 #' @name import-bam
 #' @rdname import-bam
+#' @aliases import-bam impBamGAL impBamGRL
 #' @param UserDir The relative or full path of folder containing bam files.
 #' @param searchArea A \code{GenomicRanges object} that contains the regions of
 #' interest
@@ -239,6 +240,7 @@ impBamGAL <- function(UserDir, searchArea, XStag = FALSE, verbose = TRUE) {
 #' 
 #' @name import-bcf
 #' @rdname import-bcf
+#' @aliases import-bcf impBcfGRL impBcfGR
 #' @param UserDir The relative or full path of folder containing bam files.
 #' @param searchArea A \code{GenomicRanges} object that contains the regions of
 #' interest
@@ -350,6 +352,8 @@ impBcfGR <- function(UserDir, searchArea = NULL, verbose = TRUE) {
 #' 
 #' @name cigar-utilities
 #' @rdname cigar-utilities
+#' @aliases cigar-utilities realCigarPosition realCigarPositions
+#' realCigarPositionsList
 #' @param RleCigar An \code{Rle} containing cigar information
 #' @param RleCigarList An \code{RleList} containing cigar information
 #' @param BpPos the absolute position on the chromosome of interest
@@ -1146,6 +1150,7 @@ scanForHeterozygotes <- function(BamList, minimumReadsAtPos = 20, maximumMajorAl
 #' reads, and therefore create a matrix with expected frequency of 0.5 for each
 #' allele.
 #' 
+#' @aliases getDefaultMapBiasExpMean getDefaultMapBiasExpMean3D
 #' @param alleleCountList A \code{GRangesList object} containing read
 #' information
 #' @return \code{getDefaultMapBiasExpMean} returns a matrix with a default
@@ -1450,10 +1455,11 @@ getAlleleCount <- function() {
 #' 
 #' @name barplot-lattice-support
 #' @rdname barplot-lattice-support
+#' @aliases barplot-lattice-support barplotLatticeCounts barplotLatticeFraction
 #' @param identifier, the single snp name to plot
 #' @param ... used to pass on variables
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the barplot
+#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the barplot
 #' function can be called up on.  }
 #' @keywords barplot
 #' @examples

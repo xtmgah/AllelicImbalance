@@ -13,6 +13,9 @@
 #'
 #' @name inferAlleles
 #' @rdname inferAlleles
+#' @aliases inferAlleles
+#' inferAlleles,ASEset-method 
+#' @docType methods
 #' @param x ASEset
 #' @param strand strand to infer from
 #' @param inferOver 'eachSample' or 'allSamples' 
@@ -147,6 +150,7 @@ setMethod("inferAlleles", signature(x = "ASEset"), function(x,strand="*",return.
 #' 
 #' @name inferGenotypes
 #' @rdname inferGenotypes
+#' @aliases inferGenotypes inferGenotypes,ASEset-method
 #' @param x ASEset
 #' @param strand strand to infer from
 #' @param threshold.count.sample least amount of counts to try to infer allele

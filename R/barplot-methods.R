@@ -15,9 +15,11 @@
 #' samples, or else of a length corresponding to the number of samples for
 #' individual colouring.
 #' 
-#' @name barplot
-#' @rdname barplot
-#' @param height An \linkS4class{ASEset} object
+#' @name ASEset-barplot
+#' @rdname ASEset-barplot
+#' @aliases ASEset-barplot barplot barplot,ASEset-method
+#' @docType methods
+#' @param height An \code{ASEset} object
 #' @param type 'count' or 'fraction'
 #' @param sampleColour User specified colours
 #' @param legend Display legend
@@ -55,7 +57,7 @@
 #' @param verbose Makes function more talkative
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the barplot
+#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the barplot
 #' function can be called up on.  }
 #' @keywords barplot
 #' @examples
@@ -68,10 +70,10 @@
 #' @exportMethod barplot
 NULL
 
-#' @rdname barplot
+#' @rdname ASEset-barplot
 setGeneric("barplot")
 
-#' @rdname barplot
+#' @rdname ASEset-barplot
 setMethod("barplot", signature(height = "ASEset"), function(height, type = "count", 
     sampleColour = NULL, legend = TRUE, pValue = TRUE, strand = "*", testValue = NULL, 
     testValue2 = NULL, OrgDb = NULL, TxDb = NULL, annotationType = c("gene", "exon", 
@@ -1315,15 +1317,16 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' trellis graphics using lattice, to be able to integrate well with Gviz track
 #' functionality.
 #' 
-#' @name lbarplot
-#' @rdname lbarplot
-#' @param x An \linkS4class{ASEset} object
+#' @name ASEset-lbarplot
+#' @aliases ASEset-lbarplot lbarplot lbarplot,ASEset-method
+#' @docType methods
+#' @param x An \code{ASEset} object
 #' @param type 'count' or 'fraction'
 #' @param strand four options, '+', '-', 'both' or '*'
 #' @param verbose Makes function more talkative
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin
-#' @seealso \itemize{ \item The \linkS4class{ASEset} class which the lbarplot
+#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the lbarplot
 #' function can be called up on.  \item The \code{\link{barplot}} non trellis
 #' barplot.  }
 #' @keywords lbarplot
@@ -1333,8 +1336,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' lbarplot(ASEset[1])
 #' 
 #' @exportMethod lbarplot
-#'
-#' @rdname lbarplot
+
 setGeneric("lbarplot", function(x, type = "count", strand = "*", 
     verbose = FALSE, ...) {
     standardGeneric("lbarplot")

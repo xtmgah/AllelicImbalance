@@ -9,7 +9,9 @@ NULL
 #' 
 #' @name chisq.test
 #' @rdname chisq.test
-#' @param x \linkS4class{ASEset} object
+#' @aliases chisq.test,ASEset-method
+#' @docType methods
+#' @param x \code{ASEset} object
 #' @param y strand option
 #' @param p NOT USED
 #' @param correct NOT USED
@@ -19,8 +21,8 @@ NULL
 #' @return \code{chisq.test} returns a matrix with the chisq.test P-value for
 #' each SNP and sample
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The binom.test which is another test
-#' that can be applied on an \linkS4class{ASEset} object.  }
+#' @seealso \itemize{ \item The \code{\link{binom.test}} which is another test
+#' that can be applied on an \link{ASEset} object.  }
 #' @keywords chi-square test
 #' @examples
 #' 
@@ -32,13 +34,12 @@ NULL
 #' 
 #'  @importFrom stats chisq.test
 #'  @exportMethod chisq.test
-#'  @export chisq.test
 NULL
 
 #' @rdname chisq.test
 setGeneric("chisq.test")
 
-# @rdname chisq.test
+#' @rdname chisq.test
 setMethod("chisq.test", signature(x = "ASEset", y = "ANY"), function(x, y = "*") {
     strand = y
     
