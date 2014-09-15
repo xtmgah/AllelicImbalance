@@ -15,8 +15,8 @@
 \alias{frequency,ASEset-method}
 \alias{genotype}
 \alias{genotype,ASEset-method}
-\alias{genotype,ASEset-method<-}
 \alias{genotype<-}
+\alias{genotype<-,ASEset-method}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
 \alias{table}

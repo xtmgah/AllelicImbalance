@@ -31,7 +31,7 @@ NULL
 #' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
 #' frequency genotype genotype<- alleleCounts,ASEset-method mapBias,ASEset-method
 #' fraction,ASEset-method arank,ASEset-method table,ASEset-method
-#' frequency,ASEset-method genotype,ASEset-method genotype,ASEset-method<-
+#' frequency,ASEset-method genotype,ASEset-method genotype<-,ASEset-method
 #' alleleCounts<- alleleCounts<-,ASEset-method
 #' 
 #' @docType class
@@ -212,12 +212,12 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 })
 
 #' @rdname ASEset-class
-setGeneric("alleleCounts<-", function(x, value, strand = "*") {
+setGeneric("alleleCounts<-", function(x, strand = "*", value) {
     standardGeneric("alleleCounts<-")
 })
 
 setMethod("alleleCounts<-", signature(x = "ASEset"), function(x,
-	value, strand = "*") {
+	 strand = "*", value) {
 
     if (!sum(strand %in% c("+", "-", "*")) > 0) {
         stop("strand parameter has to be either '+', '-', '*' ")

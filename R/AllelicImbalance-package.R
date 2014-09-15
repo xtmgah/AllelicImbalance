@@ -62,6 +62,7 @@
 #' @importFrom GenomicRanges grglist
 #' @importFrom GenomicRanges flank
 #' @importFrom GenomicRanges assays
+#' @importFrom GenomicRanges assays<-
 #' 
 #' @importFrom Biostrings subseq
 #' @importFrom Biostrings DNAStringSet
@@ -79,6 +80,7 @@
 #' @importFrom Rsamtools BcfFile
 #' @importFrom Rsamtools BcfFileList
 #' @importFrom Rsamtools indexBcf
+#' @importFrom Rsamtools indexFa
 #' @importFrom Rsamtools FaFile
 #' @importFrom Rsamtools scanFa
 #' @importFrom Rsamtools scanFaIndex
