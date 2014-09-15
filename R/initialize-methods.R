@@ -278,6 +278,34 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
     ASEset(sset, variants = variants)
 } 
 
+#' Initialize ReferenceBias
+#' 
+#' Functions to construct ReferenceBias objects
+#' 
+#' produces a class container for reference bias calculations
+#' 
+#' @name initialize-ReferenceBias
+#' @rdname initialize-ReferenceBias
+#' @aliases initialize-ReferenceBias refBias
+#' @param x \code{ASEset} 
+#' @param .Object to be ReferenceBias-class object
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords bias mapbias refBias
+#' @examples
+#'
+#' data(ASEset)
+#' a <- ASEset
+#' genotype(a) <- inferGenotypes(a)
+#' a <- refAllele(a,
+#'  	fasta=system.file('extdata/hg19.chr17.fa', 
+#'  	package='AllelicImbalance'))	
+#' refbiasObject <- refBias(a)
+#' 
+#' @export refBias
+NULL
+
+
+#' @rdname initialize-ReferenceBias
 setMethod("initialize","ReferenceBias", function(
 	.Object,x = "ASEset"
 	){
@@ -309,6 +337,7 @@ setMethod("initialize","ReferenceBias", function(
 	}
 )
 
+#' @rdname initialize-ReferenceBias
 refBias <- function(x){
 
 		if(!class(x)=="ASEset"){

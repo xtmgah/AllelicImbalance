@@ -12,7 +12,7 @@ NULL
 #' 
 #' @name ReferenceBias-class
 #' @rdname ReferenceBias-class
-#' @aliases ReferenceBias-class ReferenceBias 
+#' @aliases ReferenceBias-class ReferenceBias table,ReferenceBias-method
 #' @docType class
 #' @param x ReferenceBias object
 #' @param strand which strand of '+', '-' or '*'
@@ -32,11 +32,15 @@ NULL
 #' @examples
 #'
 #' data(ASEset)
-#' refbiasObject <- refBiad(ASEset)
-#'
-#' @exportClass RefBias
+#' a <- ASEset
+#' genotype(a) <- inferGenotypes(a)
+#' a <- refAllele(a,
+#'  	fasta=system.file('extdata/hg19.chr17.fa', 
+#'  	package='AllelicImbalance'))	
+#' refbiasObject <- refBias(a)
 #' 
-#' @export frequency
+#' @exportClass ReferenceBias
+#' @exportMethod table
 
 setClass("ReferenceBias", representation(
 			refFraction="array"))
@@ -53,8 +57,8 @@ setClass("ReferenceBias", representation(
 setValidity("ReferenceBias", .valid_RefBias_object)
 
 
-#' @rdname ASEset-class
-setGeneric("table")
+# @rdname ReferenceBias-class
+#setGeneric("table")
 #setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
 #    standardGeneric("table")
 #})

@@ -20,9 +20,6 @@ These filters are called upon ASEset objects
 \examples{
 #load example data
 cat("there is no example data yet for this method")
-
-importFrom(methods, show)
-exportMethods(show)
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen

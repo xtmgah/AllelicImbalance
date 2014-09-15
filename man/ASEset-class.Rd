@@ -40,8 +40,6 @@ frequency(x, ...)
 genotype(x)
 
 genotype(x) <- value
-
-table(...)
 }
 \arguments{
 \item{x}{ASEset object}

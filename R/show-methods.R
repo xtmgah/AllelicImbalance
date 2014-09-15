@@ -19,8 +19,8 @@ NULL
 #' #load example data
 #' cat("there is no example data yet for this method")
 #' 
-#' importFrom(methods, show)
-#' exportMethods(show)
+#' @importFrom methods show
+#' @exportMethod show
 
 setMethod("show","ReferenceBias",
 	function(object)

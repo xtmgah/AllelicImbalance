@@ -3,6 +3,7 @@
 \name{ReferenceBias-class}
 \alias{ReferenceBias}
 \alias{ReferenceBias-class}
+\alias{table,ReferenceBias-method}
 \title{ReferenceBias class}
 \arguments{
 \item{x}{ReferenceBias object}
@@ -34,7 +35,12 @@ Arguments: \item{x}{an ASEset object  }
 }
 \examples{
 data(ASEset)
-refbiasObject <- refBiad(ASEset)
+a <- ASEset
+genotype(a) <- inferGenotypes(a)
+a <- refAllele(a,
+ 	fasta=system.file('extdata/hg19.chr17.fa',
+ 	package='AllelicImbalance'))
+refbiasObject <- refBias(a)
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen
