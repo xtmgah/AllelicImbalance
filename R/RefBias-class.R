@@ -1,30 +1,31 @@
 #'@include initialize-methods.R
 NULL
 
-#' RefBias class
+#' ReferenceBias class
 #' 
-#' Object that holds RefBias information
+#' Object that holds Reference bias information
 #'
-#' RefBias-class is in principle an array with the fractions of the reference allele
-#' in the dimensions SNP, sample, and strand
+#' Reference bias-class contain annotated fractions of the reference allele
 #'
 #' Shortly the RefBias-class most prominent purpose is to be able to dispatch on
 #' methods like, 'plot', 'table', 'summary' and similar.
 #' 
-#' @name RefBias-class
-#' @rdname RefBias-class
-#' @aliases RefBias-class RefBias 
+#' @name ReferenceBias-class
+#' @rdname ReferenceBias-class
+#' @aliases ReferenceBias-class ReferenceBias 
 #' @docType class
-#' @param x RefBias object
+#' @param x ReferenceBias object
 #' @param strand which strand of '+', '-' or '*'
 #' @param verbose makes function more talkative
-#' @return An object of class RefBias storing reference fractions.
+#' @return An object of class ReferenceBias storing reference fractions.
 
-#' @section Constructor: RefBias(x = ASEset)
+#' @section Constructor: refBias(x = ASEset)
 #' 
 #' \describe{
 #' 
 #' Arguments: \item{x}{an ASEset object  }
+#'
+#' }
 #'
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords class ASEset

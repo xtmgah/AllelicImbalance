@@ -7,11 +7,11 @@ NULL
 #' 
 #' These filters are called upon ASEset objects 
 #' 
-#' @name RefBias-show
-#' @rdname RefBias-show
-#' @aliases RefBias-show RefBias-show,RefBias-method 
+#' @name ReferenceBias-show
+#' @rdname ReferenceBias-show
+#' @aliases ReferenceBias-show ReferenceBias-show,ReferenceBias-method show,ReferenceBias-method
 #' @docType methods
-#' @param object \code{RefBias} object
+#' @param object ReferenceBias object
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords show
 #' @examples
@@ -31,6 +31,5 @@ setMethod("show","ReferenceBias",
 		cat("Contains: RefFraction array\n")
 		}
 )
-
 
 
