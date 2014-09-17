@@ -19,8 +19,6 @@
 \alias{genotype<-,ASEset-method}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
-\alias{table}
-\alias{table,ASEset-method}
 \title{ASEset objects}
 \usage{
 alleleCounts(x, strand = "*", return.class = "list")
@@ -32,8 +30,6 @@ mapBias(x)
 fraction(x, strand = "*", verbose = FALSE)
 
 arank(x, return.type = "names", return.class = "list", strand = "*", ...)
-
-table(...)
 
 frequency(x, ...)
 

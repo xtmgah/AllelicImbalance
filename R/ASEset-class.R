@@ -28,9 +28,9 @@ NULL
 #' 
 #' @name ASEset-class
 #' @rdname ASEset-class
-#' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank table
+#' @aliases ASEset-class ASEset alleleCounts mapBias fraction arank 
 #' frequency genotype genotype<- alleleCounts,ASEset-method mapBias,ASEset-method
-#' fraction,ASEset-method arank,ASEset-method table,ASEset-method
+#' fraction,ASEset-method arank,ASEset-method 
 #' frequency,ASEset-method genotype,ASEset-method genotype<-,ASEset-method
 #' alleleCounts<- alleleCounts<-,ASEset-method
 #' 
@@ -128,7 +128,7 @@ NULL
 #'
 #' @exportClass ASEset
 #' @exportMethod alleleCounts alleleCounts<- mapBias fraction arank
-#' table frequency genotype genotype<-
+#' frequency genotype genotype<-
 #' 
 #' @export frequency
 
@@ -385,39 +385,41 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 	}
 }) 
 
-#' @rdname ASEset-class
-setGeneric("table")
+#setGeneric("table")
 #setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
 #    standardGeneric("table")
 #})
 
-setMethod("table", signature(... = "ASEset"), function(...) {
-
-	args <- list(...)
-	if (length(args) > 1)
-	  stop("Only one argument in '...' supported")
-	x <- args[[1L]]
-
-	#because the generis of table is rubbish we have to return a list for each strand
-	retList <- list()
-
-	for(strand in c("+","-","*")){
-		df <- data.frame(row.names=rownames(x))
-		df[,c("chromosome","position")] <- c(as.character(seqnames(x)),start(x))
-		df <- cbind(df,as.data.frame(arank(x, return.type="counts",
-					   return.class="matrix",strand=strand)))
-
-		#if only one sample add fraction to table()
-		if(ncol(x)==1){
-			df[,"fraction"] <- as.vector(fraction(x,strand=strand))
-		}
-
-		retList[[strand]] <- df
-
-	}
-	return(SimpleList(retList))
-
-})	
+# @rdname ASEset-class
+#setMethod("table", signature(... = "ASEset"), function(...) {
+#
+#	args <- list(...)
+#	if (length(args) > 1)
+#	  stop("Only one argument in '...' supported")
+#	x <- args[[1L]]
+#
+#	#because the generis of table is rubbish we have to return a list for each strand
+#	#retList <- list()
+#
+#	#for(strand in c("+","-","*")){
+#	#	df <- data.frame(row.names=rownames(x))
+#	#	df[,c("chromosome","position")] <- c(as.character(seqnames(x)),start(x))
+#	#	df <- cbind(df,as.data.frame(arank(x, return.type="counts",
+#	#				   return.class="matrix",strand=strand)))
+#
+#	#	#if only one sample add fraction to table()
+#	#	if(ncol(x)==1){
+#	#		df[,"fraction"] <- as.vector(fraction(x,strand=strand))
+#	#	}
+#
+#	#	retList[[strand]] <- df
+#
+#	}
+#	#return(SimpleList(retList))
+#
+#	df()
+#
+#})	
 
 #' @rdname ASEset-class
 setGeneric("frequency")

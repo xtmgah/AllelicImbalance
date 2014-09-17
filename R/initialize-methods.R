@@ -288,7 +288,6 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #' @rdname initialize-ReferenceBias
 #' @aliases initialize-ReferenceBias refBias
 #' @param x \code{ASEset} 
-#' @param .Object to be ReferenceBias-class object
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords bias mapbias refBias
 #' @examples
@@ -299,53 +298,58 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #' a <- refAllele(a,
 #'  	fasta=system.file('extdata/hg19.chr17.fa', 
 #'  	package='AllelicImbalance'))	
-#' refbiasObject <- refBias(a)
+#' refbiasObject <- ReferenceBias(a)
 #' 
 #' @export refBias
 NULL
 
 
 #' @rdname initialize-ReferenceBias
-setMethod("initialize","ReferenceBias", function(
-	.Object,x = "ASEset"
+#setMethod("ReferenceBias","ReferenceBias", function(
+RBias <- ReferenceBias <- function(
+	x = "ASEset"
 	){
-
-		#if non-stranded data	
-		if(all(c("countsPlus","countsMinus") %in% names(assays(x)))){
-			.Object@refFraction <- 
-				array(c(refFraction(x,strand="*"),
-					  refFraction(x,strand="+"),
-					  refFraction(x,strand="-")),
-					  dim=c(nrow(x),ncol(x),3),
-					  dimnames=list(rownames(x),colnames(x),c("*","+","-")))
-		}
-		else if(c("countsUnknown") %in% names(assays(x))){
-			.Object@refFraction <- 
-				array(c(refFraction(x,strand="*"),
-					  matrix(NA, nrow=nrow(x),ncol=ncol(x)),
-					  matrix(NA, nrow=nrow(x),ncol=ncol(x))),
-					  dim=c(nrow(x),ncol(x),3),
-					  dimnames=list(rownames(x),colnames(x),c("*","+","-")))
-		}
-				
-
-		#valid
-		validObject(.Object)
-
-		#Return object
-		.Object
+	#if non-stranded data	
+	if(all(c("countsPlus","countsMinus") %in% names(assays(x)))){
+		assay <- 
+			array(c(refFraction(x,strand="*"),
+				  refFraction(x,strand="+"),
+				  refFraction(x,strand="-")),
+				  dim=c(nrow(x),ncol(x),3),
+				  dimnames=list(rownames(x),colnames(x),c("*","+","-")))
 	}
-)
+	else if(c("countsUnknown") %in% names(assays(x))){
+		assay <- 
+			array(c(refFraction(x,strand="*"),
+				  matrix(NA, nrow=nrow(x),ncol=ncol(x)),
+				  matrix(NA, nrow=nrow(x),ncol=ncol(x))),
+				  dim=c(nrow(x),ncol(x),3),
+				  dimnames=list(rownames(x),colnames(x),c("*","+","-")))
+	}
+		
 
-#' @rdname initialize-ReferenceBias
-refBias <- function(x){
 
-		if(!class(x)=="ASEset"){
-			stop("x must be of class ASEset")
-		}
 
-        # create object
-        new("ReferenceBias", x)
+	sset <- SummarizedExperiment(assays = SimpleList(assay), rowData = rowData(x), colData = colData(x)) 
+	rownames(sset) <- rownames(x)
+
+	#valid
+	#validObject(.Object)
+
+	#Return object
+	new("ReferenceBias", sset)
 }
 
+
+##' @rdname initialize-ReferenceBias
+#refBias <- function(x){
+#
+#		if(!class(x)=="ASEset"){
+#			stop("x must be of class ASEset")
+#		}
+#
+#        # create object
+#        
+#}
+#
 
