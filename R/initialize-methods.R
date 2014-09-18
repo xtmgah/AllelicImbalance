@@ -326,18 +326,15 @@ RBias <- ReferenceBias <- function(
 				  dim=c(nrow(x),ncol(x),3),
 				  dimnames=list(rownames(x),colnames(x),c("*","+","-")))
 	}
-		
 
-
-
-	sset <- SummarizedExperiment(assays = SimpleList(assay), rowData = rowData(x), colData = colData(x)) 
+	sset <- SummarizedExperiment(assays = SimpleList(referenceFrequency=assay), rowData = rowData(x), colData = colData(x)) 
 	rownames(sset) <- rownames(x)
 
 	#valid
 	#validObject(.Object)
 
 	#Return object
-	new("ReferenceBias", sset)
+	new("ReferenceBias", sset, strands = c("*","+","-"))
 }
 
 

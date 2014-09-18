@@ -36,58 +36,114 @@ NULL
 #' a <- refAllele(a,
 #'  	fasta=system.file('extdata/hg19.chr17.fa', 
 #'  	package='AllelicImbalance'))	
-#' refbiasObject <- refBias(a)
+#' rb <- RBias(a)
 #' 
 #' @exportClass ReferenceBias
 #' @export
+NULL
 
-setClass("ReferenceBias", contains = "SummarizedExperiment")
-	
 
-#setClass("ReferenceBias", representation(
-#			refFraction="array"))
-#
-#.valid_RefBias_object <- function(object) {
-#
-#	#check dimensions
-#	#if(!length(dim(object))%in% c(1,2,3)){
-#	#	stop("maximum size of dimension is 3")
-#	#}
-#
-#	return(TRUE)
-#}
-#setValidity("ReferenceBias", .valid_RefBias_object)
-#
+#' @rdname ReferenceBias-class
+setClass("ReferenceBias", contains = "SummarizedExperiment",
+	representation(strands = "vector"))
 
-# @rdname ReferenceBias-class
-#setGeneric("table")
-#setGeneric("table", function(x, strand = "*", sortBy="none", ...) {
-#    standardGeneric("table")
-#})
+setGeneric("refbiasByAnnotation", function(x,...){
+    standardGeneric("refbiasByAnnotation")
+})
 
-#setMethod("table", signature(... = "ReferenceBias"), function(...) {
-#
-#	args <- list(...)
-#	if (length(args) > 1)
-#	  stop("Only one argument in '...' supported")
-#	x <- args[[1L]]
-#
-#	#because the generis of table is rubbish we have to return a list for each strand
-#	retList <- list()
-#
-#	for(strand in c("+","-","*")){
-#
-#		lst <- list()
-#		y <- x@refFraction[,,strand]
-#		mean.na.rm <- function(x){mean(x,na.rm=TRUE)}
-#		lst[["samples"]] <- apply(y,2,mean.na.rm)
-#		lst[["SNPs"]] <- apply(y,1,mean.na.rm)
-#		lst[["all"]] <- mean(y,na.rm=TRUE)
-#		
-#		retList[[strand]] <- lst
-#
-#	}
-#	return(SimpleList(retList))
-#
-#})	
-#
+#' @rdname ReferenceBias-class
+setMethod("refbiasByAnnotation", signature(x = "ReferenceBias"), function(x,TxDb){
+	cat("not implemented yet, sorry")	
+})
+
+#hidden function
+
+.selectArrayElement <- function(strand) 
+	{
+    if (!sum(strand %in% c("+", "-", "*")) > 0) {
+        stop("strand parameter has to be either '+', '-', '*' ")
+    }
+    
+    if (strand == "+") {
+        el <- 2
+    } else if (strand == "-") {
+        el <- 3
+    } else if (strand == "*") {
+        el <- 1
+	} else {
+        stop("not existing strand option")
+    }
+	el
+}
+
+#' @rdname ReferenceBias-class
+#' @export
+setMethod("frequency", signature(x = "ReferenceBias"), function(x, 
+	return.class = "matrix", strand = "*"
+	) {
+
+	el <- .selectArrayElement(strand)
+	ar <- assays(x)[["referenceFrequency"]][,,el]
+
+	if(return.class=="matrix"){
+		return(ar)
+	}else{
+		stop("return.class has to be 'matrix' ")
+	}
+})
+
+setGeneric("hetPerSample", function(x,...){
+    standardGeneric("hetPerSample")
+})
+
+#' @rdname ReferenceBias-class
+#' @export
+setMethod("hetPerSample", signature(x = "ReferenceBias"), function(x, 
+	return.class = "vector", strand = "*"
+	) {
+
+	el <- .selectArrayElement(strand)
+	ar <- assays(x)[["referenceFrequency"]][,,el]
+	ar[!is.na(ar)] <- 1
+	ar[is.na(ar)] <- 0
+
+	#dimnames(ar) <- list(rownames(x),colnames(x),x@strands)
+
+	vec <- apply(ar,2,sum)
+
+	if(return.class=="vector"){
+		return(vec)
+	}else{
+		stop("return.class has to be 'vector' ")
+	}
+
+})
+
+setGeneric("hetPerSnp", function(x,...){
+    standardGeneric("hetPerSnp")
+})
+
+#' @rdname ReferenceBias-class
+#' @export
+setMethod("hetPerSnp", signature(x = "ReferenceBias"), function(x, 
+	return.class = "vector", strand = "*"
+	) {
+
+	el <- .selectArrayElement(strand)
+	ar <- assays(x)[["referenceFrequency"]][,,el]
+	ar[!is.na(ar)] <- 1
+	ar[is.na(ar)] <- 0
+
+	#dimnames(ar) <- list(rownames(x),colnames(x),x@strands)
+
+	vec <- apply(ar,1,sum)
+
+	if(return.class=="vector"){
+		return(ar)
+	}else{
+		stop("return.class has to be 'vector' ")
+	}
+	vec
+})
+
+

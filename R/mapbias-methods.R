@@ -34,12 +34,15 @@
 NULL
 
 #' @rdname refFraction
-setGeneric("refFraction", function(x, strand="*" 
+setGeneric("refFraction", function(x, ... 
 	){
     standardGeneric("refFraction")
 })
 
-setMethod("refFraction", signature(x = "ASEset"), function(x, strand="*"){
+setMethod("refFraction", signature(x = "ASEset"),
+		function(x, strand="*",
+			threshold.count.sample 
+	){
 	
 	#check for presence of genotype data
     if (!("genotype" %in% names(assays(x)))) {
@@ -59,16 +62,16 @@ setMethod("refFraction", signature(x = "ASEset"), function(x, strand="*"){
 	alleleCounts(x,strand=strand) <- acounts
 
 	#calc frequency
-	fr <- frequency(x,strand=strand,return.class="array")
-
-	#for loop in wait for a more ultimate solution
-	ret <- matrix(NA, ncol=ncol(x), nrow=nrow(x),
-			dimnames=list(rownames(x),colnames(x)))
-	for (i in 1:nrow(x)){
-		ret[i,] <- fr[i, , mcols(x)[i,"ref"] ]
-	}
+	fr <- frequency(x, strand=strand, return.class="array",
+			threshold.count.sample = threshold.count.sample)
+					
 	
-	ret
+matrix(fr[aperm(array(matrix(x@variants, ncol=length(x@variants),
+			 nrow=nrow(x), byrow=TRUE)==mcols(x)[,"ref"]
+		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(1,3,2))
+		],ncol=ncol(x),nrow=nrow(x),dimnames=list(rownames(x),colnames(x)))
+
+
 })
 
 

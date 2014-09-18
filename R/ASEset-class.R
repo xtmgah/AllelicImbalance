@@ -130,7 +130,7 @@ NULL
 #' @exportMethod alleleCounts alleleCounts<- mapBias fraction arank
 #' frequency genotype genotype<-
 #' 
-#' @export frequency
+#' @export 
 
 setClass("ASEset", contains = "SummarizedExperiment", 
 	representation(variants = "vector"))
@@ -339,7 +339,6 @@ setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*",
     
     m
     
-    
 })
 
 #' @rdname ASEset-class
@@ -356,8 +355,11 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 			ar <- t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
 					1, function(x){rank(x,ties.method="first")}))
-			return(matrix(x@variants[ar],ncol=4, byrow=FALSE,
-					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4))))
+			#mat <- matrix(NA,ncol=4, nrow=nrow(x), 
+					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4)))
+			#mat[,1]  <- ar[ar == 4]
+		
+			return()
 		}else if (return.type == "rank") {
 			return(t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
@@ -485,5 +487,27 @@ setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
 
 	assays(x)[["genotype"]] <- value	
 	x
+})
+
+#' @rdname ASEset-class
+setGeneric("countsPerSnp", function(x, ...){
+    standardGeneric("countsPerSnp")
+})
+
+#could be renamed to countsAllAlleles
+setMethod("countsPerSnp", signature(x = "ASEset"), function(x, 
+	return.class = "matrix", return.type="mean", strand = "*") {
+
+	if(return.class=="matrix"){
+		return(apply(alleleCounts(x, strand=strand, return.class="array"), c(1,2), sum))
+	}else if(return.class=="vector"){
+		if(return.type=="all"){
+			return(apply(alleleCounts(x, strand=strand, return.class="array"), 1, sum))
+		}else if(return.type=="mean"){
+			return(apply(apply(alleleCounts(x, strand=strand, return.class="array"), c(1,2), sum), 1, mean))
+		}
+	}else{
+		stop("return.class has to be 'vec'")
+	}
 })
 
