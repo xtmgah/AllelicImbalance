@@ -33,7 +33,7 @@ setGeneric("detectAI", function(x, ...){
 })
 
 setMethod("detectAI", signature(x = "ASEset"), function(x, 
-	return.class = "vector", return.type="all", strand = "*",
+	return.class = "logical", return.type="all", strand = "*",
 	threshold.frequency=0.05, threshold.count.sample=5,
 	min.delta.frequency=0.05, max.pvalue=0.05,
 	function.test="binom.test") {
@@ -74,20 +74,20 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
 		],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
 
-		mat3 <- matrix(aperm(ac,c(3,2,1))[aperm(array(matrix(x@variants, ncol=length(x@variants),
-			 nrow=nrow(x), byrow=TRUE)==arn[,2]
-		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
-		],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
+		#mat3 <- matrix(aperm(ac,c(3,2,1))[aperm(array(matrix(x@variants, ncol=length(x@variants),
+		#	 nrow=nrow(x), byrow=TRUE)==arn[,2]
+		# ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
+		#],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
 
-		mat4 <- matrix(aperm(ac,c(3,2,1))[aperm(array(matrix(x@variants, ncol=length(x@variants),
-			 nrow=nrow(x), byrow=TRUE)==arn[,2]
-		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
-		],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
+		#mat4 <- matrix(aperm(ac,c(3,2,1))[aperm(array(matrix(x@variants, ncol=length(x@variants),
+		#	 nrow=nrow(x), byrow=TRUE)==arn[,2]
+		# ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
+		#],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
 
 		allele1 <- mat1[idx] 
 		allele2 <- mat2[idx]
-		allele3 <- mat3[idx]
-		allele4 <- mat4[idx]
+		#allele3 <- mat3[idx]
+		#allele4 <- mat4[idx]
 
 		#test the two most expressed alleles
 		biasmat1 <- matrix(aperm(mapBias(x, return.class="array"),c(3,2,1))[aperm(array(matrix(
@@ -117,10 +117,13 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 
 	}else{stop("function.test must be binom.test")}
 
+	#set non p-value survivors to na
+	fr[!(pv<max.pvalue)] <- NaN
+
 	if(return.class=="logical"){
-		
-	}else if(return.class=="vector"){
-		stop("return.class vector as option is not available atm")
+		matrix(!is.na(fr),ncol=ncol(x),nrow=nrow(x), dimnames=list(rownames(x),colnames(x)))
+	}else if(return.class=="matrix"){
+		stop("return.class matrix as option is not available atm")
 	}
 
 })
