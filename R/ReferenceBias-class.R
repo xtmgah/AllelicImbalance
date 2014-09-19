@@ -15,9 +15,12 @@ NULL
 #' @aliases ReferenceBias-class ReferenceBias ReferenceBias-method
 #' @docType class
 #' @param x ReferenceBias object
-#' @param verbose makes function more talkative
+#' @param TxDb A \code{transcriptDb} object
+#' @param strand '+','-' or '*'
+#' @param return.class class to return
+#' @param ... pass arguments to internal functions
 #' @return An object of class ReferenceBias storing reference fractions.
-
+#'
 #' @section Constructor: refBias(x = ASEset)
 #' 
 #' \describe{
@@ -32,32 +35,30 @@ NULL
 #'
 #' data(ASEset)
 #' a <- ASEset
-#' genotype(a) <- inferGenotypes(a)
-#' a <- refAllele(a,
-#'  	fasta=system.file('extdata/hg19.chr17.fa', 
-#'  	package='AllelicImbalance'))	
 #' rb <- RBias(a)
 #' 
 #' @exportClass ReferenceBias
-#' @export
 NULL
 
 
 #' @rdname ReferenceBias-class
+#' @exportClass ReferenceBias
 setClass("ReferenceBias", contains = "SummarizedExperiment",
 	representation(strands = "vector"))
 
+#' @rdname ReferenceBias-class
+#' @export
 setGeneric("refbiasByAnnotation", function(x,...){
     standardGeneric("refbiasByAnnotation")
 })
 
 #' @rdname ReferenceBias-class
+#' @export
 setMethod("refbiasByAnnotation", signature(x = "ReferenceBias"), function(x,TxDb){
 	cat("not implemented yet, sorry")	
 })
 
 #hidden function
-
 .selectArrayElement <- function(strand) 
 	{
     if (!sum(strand %in% c("+", "-", "*")) > 0) {
@@ -92,6 +93,8 @@ setMethod("frequency", signature(x = "ReferenceBias"), function(x,
 	}
 })
 
+#' @rdname ReferenceBias-class
+#' @export
 setGeneric("hetPerSample", function(x,...){
     standardGeneric("hetPerSample")
 })
@@ -119,6 +122,8 @@ setMethod("hetPerSample", signature(x = "ReferenceBias"), function(x,
 
 })
 
+#' @rdname ReferenceBias-class
+#' @export
 setGeneric("hetPerSnp", function(x,...){
     standardGeneric("hetPerSnp")
 })

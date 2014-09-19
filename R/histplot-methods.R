@@ -8,20 +8,26 @@
 #' @rdname histplot
 #' @aliases hist hist,ReferenceBias-method 
 #' @docType methods
-#' @param x \code{ReferenceBias} object
+#' @param x \code{ReferenceBias} object or \code{ASEset} object
+#' @param strand '+','-' or '*'
+#' @param type 'mean' (only one option atm)
+#' @param log an integer to log each value (integer 10 for log10)
+#' @param ... arguments to forward to interal boxplots function
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords plot hist
 #' @examples
 #' 
-#' #load example data
+#' ##load example data
 #' 
-#' data("ReferenceBias")
-#' hist(ReferenceBias)
+#' #data(ASEset)
+#' #a <- ASEset
+#' #hist(a)
 #' 
 NULL
 
-#' @rdname histplot-class
+#' @rdname histplot
 setMethod("hist", signature(x = "ReferenceBias"), function(x, strand="*", ...){
+
 	hi <- hist(frequency(x,strand=strand),breaks = 40, freq=TRUE, ...)
 
 	#add red line for 0.5
@@ -30,7 +36,7 @@ setMethod("hist", signature(x = "ReferenceBias"), function(x, strand="*", ...){
 	invisible(hi)
 })
 
-#' @rdname histplot-class
+#' @rdname histplot
 setMethod("hist", signature(x = "ASEset"), function(x, strand="*", type="mean", log=1, ...){
 
 		if(log==1){

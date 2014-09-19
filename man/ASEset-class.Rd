@@ -9,6 +9,7 @@
 \alias{alleleCounts<-,ASEset-method}
 \alias{arank}
 \alias{arank,ASEset-method}
+\alias{countsPerSnp}
 \alias{fraction}
 \alias{fraction,ASEset-method}
 \alias{frequency}
@@ -25,7 +26,7 @@ alleleCounts(x, strand = "*", return.class = "list")
 
 alleleCounts(x, strand = "*") <- value
 
-mapBias(x)
+mapBias(x, ...)
 
 fraction(x, strand = "*", verbose = FALSE)
 
@@ -36,6 +37,8 @@ frequency(x, ...)
 genotype(x)
 
 genotype(x) <- value
+
+countsPerSnp(x, ...)
 }
 \arguments{
 \item{x}{ASEset object}
@@ -46,11 +49,11 @@ genotype(x) <- value
 
 \item{value}{value as replacement}
 
+\item{...}{additional arguments}
+
 \item{verbose}{makes function more talkative}
 
 \item{return.type}{return 'names', rank or 'counts'}
-
-\item{...}{additional arguments}
 }
 \value{
 An object of class ASEset containing location information and allele

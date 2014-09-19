@@ -286,7 +286,7 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #' 
 #' @name initialize-ReferenceBias
 #' @rdname initialize-ReferenceBias
-#' @aliases initialize-ReferenceBias refBias
+#' @aliases initialize-ReferenceBias RBias
 #' @param x \code{ASEset} 
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords bias mapbias refBias
@@ -294,19 +294,15 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #'
 #' data(ASEset)
 #' a <- ASEset
-#' genotype(a) <- inferGenotypes(a)
-#' a <- refAllele(a,
-#'  	fasta=system.file('extdata/hg19.chr17.fa', 
-#'  	package='AllelicImbalance'))	
-#' refbiasObject <- ReferenceBias(a)
+#' refbiasObject <- RBias(a)
 #' 
-#' @export refBias
 NULL
 
 
 #' @rdname initialize-ReferenceBias
+#' @export 
 #setMethod("ReferenceBias","ReferenceBias", function(
-RBias <- ReferenceBias <- function(
+RBias <- function(
 	x = "ASEset"
 	){
 	#if non-stranded data	

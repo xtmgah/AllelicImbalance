@@ -9,7 +9,7 @@
 #' @aliases refFraction,ASEset-method
 #' @docType methods
 #' @param x \code{ASEset} object
-#' @param strand strand option
+#' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords reference fraction
 #' @examples
@@ -17,20 +17,6 @@
 #' #load example data
 #' data(ASEset)
 #' a <- ASEset
-#'
-#' #this example data contains to few SNPs to actually 
-#' #measure the effect reliably, but as example it serves
-#' #the purpose.
-#'	
-#' #prepare ASEset
-#' genotype(a) <- inferGenotypes(a,
-#'		threshold.frequency = 0.05,
-#'		threshold.count.sample = 0)
-#'
-#' a <- refAllele(a,
-#'		fasta=system.file('extdata/hg19.chr17.fa', 
-#'		package='AllelicImbalance'))	
-#'
 #' rf <- refFraction(a, strand="*")
 #' 
 #' @exportMethod refFraction
@@ -105,11 +91,11 @@ setMethod("refFraction", signature(x = "ASEset"),
 #' @examples
 #' 
 #' #load example data
-#' data(ASEset)
+#' data(ASEset.sim)
 #'
-#' fasta <- system.file('extdata/hg19.chr17.fa', package='AllelicImbalance')
-#' refAllele(ASEset,fasta=fasta)
-#' a <- refAllele(ASEset,fasta=fasta) 
+#' fasta <- system.file('extdata/hg19.chr17.subset.fa', package='AllelicImbalance')
+#' refAllele(ASEset.sim,fasta=fasta)
+#' a <- refAllele(ASEset.sim,fasta=fasta) 
 #'
 #' @exportMethod refAllele
 NULL

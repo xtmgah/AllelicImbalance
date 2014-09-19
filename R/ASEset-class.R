@@ -365,7 +365,7 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 						   x
 					}))
 
-			mat <- matrix(a@variants[ar2],ncol=4, nrow=nrow(x), byrow=FALSE,
+			mat <- matrix(x@variants[ar2],ncol=4, nrow=nrow(x), byrow=FALSE,
 					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4)))
 		
 			return(mat)
