@@ -23,7 +23,10 @@
 #' #the purpose.
 #'	
 #' #prepare ASEset
-#' genotype(a) <- inferGenotypes(a)
+#' genotype(a) <- inferGenotypes(a,
+#'		threshold.frequency = 0.05,
+#'		threshold.count.sample = 0)
+#'
 #' a <- refAllele(a,
 #'		fasta=system.file('extdata/hg19.chr17.fa', 
 #'		package='AllelicImbalance'))	
@@ -41,7 +44,7 @@ setGeneric("refFraction", function(x, ...
 
 setMethod("refFraction", signature(x = "ASEset"),
 		function(x, strand="*",
-			threshold.count.sample 
+			threshold.count.sample=0
 	){
 	
 	#check for presence of genotype data
@@ -59,17 +62,26 @@ setMethod("refFraction", signature(x = "ASEset"),
 	acounts[array(!hetFilt(x), dim=c(nrow(x), ncol(x), 4))] <- 0
 
 	#replace countmatrix in object x 
-	alleleCounts(x,strand=strand) <- acounts
+	x2 <-x
+	alleleCounts(x2,strand=strand) <- acounts
 
 	#calc frequency
-	fr <- frequency(x, strand=strand, return.class="array",
+	fr <- frequency(x2, strand=strand, return.class="array",
 			threshold.count.sample = threshold.count.sample)
-					
-	
-matrix(fr[aperm(array(matrix(x@variants, ncol=length(x@variants),
+
+	#select only ref rows
+	ar <- 	array(matrix(x@variants, ncol=length(x@variants),
 			 nrow=nrow(x), byrow=TRUE)==mcols(x)[,"ref"]
-		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(1,3,2))
-		],ncol=ncol(x),nrow=nrow(x),dimnames=list(rownames(x),colnames(x)))
+		 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x)))
+	
+	#rearrange to be able to transform back
+	fr2 <- aperm(fr, c(3,2,1))
+	ar2 <- aperm(ar, c(2,3,1))
+
+	#rearrange dims
+	refs <- fr2[ar2]
+		
+	matrix(refs,ncol=ncol(x),nrow=nrow(x), byrow=TRUE,dimnames=list(rownames(x),colnames(x)))
 
 
 })

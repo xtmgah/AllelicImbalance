@@ -244,29 +244,34 @@ setMethod("alleleCounts<-", signature(x = "ASEset"), function(x,
 })
 
 #' @rdname ASEset-class
-setGeneric("mapBias", function(x) {
+setGeneric("mapBias", function(x, ...) {
     standardGeneric("mapBias")
 })
 
-setMethod("mapBias", signature(x = "ASEset"), function(x) {
+setMethod("mapBias", signature(x = "ASEset"), function(x,
+	return.class="list") {
     # assume alleleCount information is stored as element 1
-    mapBiasList <- list()
-    for (i in 1:nrow(x)) {
-        mat <- assays(x)[["mapBias"]][i, , ]
-        if (class(mat) == "numeric") {
-            dim(mat) <- c(1, 4)
-            rownames(mat) <- colnames(x)
-        }
-        colnames(mat) <- x@variants
-        
-        mapBiasList[[i]] <- mat
-    }
-    # add snp id
-    names(mapBiasList) <- rownames(x)
-    
-    
-    # return object
-    mapBiasList
+
+	if(return.class=="array"){
+		return(assays(x)[["mapBias"]])
+
+	}else if(return.class=="list"){
+		mapBiasList <- list()
+		for (i in 1:nrow(x)) {
+			mat <- assays(x)[["mapBias"]][i, , ]
+			if (class(mat) == "numeric") {
+				dim(mat) <- c(1, 4)
+				rownames(mat) <- colnames(x)
+			}
+			colnames(mat) <- x@variants
+			
+			mapBiasList[[i]] <- mat
+		}
+		# add snp id
+		names(mapBiasList) <- rownames(x)
+		
+		return(mapBiasList)
+	}
     
 })
 
@@ -355,11 +360,15 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 			ar <- t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
 					1, function(x){rank(x,ties.method="first")}))
-			#mat <- matrix(NA,ncol=4, nrow=nrow(x), 
+			ar2 <- t(apply(ar,1,function(x){
+						   x <- sort(x,index.return=TRUE,decreasing=TRUE)$ix
+						   x
+					}))
+
+			mat <- matrix(a@variants[ar2],ncol=4, nrow=nrow(x), byrow=FALSE,
 					  dimnames=list(dimnames(ar)[[1]],c(1,2,3,4)))
-			#mat[,1]  <- ar[ar == 4]
 		
-			return()
+			return(mat)
 		}else if (return.type == "rank") {
 			return(t(apply(apply(alleleCounts(x,
 						strand=strand,return.class="array"),c(1,3),sum),
