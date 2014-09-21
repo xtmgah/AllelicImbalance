@@ -390,9 +390,8 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 			return(apply(alleleCounts(x,strand=strand,return.class="array"),c(1,3),sum))
 		}else{stop("return.type is not valid")}
 
-	}
+	}else if(return.class=="list"){
 
-	if(return.class=="list"){
 		acounts <- alleleCounts(x, strand = strand)
 		
 		if (return.type == "names") {
@@ -539,7 +538,32 @@ setMethod("countsPerSnp", signature(x = "ASEset"), function(x,
 			return(apply(apply(alleleCounts(x, strand=strand, return.class="array"), c(1,2), sum), 1, mean))
 		}
 	}else{
-		stop("return.class has to be 'vec'")
+		stop("return.class has to be 'vector' or 'matrix'")
+	}
+})
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("countsPerSample", function(x, ...){
+    standardGeneric("countsPerSample")
+})
+
+#' @rdname ASEset-class
+#' @export 
+#could be renamed to countsAllAlleles
+setMethod("countsPerSample", signature(x = "ASEset"), function(x, 
+	return.class = "matrix", return.type="mean", strand = "*") {
+
+	if(return.class=="matrix"){
+		return(apply(alleleCounts(x, strand=strand, return.class="array"), c(1,2), sum))
+	}else if(return.class=="vector"){
+		if(return.type=="all"){
+			return(apply(alleleCounts(x, strand=strand, return.class="array"), 2, sum))
+		}else if(return.type=="mean"){
+			return(apply(apply(alleleCounts(x, strand=strand, return.class="array"), c(1,2), sum), 2, mean))
+		}
+	}else{
+		stop("return.class has to be 'vector' or 'matrix'")
 	}
 })
 
