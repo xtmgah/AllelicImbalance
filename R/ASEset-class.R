@@ -136,10 +136,13 @@ setClass("ASEset", contains = "SummarizedExperiment",
 	representation(variants = "vector"))
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("alleleCounts", function(x, strand = "*", return.class="list") {
     standardGeneric("alleleCounts")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 	return.class="list") {
 
@@ -212,10 +215,13 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("alleleCounts<-", function(x, strand = "*", value) {
     standardGeneric("alleleCounts<-")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("alleleCounts<-", signature(x = "ASEset"), function(x,
 	 strand = "*", value) {
 
@@ -244,10 +250,13 @@ setMethod("alleleCounts<-", signature(x = "ASEset"), function(x,
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("mapBias", function(x, ...) {
     standardGeneric("mapBias")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("mapBias", signature(x = "ASEset"), function(x,
 	return.class="list") {
     # assume alleleCount information is stored as element 1
@@ -276,10 +285,13 @@ setMethod("mapBias", signature(x = "ASEset"), function(x,
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("fraction", function(x, strand = "*", verbose = FALSE) {
     standardGeneric("fraction")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*", 
     verbose = FALSE) {
     
@@ -347,6 +359,7 @@ setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*",
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("arank", function(x, return.type = "names", 
 	return.class = "list", strand = "*", ...) {
     standardGeneric("arank")
@@ -433,6 +446,7 @@ setMethod("arank", signature(x = "ASEset"), function(x, return.type = "names",
 #})	
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("frequency")
 
 setMethod("frequency", signature(x = "ASEset"), function(x, 
@@ -467,10 +481,13 @@ setMethod("frequency", signature(x = "ASEset"), function(x,
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("genotype", function(x){
     standardGeneric("genotype")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("genotype", signature(x = "ASEset"), function(x){
 	
     if (!("genotype" %in% names(assays(x)))) {
@@ -480,10 +497,13 @@ setMethod("genotype", signature(x = "ASEset"), function(x){
 	assays(x)[["genotype"]]
 })
 #' @rdname ASEset-class
+#' @export 
 setGeneric("genotype<-", function(x,value){
     standardGeneric("genotype<-")
 })
 
+#' @rdname ASEset-class
+#' @export 
 setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
 	
 	#check dimensions
@@ -499,10 +519,13 @@ setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
 })
 
 #' @rdname ASEset-class
+#' @export 
 setGeneric("countsPerSnp", function(x, ...){
     standardGeneric("countsPerSnp")
 })
 
+#' @rdname ASEset-class
+#' @export 
 #could be renamed to countsAllAlleles
 setMethod("countsPerSnp", signature(x = "ASEset"), function(x, 
 	return.class = "matrix", return.type="mean", strand = "*") {
