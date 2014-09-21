@@ -1197,32 +1197,32 @@ getDefaultMapBiasExpMean3D <- function(alleleCountList) {
 }
 
 
-
-extractReferenceAllele <- function(GR, path) {
-    # GR contains ranges of positions to be retrieved path contains the path to fasta
-    # reference used for alignment i.e. ('hg19.fa')
-    
-    # check if there exist an index Check to be written
-    
-    # remove chromosome name
-    if (!(grepl("chr", seqlevels(GR)))) {
-        seqLevels <- paste("chr", seqlevels(GR), sep = "")
-        seqlevels(GR) <- seqLevels
-    }
-    
-    fl <- FaFile(path)
-    
-    # open file
-    open(fl)
-    # scan fasta
-    res <- scanFa(fl, GR)
-    # clsoe file
-    close(fl)
-    res
-    
-}
-
-
+#
+#extractReferenceAllele <- function(GR, path) {
+#    # GR contains ranges of positions to be retrieved path contains the path to fasta
+#    # reference used for alignment i.e. ('hg19.fa')
+#    
+#    # check if there exist an index Check to be written
+#    
+#    # remove chromosome name
+#    if (!(grepl("chr", seqlevels(GR)))) {
+#        seqLevels <- paste("chr", seqlevels(GR), sep = "")
+#        seqlevels(GR) <- seqLevels
+#    }
+#    
+#    fl <- FaFile(path)
+#    
+#    # open file
+#    open(fl)
+#    # scan fasta
+#    res <- scanFa(fl, GR)
+#    # clsoe file
+#    close(fl)
+#    res
+#    
+#}
+#
+#
 
 #' Get Gene Area
 #' 

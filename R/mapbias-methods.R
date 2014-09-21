@@ -171,7 +171,7 @@ NULL
 
 #' @rdname defaultMapBias
 #' @export
-setGeneric("defaultMapBias", function(x, fasta ){
+setGeneric("defaultMapBias", function(x,... ){
     standardGeneric("defaultMapBias")
 })
 
