@@ -11,6 +11,8 @@ defaultMapBias(x, ...)
 }
 \arguments{
 \item{x}{\code{ASEset} object}
+
+\item{...}{internal arguments}
 }
 \description{
 Create mapbias array from genotype matrix requires genotype information

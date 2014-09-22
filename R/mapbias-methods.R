@@ -156,6 +156,7 @@ setMethod("refAllele", signature(x = "ASEset"), function(x, fasta){
 #' @aliases defaultMapBias,ASEset-method
 #' @docType methods
 #' @param x \code{ASEset} object
+#' @param ... internal arguments
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords mapbias
 #' @examples
