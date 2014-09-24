@@ -538,14 +538,16 @@ realCigarPositionsList <- function(RleCigarList) {
 #' 
 #' 
 #' @export getAlleleCounts
-getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "list", 
-    verbose = TRUE) {
+getAlleleCounts <- function(BamList, GRvariants, strand = "*",
+						return.type = "list", verbose = TRUE) { 
+    
     
     if (!class(BamList) %in% c("GAlignments", "GAlignmentsList")) {
         stop("BamList has to be of class GAlignments or GAlignmnetsList\n")
     }
-    # if just one element of, make list (which is a convenient way of handling this
-    # input type)
+    # if just one element of, make list (which is a convenient way of
+	# handling this input type)
+    # 
     if (class(BamList) == "GAlignments") {
         BamList <- GAlignmentsList(BamList)
     }
@@ -561,10 +563,11 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
         stop("strand parameter has to be either '+', '-' or '*' ")
     }
     
-    # if the user sent in the GRangesList for GRvariants, take out only the unique
-    # entries.
+    # if the user sent in the GRangesList for GRvariants,
+	# take out only the unique entries.
+    # 
     if (class(GRvariants) == "GRangesList") {
-        GRvariants <- unique(unlist(GRvariants, use.names = FALSE))  #merge BcfGRL to one unique set of Snps
+        GRvariants <- unique(unlist(GRvariants, use.names = FALSE)) 
     }
    
 	#Drop seqlevels in BamList that are not in GRvariants
@@ -578,11 +581,14 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
     
     # checking that GRvariants is ok
     if (class(GRvariants) != "GRanges") 
-        stop(paste("GRvariants must be of class GRanges, not", class(GRvariants)))
+        stop(paste("GRvariants must be of class GRanges, not",
+				   class(GRvariants)))
     if (length(GRvariants) == 0) 
-        stop("GRvariants was given as an empty GRanges object. There can be no Snps retrieved by getAlleleCount then")
+        stop("GRvariants was given as an empty GRanges object.",
+			 " There can be no Snps retrieved by getAlleleCount then")
     if (any(width(GRvariants) != 1)) 
-        stop("GRvariants can contain only entries of width=1, corresponding to SNPs.")
+        stop("GRvariants can contain only entries of width=1,",
+			 " corresponding to SNPs.")
     
     
     
@@ -595,13 +601,28 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
     
     # make row-names
     if (sum(grepl("chr", seqnames(GRvariants))) > 0) {
-        snpNames <- paste(seqnames(GRvariants), "_", start(GRvariants), sep = "")
+        snpNames <- paste(seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
     } else {
-        snpNames <- paste("chr", seqnames(GRvariants), "_", start(GRvariants), sep = "")
+        snpNames <- paste("chr", seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
     }
     
+	#if not list, make it a list
+	if(class(BamList)=="GAlignments"){
+		BamList <- GAlignmentsList(BamList)
+	}
+
+	# needs name, need a more general solution here
+	if(length(names(BamList)) == 0){
+		warning("no set names for list, new names will be sample1,2,3,etc")
+		names(BamList) <- paste("sample",1:length(BamList),sep="")
+	}
+
+	#empty array that handles only four nucleotides + one del columns
     dimnames = list(snpNames, names(BamList), c("A", "C", "G", "T"))
-    ar1 <- array(NA, c(length(GRvariants), length(BamList), 4), dimnames = dimnames)  #empty array that handles only four nucleotides + one del columns
+    ar1 <- array(NA, c(length(GRvariants), length(BamList), 4),
+				 dimnames = dimnames)  
     
     # use strand choice to only get reads from that strand
     if (!strand == "*") {
@@ -624,9 +645,8 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
         nstr <- strsplit(as.character(nuclpiles), "")
         for (k in 1:length(GRvariants)) {
             ar1[k, j, ] <- c(sum(nstr[[k]] %in% "A"), sum(nstr[[k]] %in% "C"), sum(nstr[[k]] %in% 
-                "G"), sum(nstr[[k]] %in% "T"))  #del will always be 0. Could have set it to NA, but then it makes problem further  down in the chain of functions...\t\t\t
+                "G"), sum(nstr[[k]] %in% "T"))  
         }
-        
         
     }
     
@@ -635,6 +655,9 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*", return.type = "li
         alleleCountList <- list()
         for (i in 1:nrow(ar1)) {
             mat <- ar1[i, , ]
+			if(class(mat)=="integer"){
+				mat <- t(as.matrix(mat))
+			}
             if (class(mat) == "numeric") {
                 mat <- t(mat)
                 colnames(mat) <- dimnames[[3]]
