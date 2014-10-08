@@ -1594,9 +1594,15 @@ barplotLatticeFraction <- function(identifier, ...) {
         
     }
     
+    #b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
+    #    stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
+    #    par.settings = parset)
     b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
         stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
-        par.settings = parset)
+        par.settings = parset, panel=function(x, y, ...) {
+             panel.barchart(x, y, ...)
+             panel.abline(h=0.5, lty=1)
+        }  )
     
     b
     
