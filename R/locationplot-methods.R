@@ -388,7 +388,7 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
         type), TxDb=NULL, add = FALSE, verbose = FALSE, ...) {
    
 	#tmp
-	if(!is.null(TxDb)){stop("the functionality with TxDb is not yet ready")}
+	#if(!is.null(TxDb)){stop("the functionality with TxDb is not yet ready")}
 
     # check genome
     if (is.null(genome(x)) | is.na(genome(x))) {
@@ -441,6 +441,9 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$xlab <- ""
     }
+    if (!exists("middleLine", envir = e, inherits = FALSE)) {
+        e$middleLine <- TRUE
+    }
 
     # make deTrack 
     if (verbose) {
@@ -450,7 +453,8 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 								   trackName = trackNameDeAn,
 								   mainvec=e$mainvec,
 								   ylab=e$ylab,
-								   xlab=e$xlab
+								   xlab=e$xlab,
+								   middleLine=e$middleLine
 								   )
     lst <- list(deTrack)
    
@@ -477,15 +481,15 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 
 
 	if(!is.null(TxDb)){
-    #    if (verbose) {
-    #        (cat("preparing transcriptDB track\n"))
-	#	}
-	#	txTrack <- GeneRegionTrack(TxDb, 
-	#		start=start(GR), end=end(GR), 
-	#		chr=seqlevels(GR)
-	#	)	   
+        if (verbose) {
+            (cat("preparing transcriptDB track\n"))
+		}
+		txTrack <- GeneRegionTrack(TxDb, 
+			start=start(GR), end=end(GR), 
+			chr=seqlevels(GR)
+		)	   
 
-    #    lst[[length(lst) + 1]] <- txTrack
+        lst[[length(lst) + 1]] <- txTrack
 	}
 
 

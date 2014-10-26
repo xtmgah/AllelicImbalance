@@ -1362,6 +1362,9 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$xlab <- ""
     }
+    if (!exists("middleLine", envir = e, inherits = FALSE)) {
+        e$middleLine <- TRUE
+    }
 
 	for (i in 1:nrow(x)) {
 		name <- rownames(x)[i]
@@ -1373,7 +1376,8 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 				ids=rownames(x),
 				ylab=e$ylab,
 				xlab=e$xlab,
-				mainvec=e$mainvec)
+				mainvec=e$mainvec,
+				middleLine=e$middleLine)
 		} else if (type == "count") {
 			b <- barplotLatticeCounts(
 				identifier = name, 

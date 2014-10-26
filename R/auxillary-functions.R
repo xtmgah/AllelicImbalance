@@ -1530,6 +1530,9 @@ barplotLatticeFraction <- function(identifier, ...) {
     if (!exists("xlab", envir = e, inherits = FALSE)) {
         e$xlab <- ""
     }
+    if (!exists("middleLine", envir = e, inherits = FALSE)) {
+        e$middleLine <- TRUE 
+    }
 	#acounts<-  alleleCounts(e$x, strand = strand)
 	arank<-  arank(e$x, strand = e$strand)
 	afraction<-  fraction(e$x, strand = e$strand)
@@ -1594,16 +1597,20 @@ barplotLatticeFraction <- function(identifier, ...) {
         
     }
     
-    #b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
-    #    stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
-    #    par.settings = parset)
-    b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
-        stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
-        par.settings = parset, panel=function(x, y, ...) {
-             panel.barchart(x, y, ...)
-             panel.abline(h=0.5, lty=1)
-        }  )
-    
+	if(!e$middleLine) {
+		b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
+		    stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
+		    par.settings = parset)
+	}else if (e$middleLine) {
+		b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
+			stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
+			par.settings = parset, panel=function(x, y, ...) {
+				 panel.barchart(x, y, ...)
+				 panel.abline(h=0.5, lty=1)
+			}  )
+	}else {
+		stop("middleLine has to be TRUE or FALSE")
+	} 
     b
     
 }

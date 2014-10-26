@@ -133,6 +133,10 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         e$xlab <- ""
     }
 		
+    if (!exists("middleLine", envir = e, inherits = FALSE)) {
+        e$middleLine <- TRUE
+    }
+
     ranges <- rowData(x)
     
     colnames(x) <- 1:ncol(x)
@@ -158,9 +162,6 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
         
     }
 
-	print("erste")
-	print(strand)
-
     # plot the fraction
     deTrack <- AnnotationTrack(range = ranges, genome = genome(x), id = rownames(x), 
         name = trackName, stacking = "squish", fun = details, 
@@ -171,7 +172,8 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 						   type=type, 
 						   x=x, 
 						   astrand=strand, 
-						   ids=list(list(rownames(x)))
+						   ids=list(list(rownames(x))),
+						   middleLine=e$middleLine
 						)
 		)
     deTrack
