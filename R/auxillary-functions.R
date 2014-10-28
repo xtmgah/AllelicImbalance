@@ -1927,3 +1927,129 @@ implodeList <- function(x) {
     eval(parse(text = paste0("for(i in 1:length(", oname, ")){assign(names(", oname, 
         ")[i],", oname, "[[i]])}")), parent.frame())
 } 
+
+#' alleleCounts from bam file
+#' 
+#' count alleles and create an ASEset direct from bam file instead of reading into R first.
+#' 
+#' counts the alleles in a bam file based on GRanges positions. 
+#' 
+#' 
+#' @param x list of variables
+#' @param pathToDir path to directory of bam files
+#' @param pathToFile path to a specific bam file
+#' @author Jesper R. Gadin
+#' @keywords allelecount
+#' @examples
+#'
+#' data(GRvariants)
+#' gr <- GRvariants
+#'
+#' pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
+#' countAllelesFromBam(gr, pathToDir)
+#'  
+#' @export countAllelesFromBam
+countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, return.class="array", ...) {
+
+	bamDir <- normalizePath(pathToDir)
+	allFiles <- list.files(bamDir, full.names = TRUE)
+	bamFiles <- allFiles[grep(".bam$", allFiles)]
+	if (length(bamFiles) == 0) {
+		stop(paste("No bam files found in", bamDir))
+	}
+	if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+		if (verbose) {
+			cat(paste("The bam files in UserDir are required to also have", ".bam.bai index files.", 
+				" Trying to run indexBam function on each", "\n"), )
+		}
+		indexBam(bamFiles)
+		if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+			stop("The bam files in UserDir are required to also have", ".bam.bai index files.")
+		} else {
+			if (verbose) {
+				cat(paste("Succesfully indexed all bamFiles in UserDir", UserDir, 
+				  "\n"))
+			}
+		}
+	}
+	
+	#flags can be 99 147 83 or 163
+	if(!is.null(flag)){
+		if(!flag%in%c(99,147,83,163)){
+			stop("flag values can only be 99 147 83 or 163")
+		}
+		
+		if(flag==99){
+
+			flag=scanBamFlag( isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = TRUE,	
+					isMateMinusStrand = TRUE
+					)
+		}else if(flag==83){
+
+		
+
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = TRUE,	
+					isMinusStrand = TRUE
+					)
+		}else if(flag==147){
+
+		
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = FALSE,	
+					isMinusStrand = TRUE
+					)
+		}else if(flag==163){
+
+		
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = FALSE,	
+					isMateMinusStrand = TRUE
+					)
+		}
+	}
+
+	#scanBamFlag
+	if(is.null(scanBamFlag)){
+		flag <- scanBamFlag()
+	}else if(!is.null(scanBamFlag)){
+		if(length(scanBamFlag)==2){
+			flag <- scanBamFlag
+		}else{
+			stop("scanBamFlag has to be the return values from scanBamFlag()")
+		}
+	}
+
+	#fls <- PileupFiles(c(fl, fl))
+	fls <- PileupFiles(bamFiles)
+	
+	countF <-
+		function(x){
+		x[["seq"]][-5,,1]
+
+	}                     
+	which <- gr
+	p1 <- ApplyPileupsParam(flag=flag,
+							which=which, 
+							minBaseQuality = 0L,
+							what="seq",
+							yieldBy = c("range", "position")
+							)
+
+	res <- applyPileups(fls, countF, param=p1)
+	ar <- array(unlist(res), dim=c(4,20,length(gr)),
+				dimnames=list(c("A","C","G","T"), 
+							  names(fls), 
+							  names(gr)))
+	ar <- aperm(ar,dim=c(3,2,1))
+	ar
+
+}
