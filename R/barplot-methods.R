@@ -689,61 +689,16 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                   if ((strand == "*" ) & (!is.null(OrgDb) | 
                     !is.null(TxDb))) {
                     xLegendPos <- 0.5
-                    yLegendPos <- 1.02
+                    yLegendPos <- 1.00
                   } else {
                     xLegendPos <- 0.94
-                    yLegendPos <- 1.02
+                    yLegendPos <- 1.00
                   }
                   
-                  # each row
-                  if (sum(!TFz) == 2) {
-                    symbols(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                      y = (lowerLeftCorner[2] + size[2] * yLegendPos) * rep(1, length(unique(fgCol))), 
-                      bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                      add = TRUE, inches = FALSE)
-                    symbols(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                      y = (lowerLeftCorner[2] + size[2] * (yLegendPos - 0.02)) * 
-                        rep(1, length(unique(bgCol))), bg = unique(bgCol), squares = rep(c(size[1] * 
-                        0.012), length(unique(bgCol))), add = TRUE, inches = FALSE)
-                    # row-lab
-                    text(x = c(lowerLeftCorner[1] + (size[1] * xLegendPos + c(0.02, 
-                      0.02))), y = (lowerLeftCorner[2] + size[2] * (yLegendPos * 
-                      c(1, 0.98))), textOver, srt = 0, cex = cex.legend, adj = c(0, 
-                      0.5), xpd = TRUE)
-                    # col-lab
-                    text(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                      y = lowerLeftCorner[2] + size[2] * (yLegendPos + 0.01), legend.colnames, 
-                      srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                  } else if (sum(!TFz[1]) == 1) {
-                    symbols(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                      y = (lowerLeftCorner[2] + size[2] * yLegendPos) * rep(1, length(unique(fgCol))), 
-                      bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                      add = TRUE, inches = FALSE)
-                    text(x = c(lowerLeftCorner[1] + (size[1] * xLegendPos + c(0.02))), 
-                      y = lowerLeftCorner[2] + (size[2] * c(1.02)), textOver, srt = 0, 
-                      cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                    text(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                      y = lowerLeftCorner[2] + size[2] * (yLegendPos + 0.01), legend.colnames, 
-                      srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                  } else if (sum(!TFz[2]) == 1) {
-                    symbols(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                      y = (lowerLeftCorner[2] + size[2] * yLegendPos) * rep(1, length(unique(bgCol))), 
-                      bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
-                      add = TRUE, inches = FALSE)
-                    text(x = c(lowerLeftCorner[1] + (size[1] * xLegendPos + c(0.02))), 
-                      y = lowerLeftCorner[2] + (size[2] * c(1.02)), textOver, srt = 0, 
-                      cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                    text(x = lowerLeftCorner[1] + size[1] * seq(xLegendPos, (xLegendPos - 
-                      (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                      y = lowerLeftCorner[2] + size[2] * (yLegendPos + 0.01), legend.colnames, 
-                      srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                  }
+				  legendBarplot(lowerLeftCorner, size, rownames=textOver, colnames=legend.colnames,
+						   boxsize=legend.fill.size, boxspace=legend.interspace, fgCol, bgCol,
+						   ylegendPos=ylegendPos, xlegendPos=xlegendPos)
+
                   
                 }
             }
@@ -1076,145 +1031,69 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                 if (legend) {
                   # plus strand
                   TFz <- rownames(over) == "X"
+
                   if (!sum(!TFz) == 0) {
                     textOver <- paste(rownames(over)[!TFz], apply(over, 1, sum)[!TFz])
-
 					#remove the total count for that nucleotide
 					textOver <- unlist(lapply(strsplit(textOver," "),function(x){x[1]}))
-                   
-					#user-option for changing the legend.size
-					boxsize <- legend.fill.size
-					boxspace <- legend.interspace
 
-                    # each row
-                    if (sum(!TFz) == 2) {
+					legendBarplot(lowerLeftCorner, size, rownames=textOver, colnames=legend.colnames,
+						   boxsize=legend.fill.size, boxspace=legend.interspace, fgCol, bgCol)
 
-					#first fill/box
-					x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * boxspace * (length(unique(fgCol)) - 1))),
-							length = length(unique(fgCol)))
-					y = (lowerLeftCorner[2] + size[2] * (1 + 0.02 * boxspace)) * rep(1,
-							length(unique(fgCol)))
-					squares	= rep(c(size[1] * 0.012 * boxsize), length(unique(fgCol)))
-
-                      symbols(x = x, 
-                        y = y, 
-                        bg = unique(fgCol),
-						squares = squares, 
-                        add = TRUE, 
-						inches = FALSE,
-						xpd=TRUE)
-
-						#second fill/box
-						x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-							(0.02 * boxspace * (length(unique(bgCol)) - 1))),
-								length = length(unique(bgCol)))
-						y=(lowerLeftCorner[2] + size[2] * 1) * rep(1, length(unique(bgCol)))
-						squares=rep(c(size[1] * 0.012 * boxsize), length(unique(bgCol)))
-
-                      symbols(x=x, 
-                        y = y , 
-                        bg = unique(bgCol), 
-						squares = squares, 
-                        add = TRUE, 
-						inches = FALSE,
-						xpd=TRUE)
-
-                      # row-lab
-						x = c(lowerLeftCorner[1] + (size[1] * (c(0.96, 0.96)+0.02 * boxspace)))
-						y = lowerLeftCorner[2] + (size[2] * c(1+(0.02 * boxspace), 1))
-                      text(x=x, 
-                        y = y, textOver, 
-                        srt = 0, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-					  
-                      # col-lab
-						x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - ((0.02 * boxspace) * 
-                        (length(unique(fgCol)) - 1))), length = length(unique(fgCol)))
-						y = lowerLeftCorner[2] + size[2] * (1+0.03*boxspace)
-                      text(x=x, 
-                        y = y, legend.colnames, 
-                        srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-
-                    } else if (sum(!TFz[1]) == 1) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 1.02) * rep(1, length(unique(fgCol))), 
-                        bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                        add = TRUE, inches = FALSE)
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98))), y = lowerLeftCorner[2] + 
-                        (size[2] * c(1.02)), textOver, srt = 0, cex = cex.legend, 
-                        adj = c(0, 0.5), xpd = TRUE)
-                      text(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - (0.02 * 
-                        (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = lowerLeftCorner[2] + size[2] * 1.03, legend.colnames, 
-                        srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                    } else if (sum(!TFz[2]) == 1) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 1.02) * rep(1, length(unique(bgCol))), 
-                        bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
-                        add = TRUE, inches = FALSE)
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98))), y = lowerLeftCorner[2] + 
-                        (size[2] * c(1.02)), textOver, srt = 0, cex = cex.legend, 
-                        adj = c(0, 0.5), xpd = TRUE)
-                      text(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - (0.02 * 
-                        (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = lowerLeftCorner[2] + size[2] * 1.03, legend.colnames, 
-                        srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
                     }
                   }
-                  # minus strand
-                  TFz <- rownames(under) == "X"
-                  if (!sum(!TFz) == 0) {
-                    textUnder <- paste(rownames(under)[!TFz], -apply(under, 1, sum)[!TFz])
-                    
-					#remove the total count for that nucleotide
-					textUnder <- unlist(lapply(strsplit(textUnder," "),function(x){x[1]}))
+                 # # minus strand
+                 # TFz <- rownames(under) == "X"
+                 # if (!sum(!TFz) == 0) {
+                 #   textUnder <- paste(rownames(under)[!TFz], -apply(under, 1, sum)[!TFz])
+                 #   
+				 #   #remove the total count for that nucleotide
+				 #   textUnder <- unlist(lapply(strsplit(textUnder," "),function(x){x[1]}))
 
-					#user option for changing the legend.size
-					if(!is.null(legend.fill.size)){
-						size <- legend.fill.size
-					}else{
-						size <- size
-					}
+				 #   #user option for changing the legend.size
+				 #   if(!is.null(legend.fill.size)){
+				 #   	size <- legend.fill.size
+				 #   }else{
+				 #   	size <- size
+				 #   }
 
-                    if (sum(!TFz) == 2) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 0.03) * rep(1, length(unique(fgCol))), 
-                        bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                        add = TRUE, inches = FALSE)
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(bgCol))), 
-                        bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
-                        add = TRUE, inches = FALSE)
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98, 0.98))), 
-                        y = lowerLeftCorner[2] + size[2] * c(0.03, 0.01), textUnder, 
-                        srt = 0, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                    } else if (sum(!TFz[1]) == 1) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(fgCol))), 
-                        bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                        add = TRUE, inches = FALSE)
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98))), y = lowerLeftCorner[2] + 
-                        size[2] * c(0.01), textUnder, srt = 0, cex = cex.legend, 
-                        adj = c(0, 0.5), xpd = TRUE)
-                      
-                    } else if (sum(!TFz[2]) == 1) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(bgCol))), 
-                        bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
-                        add = TRUE, inches = FALSE)
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98, 0.98))), 
-                        y = lowerLeftCorner[2] + size[2] * c(0.01), textUnder, srt = 0, 
-                        cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
-                    }
-                    
-                  }
-                }
+                 #   if (sum(!TFz) == 2) {
+                 #     symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+                 #       (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
+                 #       y = (lowerLeftCorner[2] + size[2] * 0.03) * rep(1, length(unique(fgCol))), 
+                 #       bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
+                 #       add = TRUE, inches = FALSE)
+                 #     symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+                 #       (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
+                 #       y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(bgCol))), 
+                 #       bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
+                 #       add = TRUE, inches = FALSE)
+                 #     text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98, 0.98))), 
+                 #       y = lowerLeftCorner[2] + size[2] * c(0.03, 0.01), textUnder, 
+                 #       srt = 0, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
+                 #   } else if (sum(!TFz[1]) == 1) {
+                 #     symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+                 #       (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
+                 #       y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(fgCol))), 
+                 #       bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
+                 #       add = TRUE, inches = FALSE)
+                 #     text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98))), y = lowerLeftCorner[2] + 
+                 #       size[2] * c(0.01), textUnder, srt = 0, cex = cex.legend, 
+                 #       adj = c(0, 0.5), xpd = TRUE)
+                 #     
+                 #   } else if (sum(!TFz[2]) == 1) {
+                 #     symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+                 #       (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
+                 #       y = (lowerLeftCorner[2] + size[2] * 0.01) * rep(1, length(unique(bgCol))), 
+                 #       bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
+                 #       add = TRUE, inches = FALSE)
+                 #     text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98, 0.98))), 
+                 #       y = lowerLeftCorner[2] + size[2] * c(0.01), textUnder, srt = 0, 
+                 #       cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
+                 #   }
+                 #   
+                 # }
+                #}
             }
         }
     } else if (type == "fraction") {
