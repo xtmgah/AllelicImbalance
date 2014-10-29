@@ -54,6 +54,7 @@
 #' @param add.frame \code{boolean} to give the new plot a frame or not
 #' @param filter.pValue.fraction \code{numeric} between 0 and 1 that filter
 #' away pValues where the main allele has this frequency.
+#' @param legend.fill.size size of the fill/boxes in the legend (default:NULL)
 #' @param verbose Makes function more talkative
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -81,7 +82,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
     xlab = TRUE, legend.colnames = "", las.ylab = 1, las.xlab = 2, cex.main = 1, 
     cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6, add = FALSE, 
     lowerLeftCorner = c(0, 0), size = c(1, 1), addHorizontalLine = 0.5, add.frame = TRUE, 
-    filter.pValue.fraction = 0.99, verbose = FALSE, ...) {
+    filter.pValue.fraction = 0.99, legend.fill.size=1,legend.interspace=1, verbose = FALSE, ...) {
     
     # catch useful graphical parameters that can be used to later add onto plot. This
     # list will be retireved by using 'glst <- barplot(x)'
@@ -1077,28 +1078,63 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                   TFz <- rownames(over) == "X"
                   if (!sum(!TFz) == 0) {
                     textOver <- paste(rownames(over)[!TFz], apply(over, 1, sum)[!TFz])
-                    
+
+					#remove the total count for that nucleotide
+					textOver <- unlist(lapply(strsplit(textOver," "),function(x){x[1]}))
+                   
+					#user-option for changing the legend.size
+					boxsize <- legend.fill.size
+					boxspace <- legend.interspace
+
                     # each row
                     if (sum(!TFz) == 2) {
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 1.02) * rep(1, length(unique(fgCol))), 
-                        bg = unique(fgCol), squares = rep(c(size[1] * 0.012), length(unique(fgCol))), 
-                        add = TRUE, inches = FALSE)
-                      symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
-                        (0.02 * (length(unique(bgCol)) - 1))), length = length(unique(bgCol))), 
-                        y = (lowerLeftCorner[2] + size[2] * 1) * rep(1, length(unique(bgCol))), 
-                        bg = unique(bgCol), squares = rep(c(size[1] * 0.012), length(unique(bgCol))), 
-                        add = TRUE, inches = FALSE)
+
+					#first fill/box
+					x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+                        (0.02 * boxspace * (length(unique(fgCol)) - 1))),
+							length = length(unique(fgCol)))
+					y = (lowerLeftCorner[2] + size[2] * (1 + 0.02 * boxspace)) * rep(1,
+							length(unique(fgCol)))
+					squares	= rep(c(size[1] * 0.012 * boxsize), length(unique(fgCol)))
+
+                      symbols(x = x, 
+                        y = y, 
+                        bg = unique(fgCol),
+						squares = squares, 
+                        add = TRUE, 
+						inches = FALSE,
+						xpd=TRUE)
+
+						#second fill/box
+						x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
+							(0.02 * boxspace * (length(unique(bgCol)) - 1))),
+								length = length(unique(bgCol)))
+						y=(lowerLeftCorner[2] + size[2] * 1) * rep(1, length(unique(bgCol)))
+						squares=rep(c(size[1] * 0.012 * boxsize), length(unique(bgCol)))
+
+                      symbols(x=x, 
+                        y = y , 
+                        bg = unique(bgCol), 
+						squares = squares, 
+                        add = TRUE, 
+						inches = FALSE,
+						xpd=TRUE)
+
                       # row-lab
-                      text(x = c(lowerLeftCorner[1] + (size[1] * c(0.98, 0.98))), 
-                        y = lowerLeftCorner[2] + (size[2] * c(1.02, 1)), textOver, 
+						x = c(lowerLeftCorner[1] + (size[1] * (c(0.96, 0.96)+0.02 * boxspace)))
+						y = lowerLeftCorner[2] + (size[2] * c(1+(0.02 * boxspace), 1))
+                      text(x=x, 
+                        y = y, textOver, 
                         srt = 0, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
+					  
                       # col-lab
-                      text(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - (0.02 * 
-                        (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
-                        y = lowerLeftCorner[2] + size[2] * 1.03, legend.colnames, 
+						x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - ((0.02 * boxspace) * 
+                        (length(unique(fgCol)) - 1))), length = length(unique(fgCol)))
+						y = lowerLeftCorner[2] + size[2] * (1+0.03*boxspace)
+                      text(x=x, 
+                        y = y, legend.colnames, 
                         srt = 90, cex = cex.legend, adj = c(0, 0.5), xpd = TRUE)
+
                     } else if (sum(!TFz[1]) == 1) {
                       symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
                         (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
@@ -1132,6 +1168,16 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                   if (!sum(!TFz) == 0) {
                     textUnder <- paste(rownames(under)[!TFz], -apply(under, 1, sum)[!TFz])
                     
+					#remove the total count for that nucleotide
+					textUnder <- unlist(lapply(strsplit(textUnder," "),function(x){x[1]}))
+
+					#user option for changing the legend.size
+					if(!is.null(legend.fill.size)){
+						size <- legend.fill.size
+					}else{
+						size <- size
+					}
+
                     if (sum(!TFz) == 2) {
                       symbols(x = lowerLeftCorner[1] + size[1] * seq(0.96, (0.96 - 
                         (0.02 * (length(unique(fgCol)) - 1))), length = length(unique(fgCol))), 
