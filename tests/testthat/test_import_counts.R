@@ -9,7 +9,8 @@ test_that(paste("check that different import methods give same result"), {
 	#pathToDir <- system.file('inst/extdata/ERP000101_subset/tmp', package='AllelicImbalance')
 
 	#import variant 1
-	bam <- impBamGAL(pathToDir, gr, reduce=TRUE, readLength=36, scanBamFlag=scanBamFlag(), verbose=TRUE)
+	bam <- impBamGAL(pathToDir, gr, reduce=TRUE, readLength=36,
+					 scanBamFlag=scanBamFlag(), verbose=FALSE)
 	bam2 <- GAlignmentsList(lapply(bam,function(x){x[mcols(x)[["flag"]]%in%c(99,147,163,83)]}))
 	seqlevels(bam2) <- seqlevels(gr)
 
@@ -27,13 +28,13 @@ test_that(paste("check that different import methods give same result"), {
 	#import variant 2
 
 	#minus strand
-	arm1 <- countAllelesFromBam(gr, pathToDir, flag=83)
-	arm2 <- countAllelesFromBam(gr, pathToDir, flag=163)
+	arm1 <- countAllelesFromBam(gr, pathToDir, flag=83, verbose=FALSE)
+	arm2 <- countAllelesFromBam(gr, pathToDir, flag=163, verbose=FALSE)
 	arm <- arm1 + arm2
 
 	#plus strand
-	arp1 <- countAllelesFromBam(gr, pathToDir, flag=99)
-	arp2 <- countAllelesFromBam(gr, pathToDir, flag=147)
+	arp1 <- countAllelesFromBam(gr, pathToDir, flag=99, verbose=FALSE)
+	arp2 <- countAllelesFromBam(gr, pathToDir, flag=147, verbose=FALSE)
 	arp <- arp1 + arp2
 
 	#test equality
