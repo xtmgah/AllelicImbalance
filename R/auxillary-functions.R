@@ -535,7 +535,7 @@ realCigarPositionsList <- function(RleCigarList) {
 #' '-', or '*'.  This argument determines if \code{getAlleleCounts} will
 #' retrieve counts from all reads, or only from reads marked as '+', '-' or '*'
 #' (unknown), respectively.
-#' @param return.array 'list' or 'array'
+#' @param return.class 'list' or 'array'
 #' @param verbose Setting \code{verbose=TRUE} makes function more talkative
 #' @return \code{getAlleleCounts} returns a list of several data.frame objects,
 #' each storing the count data for one SNP.
@@ -565,7 +565,7 @@ realCigarPositionsList <- function(RleCigarList) {
 #' 
 #' @export getAlleleCounts
 getAlleleCounts <- function(BamList, GRvariants, strand = "*",
-						return.class = "array", verbose = TRUE) { 
+						return.class = "list", verbose = TRUE) { 
     
     
     if (!class(BamList) %in% c("GAlignments", "GAlignmentsList")) {
@@ -1972,21 +1972,26 @@ implodeList <- function(x) {
 #' counts the alleles in a bam file based on GRanges positions. 
 #' 
 #' 
-#' @param x list of variables
+#' @param gr GRanges that contains SNPs of interest
 #' @param pathToDir path to directory of bam files
-#' @param pathToFile path to a specific bam file
+#' @param flag specify one flag to use as filter, default is no filtering. 
+#' allowed flags are 99, 147, 83 and 163
+#' @param scanBamFlag set a custom flag to use as filter
+#' @param return.class type of class for the returned object
+#' @param verbose makes funciton more talkative
 #' @author Jesper R. Gadin
-#' @keywords allelecount
+#' @keywords allelecount counting
 #' @examples
 #'
 #' data(GRvariants)
 #' gr <- GRvariants
 #'
-#' pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
-#' countAllelesFromBam(gr, pathToDir)
+#' ##not run at the moment
+#' #pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
+#' #ar <- countAllelesFromBam(gr, pathToDir)
 #'  
 #' @export countAllelesFromBam
-countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, return.class="array", verbose=TRUE, ...) {
+countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, return.class="array", verbose=TRUE) {
 
 	bamDir <- normalizePath(pathToDir)
 	allFiles <- list.files(bamDir, full.names = TRUE)
@@ -2022,9 +2027,10 @@ countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, retu
 		}
 	}
 	#flags can be 99 147 83 or 163
-	if(!is.null(flag)){
-		if(!flag%in%c(99,147,83,163)){
-			stop("flag values can only be 99 147 83 or 163")
+	if(length(flag)==1 & is.null(scanBamFlag)){
+		if(! (flag%in%c(99,147,83,163))){
+			stop(paste("flag values can only be 99 147 83 or 163",
+					   "the input flag value was", flag,sep=" "))
 		}
 		
 		if(flag==99){
@@ -2100,9 +2106,12 @@ countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, retu
 #' counts the alleles in a bam file based on GRanges positions. 
 #' 
 #' 
-#' @param x list of variables
-#' @param pathToDir path to directory of bam files
-#' @param pathToFile path to a specific bam file
+#' @param gr GenomicRanges of SNPs to create ASEset for
+#' @param PE if paired end or not (default: TRUE)
+#' @param pathToDir Directory of bam files with index in same directory
+#' @param ... passed on to countAllelesFromBam function
+#' @param flagsMinusStrand flags that mark reads coming from minus strand
+#' @param flagsPlusStrand flags that mark reads coming from plus strand
 #' @author Jesper R. Gadin
 #' @keywords allelecount
 #' @examples
@@ -2110,21 +2119,29 @@ countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, retu
 #' data(GRvariants)
 #' gr <- GRvariants
 #'
-#' pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
-#' countAllelesFromBam(gr, pathToDir)
+#' ##no execution at the moment
+#' #pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
+#' #a <- ASEsetFromBam(gr, pathToDir)
 #'  
-#' @export countAllelesFromBam
-ASEsetFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, ...) {
+#' @export ASEsetFromBam
 
-	#minus strand
-	arm1 <- countAllelesFromBam(gr, pathToDir, flag=83)
-	arm2 <- countAllelesFromBam(gr, pathToDir, flag=163)
-	arm <- arm1 + arm2
+ASEsetFromBam <- function(gr, pathToDir,PE=TRUE, flagsMinusStrand=c(83,163), flagsPlusStrand=c(99,147), ...) {
 
-	#plus strand
-	arp1 <- countAllelesFromBam(gr, pathToDir, flag=99)
-	arp2 <- countAllelesFromBam(gr, pathToDir, flag=147)
-	arp <- arp1 + arp2
+	if(!PE){
+		stop("no support for SE atm")
+	}
+
+	if(PE==TRUE){
+		#minus strand
+		arm1 <- countAllelesFromBam(gr, pathToDir, flag=83)
+		arm2 <- countAllelesFromBam(gr, pathToDir, flag=163)
+		arm <- arm1 + arm2
+
+		#plus strand
+		arp1 <- countAllelesFromBam(gr, pathToDir, flag=99)
+		arp2 <- countAllelesFromBam(gr, pathToDir, flag=147)
+		arp <- arp1 + arp2
+	}
 	
 	#ASEsetFromArray
 	a <- ASEsetFromArray(rowData, countsPlus = arp, 

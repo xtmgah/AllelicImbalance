@@ -39,7 +39,9 @@ NULL
 #' genome(x) <- 'hg19'
 #' seqlevels(r) <- seqlevels(x)
 #' 
-#' GR <- GRanges(seqnames=seqlevels(x),ranges=IRanges(start=min(start(x)),end=max(end(x))),strand='+', genome=genome(x))
+#' GR <- GRanges(seqnames=seqlevels(x),
+#'			ranges=IRanges(start=min(start(x)),end=max(end(x))),
+#'			strand='+', genome=genome(x))
 #' 
 #' deTrack <- ASEDAnnotationTrack(x, GR=GR, type='fraction',strand='+')
 #' covTracks <- CoverageDataTrack(x,BamList=r,strand='+') 

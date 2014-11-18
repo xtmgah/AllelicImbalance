@@ -45,6 +45,7 @@
 #' @param cex.ylab set ylab label size
 #' @param cex.xlab set xlab label size
 #' @param cex.legend set legend label size
+#' @param legend.interspace set legend space between fills and text
 #' @param add \code{boolean} indicates if a new device should be started
 #' @param lowerLeftCorner integer that is only useful when \code{add}=TRUE
 #' @param size Used internally by locationplot. Rescales each small barplot
@@ -697,7 +698,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                   
 				  legendBarplot(lowerLeftCorner, size, rownames=textOver, colnames=legend.colnames,
 						   boxsize=legend.fill.size, boxspace=legend.interspace, fgCol, bgCol,
-						   ylegendPos=ylegendPos, xlegendPos=xlegendPos)
+						   ylegendPos=1, xlegendPos=0.96, cex=cex.legend)
 
                   
                 }
@@ -1037,9 +1038,9 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 					#remove the total count for that nucleotide
 					textOver <- unlist(lapply(strsplit(textOver," "),function(x){x[1]}))
 
-					legendBarplot(lowerLeftCorner, size, rownames=textOver, colnames=legend.colnames,
-						   boxsize=legend.fill.size, boxspace=legend.interspace, fgCol, bgCol)
-
+					  legendBarplot(lowerLeftCorner, size, rownames=textOver, colnames=legend.colnames,
+						   boxsize=legend.fill.size, boxspace=legend.interspace, fgCol, bgCol,
+						   ylegendPos=1, xlegendPos=0.96, cex=cex.legend)
                     }
                   }
                  # # minus strand

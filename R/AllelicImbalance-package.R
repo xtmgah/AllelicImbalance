@@ -83,6 +83,9 @@
 #' @importFrom Rsamtools FaFile
 #' @importFrom Rsamtools scanFa
 #' @importFrom Rsamtools scanFaIndex
+#' @importFrom Rsamtools applyPileups
+#' @importFrom Rsamtools ApplyPileupsParam
+#' @importFrom Rsamtools PileupFiles
 #' 
 #' @importClassesFrom GenomicAlignments GAlignments
 #' @importClassesFrom GenomicAlignments GAlignmentPairs

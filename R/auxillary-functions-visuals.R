@@ -5,16 +5,17 @@
 #' the function is preferably called from within the AllelicImbalance barplot method.
 #' 
 #' 
-#' @param lowerLeftCorner
-#' @param size
-#' @param rownames
-#' @param colnames
-#' @param boxsize
-#' @param boxspace
-#' @param fgCol
-#' @param bgCol
-#' @param yLegendPos
-#' @param xLegendPos
+#' @param lowerLeftCorner position of the plot to add legend to (default c(0,0))
+#' @param size scale the plot, default is 1
+#' @param rownames rownames in legend
+#' @param colnames colnames in legend
+#' @param boxsize size of each box fill
+#' @param boxspace space inbetween the box fill
+#' @param fgCol color for allele1
+#' @param bgCol color for allele2
+#' @param ylegendPos placement of the legend within the plot for y
+#' @param xlegendPos placement of the legend within the plot for x
+#' @param cex size of legend text
 #' @author Jesper R. Gadin
 #' @keywords legend barplot
 #' @examples
@@ -22,12 +23,12 @@
 #' #code placeholders
 #' #< create a barplot with legend >
 #' #< add legend >
-#'
 #'  
 #' @export legendBarplot
 
 legendBarplot <- function(lowerLeftCorner, size, rownames, colnames, boxsize=1, boxspace=1,fgCol,bgCol,
-						  ylegendPos=1, xlegendPos=0.96){
+						  ylegendPos=1, xlegendPos=0.96, cex=1){
+	cex.legend <- cex
 
 	#first fill/box
 	x = lowerLeftCorner[1] + size[1] * seq(xlegendPos, (xlegendPos - 

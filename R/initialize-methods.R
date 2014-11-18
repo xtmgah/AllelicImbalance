@@ -28,6 +28,9 @@ NULL
 #' counts as columns and sample counts as rows
 #' @param countListUnknown A \code{list} where each entry is a matrix with
 #' allele counts as columns and sample counts as rows
+#' @param countsPlus An array containing the countinformation
+#' @param countsMinus An array containing the countinformation
+#' @param countsUnknown An array containing the countinformation
 #' @param colData A \code{DataFrame} object containing sample specific data
 #' @param mapBiasExpMean A 3D \code{array} where the SNPs are in the 1st
 #' dimension, samples in the 2nd dimension and variants in the 3rd dimension.
@@ -86,12 +89,11 @@ NULL
 #' a <- ASEsetFromCountList(rowData, countListPlus=countListPlus, 
 #' countListMinus=countListMinus, colData=colData)
 #' 
-#' @export ASEsetFromCountList
-#' @export ASEsetFromArrays
 NULL
 
 
 #' @rdname initialize-ASEset
+#' @export 
 ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus = NULL, 
     countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, 
     verbose = FALSE, ...) {
@@ -280,6 +282,7 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 } 
 
 #' @rdname initialize-ASEset
+#' @export 
 ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL, 
     countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, 
     verbose = FALSE, ...) {
@@ -305,70 +308,6 @@ ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL,
     
     countLists <- c("countsPlus", "countsMinus", "countsUnknown")[(c( 
         !is.null(countsPlus), !is.null(countsMinus), !is.null(countsUnknown)))]
-    
-    ## check that all lengths are the same in all lists
-    #l <- unlist(lapply(countLists, function(x) {
-    #    length(get(x))
-    #}))
-    #if (sum(!(l == l[1])) > 0) {
-    #    stop("one or more list contains more or less list elements than the others")
-    #}
-    
-    ## check that the number of columns in each dataframe are the same
-    #l <- unlist(lapply(countLists, function(x) {
-    #    lapply(get(x), ncol)
-    #}))
-    #m <- matrix(unlist(l), ncol = length(l))
-    #if (sum(!(m == m[1])) > 0) {
-    #    stop("one or more list contains more or less columns than the others")
-    #}
-    #
-    ## check that the number of rows in each dataframe are the same
-    #l <- unlist(lapply(countLists, function(x) {
-    #    lapply(get(x), nrow)
-    #}))
-    #m <- matrix(unlist(l), ncol = length(l))
-    #if (sum(!(m == m[1])) > 0) {
-    #    stop("one or more list contains more or less rows than the others")
-    #}
-    
-    # check that all colnames in all dataframes are the same in same order
-    #cMatrix <- matrix(NA, nrow = length(unlist(unique(lapply(countLists[1], colnames)))), 
-    #    ncol = length(countLists))
-    #for (i in 1:length(countLists)) {
-    #    # within list comparision
-    #    countListName <- countLists[i]
-    #    countList <- get(countListName)
-    #    l <- lapply(countList, colnames)
-    #    m <- matrix(unlist(l), ncol = length(l))
-    #    if (sum(!(m == m[, 1])) > 0) {
-    #        stop(paste("the names or order of names are not the same in all data frames in list", 
-    #            countListName))
-    #    }
-    #    cMatrix[, i] <- m[, 1]
-    #}
-    #if (sum(!(cMatrix == cMatrix[, 1])) > 0) {
-    #    stop(paste("the names or order of names are not the same between all data frame lists"))
-    #}
-    
-    # check that all rownames in all dataframes are the same in same order
-    #cMatrix <- matrix(NA, nrow = length(unlist(unique(lapply(countLists[1], rownames)))), 
-    #    ncol = length(countLists))
-    #for (i in 1:length(countLists)) {
-    #    # within list comparision
-    #    countListName <- countLists[i]
-    #    countList <- get(countListName)
-    #    l <- lapply(countList, rownames)
-    #    m <- matrix(unlist(l), ncol = length(l))
-    #    if (sum(!(m == m[, 1])) > 0) {
-    #        stop(paste("the names or order of names are not the same in all data frames in list", 
-    #            countListName))
-    #    }
-    #    cMatrix[, i] <- m[, 1]
-    #}
-    #if (sum(!(cMatrix == cMatrix[, 1])) > 0) {
-    #    stop(paste("the names or order of names are not the same between all data frame lists"))
-    #}
     
     # check mapBiasExpMean
     if (!(is.null(mapBiasExpMean))) {
@@ -414,21 +353,11 @@ ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL,
     }
     # minus
     if (!is.null(countsMinus)) {
-		##empty array that handles only four nucleotides 
-        #ar2 <- array(NA, c(snps, ind, 4))  
-        #for (i in 1:snps) {
-        #    ar2[i, , ] <- countsMinus[[i]]
-        #}
         assays[["countsMinus"]] <- countsMinus
         
     }
     # unknown
     if (!is.null(countsUnknown)) {
-		##empty array that handles only four nucleotides 
-        #ar3 <- array(NA, c(snps, ind, 4))  
-        #for (i in 1:snps) {
-        #    ar3[i, , ] <- countsUnknown[[i]]
-        #}
         assays[["countsUnknown"]] <- countsUnknown
         
     }else if((!is.null(countsMinus)) & (!is.null(countsPlus))){
