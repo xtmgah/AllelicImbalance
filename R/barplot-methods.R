@@ -1281,6 +1281,9 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     if (!exists("mainvec", envir = e, inherits = FALSE)) {
 		e$mainvec <- rep("",nrow(x))
 	}
+    if (!exists("cex.mainvec", envir = e, inherits = FALSE)) {
+		e$cex.mainvec <- 1
+	}
     if (!exists("ylab", envir = e, inherits = FALSE)) {
         e$ylab <- ""
     }
@@ -1289,6 +1292,9 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     }
     if (!exists("middleLine", envir = e, inherits = FALSE)) {
         e$middleLine <- TRUE
+    }
+    if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
+        e$deAnnoPlot <- FALSE
     }
 
 	for (i in 1:nrow(x)) {
@@ -1302,7 +1308,9 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 				ylab=e$ylab,
 				xlab=e$xlab,
 				mainvec=e$mainvec,
-				middleLine=e$middleLine)
+				middleLine=e$middleLine,
+				deAnnoPlot=e$deAnnoPlot,
+				cex.mainvec=e$cex.mainvec)
 		} else if (type == "count") {
 			b <- barplotLatticeCounts(
 				identifier = name, 

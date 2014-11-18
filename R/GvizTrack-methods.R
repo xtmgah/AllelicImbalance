@@ -126,6 +126,10 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 		e$mainvec <- rep("",nrow(e$x))
 	}
 
+    if (!exists("cex.mainvec", envir = e, inherits = FALSE)) {
+		e$cex.mainvec <- 1
+	}
+
     if (!exists("ylab", envir = e, inherits = FALSE)) {
         e$ylab <- ""
     }
@@ -168,6 +172,7 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowDa
 		detailsFunArgs = c(ylab=e$ylab,
 						   xlab=e$xlab,
 						   deAnnoPlot = e$deAnnoPlot,
+						   cex.mainvec = e$cex.mainvec,
 						   mainvec=list(list(e$mainvec)),
 						   type=type, 
 						   x=x, 

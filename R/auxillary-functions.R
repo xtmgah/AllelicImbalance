@@ -1547,6 +1547,9 @@ barplotLatticeFraction <- function(identifier, ...) {
 	if(class(e$mainvec)=="list"){
 		e$mainvec <- unlist(e$mainvec)
 	}
+    if (!exists("cex.mainvec", envir = e, inherits = FALSE)) {
+		e$cex.mainvec <- 1
+	}
     if (!exists("main", envir = e, inherits = FALSE)) {
 		e$main <- e$mainvec[e$ids %in% identifier]
 	}
@@ -1579,8 +1582,8 @@ barplotLatticeFraction <- function(identifier, ...) {
     for (i in 1:length(a.f)) {
         sample <- c(sample, rownames(afraction)[i], rownames(afraction)[i])
     }
-    df <- data.frame(values = values, sample = sample, alleles = rep(a.r, length(a.f))
-)
+    df <- data.frame(values = values, sample = sample, alleles = rep(a.r, length(a.f)))
+
     
     TFna <- is.na(df$values)
     df$values[TFna] <- 0  # 0.5 + 0.5 -> 1
@@ -1599,42 +1602,45 @@ barplotLatticeFraction <- function(identifier, ...) {
     parset <- list()
     scales = list(rot = c(90, 0))
     
-    #if (!exists("amainVec", envir = e, inherits = FALSE)) {
-    #   e$amainVec <- rownames(x[identifier,])
-    #}
-	    if (e$deAnnoPlot) {
-        parset <- list(
-					   layout.widths = list(
-							left.padding = 0,
-							axis.left = 0,
-							ylab.axis.padding = 0, 
-							right.padding = 0, 
-							axis.right = 0
-							),
-					   layout.heights = list(
-							top.padding = 0.1,
-							between = 0.1,
-							xlab.top= 0.1,
-							axis.top = 0,
-							main=1.1,
-							main.key.padding=1,
-							axis.xlab.padding = 1, 
-							bottom.padding = 1, 
-							axis.bottom = 0.3
-							)
-					   )
-        
-        scales = list(y = list(at = NULL, labels = NULL), rot = c(90, 0))
-        
-    }
+	if (e$deAnnoPlot) {
+		parset <- list(
+				   layout.widths = list(
+						left.padding = 0,
+						axis.left = 0,
+						ylab.axis.padding = 0, 
+						right.padding = 0, 
+						axis.right = 0
+						),
+				   layout.heights = list(
+						top.padding = 0.1,
+						between = 0.1,
+						xlab.top= 0.1,
+						axis.top = 0,
+						main=1.1,
+						main.key.padding=1,
+						axis.xlab.padding = 1, 
+						bottom.padding = 1, 
+						axis.bottom = 0.3
+						)
+				   )
+	
+		scales = list(y = list(at = NULL, labels = NULL),
+					  x = list(labels = rep("",ncol(e$x)))
+					  )
+					  #, rot = c(90, 0))
+	}
     
 	if(!e$middleLine) {
 		b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
-		    stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
+		    stack = TRUE, scales = scales, 
+			main = list(label=e$main, cex=e$cex.mainvec), 
+			ylab = e$ylab, xlab = e$xlab, 
 		    par.settings = parset)
 	}else if (e$middleLine) {
 		b <- barchart(values ~ sample, group = alleles, data = df, col = my_cols, origin = 0, 
-			stack = TRUE, scales = scales, main = e$main, ylab = e$ylab, xlab = e$xlab, 
+			stack = TRUE, scales = scales, 
+			main = list(label=e$main, cex=e$cex.mainvec), 
+			ylab = e$ylab, xlab = e$xlab, 
 			par.settings = parset, panel=function(x, y, ...) {
 				 panel.barchart(x, y, ...)
 				 panel.abline(h=0.5, lty=1)

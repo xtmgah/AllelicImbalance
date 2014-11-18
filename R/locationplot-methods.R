@@ -347,6 +347,8 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' packageh. It is obviously important to make sure that the genome build used
 #' is set correctly, e.g. 'hg19'.
 #' 
+#' sizes has to be of the same length as the number of tracks used.
+#' 
 #' @name ASEset-glocationplot
 #' @aliases ASEset-glocationplot glocationplot glocationplot,ASEset-method
 #' @docType methods
@@ -358,8 +360,9 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' @param GenomeAxisTrack include an genomic axis track
 #' @param add add to existing plot
 #' @param TxDb a TxDb object which provides annotation
+#' @param sizes vector with the sum 1. Describes the size of the tracks 
 #' @param trackNameDeAn  trackname for deAnnotation track
-#' @param verbose Makes function more talkative
+#' @param verbose if set to TRUE it makes function more talkative
 #' @param ... arguments passed on to barplot function
 #' @author Jesper R. Gadin
 #' @seealso \itemize{ \item The \code{\link{ASEset}} class which the
@@ -379,13 +382,13 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' @exportMethod glocationplot
 setGeneric("glocationplot", function(x, type = "fraction", strand = "*", 
     BamGAL = NULL, GenomeAxisTrack = FALSE, trackNameDeAn = paste("deTrack", type), 
-    TxDb=NULL, add = FALSE, verbose = FALSE, ...) {
+    TxDb=NULL, sizes=NULL, add = FALSE, verbose = FALSE, ...) {
     standardGeneric("glocationplot")
 })
 
 setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction", 
     strand = "*", BamGAL = NULL, GenomeAxisTrack = FALSE, trackNameDeAn = paste("deTrack", 
-        type), TxDb=NULL, add = FALSE, verbose = FALSE, ...) {
+        type), TxDb=NULL, sizes=NULL, add = FALSE, verbose = FALSE, ...) {
    
 	#tmp
 	#if(!is.null(TxDb)){stop("the functionality with TxDb is not yet ready")}
@@ -435,6 +438,9 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
     if (!exists("mainvec", envir = e, inherits = FALSE)) {
 		e$mainvec <- rep("",nrow(e$x))
 	}
+    if (!exists("cex.mainvec", envir = e, inherits = FALSE)) {
+		e$cex.mainvec <- 1
+	}
     if (!exists("ylab", envir = e, inherits = FALSE)) {
         e$ylab <- ""
     }
@@ -452,6 +458,7 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
     deTrack <- ASEDAnnotationTrack(x, GR = GR, type, strand, 
 								   trackName = trackNameDeAn,
 								   mainvec=e$mainvec,
+								   cex.mainvec=e$cex.mainvec,
 								   ylab=e$ylab,
 								   xlab=e$xlab,
 								   middleLine=e$middleLine
@@ -505,7 +512,13 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 
 	#set sizes
 	parts <- 1/length(lst) #need mean coverage
-	sizes <- c(rep(parts, length(lst)))
+	if(is.null(sizes)) {
+		sizes <- c(rep(parts, length(lst)))
+	}else{
+		if(!length(sizes)==length(lst)){
+			stop("sizes vector has to be same length as the number of tracks used")
+		}
+	}
 	#sizes <- 1
 	# plot
 	plotTracks(lst, from = start, to = end, sizes = sizes, col.line = NULL, showId = FALSE, 
