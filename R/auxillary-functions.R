@@ -2165,11 +2165,11 @@ ASEsetFromBam <- function(gr, pathToDir,PE=TRUE, flagsMinusStrand=c(83,163), fla
 	
 	#ASEsetFromArray
 	if(!strandUnknown){
-		a <- ASEsetFromArrays(rowData, countsPlus = arp, 
+		a <- ASEsetFromArrays(gr, countsPlus = arp, 
 			countsMinus = arm)
 
 	}else{	
-		a <- ASEsetFromArrays(rowData, countsUnknown = arp+arm) 
+		a <- ASEsetFromArrays(gr, countsUnknown = arp+arm) 
 	}
 	a
 }
