@@ -449,16 +449,44 @@ RBias <- function(
 	new("ReferenceBias", sset, strands = c("*","+","-"))
 }
 
+#' Initialize GlobalAnalysis
+#' 
+#' Functions to construct GlobalAnalysis objects
+#' 
+#' produces a class container for a global analysis
+#' 
+#' @name initialize-GlobalAnalysis
+#' @rdname initialize-GlobalAnalysis
+#' @aliases initialize-GlobalAnalysis gba
+#' @param x \code{ASEset} 
+#' @param ... internal arguments
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords global
+#' @examples
+#'
+#' data(ASEset)
+#' a <- ASEset
+#' gba <- gba(a)
+#' 
+NULL
 
-##' @rdname initialize-ReferenceBias
-#refBias <- function(x){
-#
-#		if(!class(x)=="ASEset"){
-#			stop("x must be of class ASEset")
-#		}
-#
-#        # create object
-#        
-#}
-#
+
+#' @rdname initialize-GlobalAnalysis
+#' @export 
+#setMethod("ReferenceBias","ReferenceBias", function(
+gba <- function(
+	x = "ASEset",
+	...
+	){
+	object <- new("GlobalAnalysis", data = list())
+
+		if(!class(x)=="ASEset"){
+			stop("x must be of class ASEset")
+		}
+
+	
+	#Return object
+	object
+}
+
 
