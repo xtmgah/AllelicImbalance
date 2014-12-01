@@ -449,6 +449,61 @@ RBias <- function(
 	new("ReferenceBias", sset, strands = c("*","+","-"))
 }
 
+#' Initialize DetectedAI
+#' 
+#' Functions to construct DetectedAI objects
+#' 
+#' produces a class container for reference bias calculations
+#' 
+#' @name initialize-DetectedAI
+#' @rdname initialize-DetectedAI
+#' @aliases initialize-DetectedAI RBias
+#' @param x \code{ASEset} 
+#' @param ... internal arguments
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords bias mapbias refBias
+#' @examples
+#'
+#' data(ASEset)
+#' a <- ASEset
+#' dai <- detectAI(a)
+#' 
+NULL
+
+#' @rdname initialize-DetectedAI
+#' @export 
+#setMethod("DetectedAI","DetectedAI", function(
+DetectedAIFromArray <- function(
+	x = "ASEset",
+	strand = "*",
+	reference.frequency=NULL,
+	threshold.frequency=NULL,
+	threshold.count.sample=NULL,
+	threshold.delta.frequency=NULL,
+	threshold.pvalue=NULL,
+	...){
+
+	sset <- SummarizedExperiment(
+				assays = SimpleList(
+					reference.frequency=reference.frequency,
+					threshold.frequency=threshold.frequency,
+					threshold.count.sample=threshold.count.sample,
+					threshold.delta.frequency=threshold.delta.frequency,
+					threshold.pvalue=threshold.pvalue
+					), 
+				rowData = rowData(x), 
+				colData = colData(x)
+			) 
+
+	rownames(sset) <- rownames(x)
+
+	#valid
+	#validObject(.Object)
+
+	#Return object
+	new("DetectedAI", sset, strand = strand)
+}
+
 #' Initialize GlobalAnalysis
 #' 
 #' Functions to construct GlobalAnalysis objects
