@@ -12,6 +12,7 @@ NULL
 #' @aliases DetectedAI-class DetectedAI DetectedAI-method
 #' @docType class
 #' @param x ASEset object or list of ASEsets
+#' @param return.class type of class returned eg. "list or ""array".
 #' @param ... pass arguments to internal functions
 #' @return An object of class DetectedAI containing logics for thresholds of interest.
 #'

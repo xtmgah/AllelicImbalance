@@ -314,8 +314,8 @@ setMethod("randomRef", signature(x = "ASEset"), function(x, inferGenotypes=FALSE
 #' @examples
 #' 
 #' #load example data
-#' data(ASEset.sim)
-#' a <- ASEset.sim
+#' data(ASEset)
+#' a <- ASEset
 #'
 #' mat <- mapBiasRef(a) 
 #'

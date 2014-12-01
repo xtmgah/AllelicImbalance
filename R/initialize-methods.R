@@ -457,8 +457,15 @@ RBias <- function(
 #' 
 #' @name initialize-DetectedAI
 #' @rdname initialize-DetectedAI
-#' @aliases initialize-DetectedAI RBias
+#' @aliases initialize-DetectedAI 
 #' @param x \code{ASEset} 
+#' @param strand set strand to detectAI over "+","-","*"
+#' @param reference.frequency frequencies of reference alleles based allele counts
+#' @param threshold.frequency logical array for frequency thresholds
+#' @param threshold.count.sample logical array for per sample allele count thresholds
+#' @param threshold.delta.frequency logical array for delta frequency thresholds.
+#' Similar to fold-change, but is the difference in frequency from equal expression.
+#' @param threshold.pvalue logical array for pvalue thresholds (max 1, min 0)
 #' @param ... internal arguments
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords bias mapbias refBias

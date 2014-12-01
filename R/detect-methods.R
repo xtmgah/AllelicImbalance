@@ -36,6 +36,10 @@
 #' @param min.delta.frequency minimum of frequency difference from 0.5 (or mapbias adjusted value)
 #' @param max.pvalue pvalue over this number will be filtered out
 #' @param function.test At the moment the only available option is 'binomial.test'
+#' @param inferGenotype infer genotypes based on count data in ASEset object
+#' @param random.ref set the reference as random if you dont know. Affects interpretation of results.
+#' @param verbose makes function more talkative
+#' @param gc use garbage collection when possible to save space
 #' @param ... internal arguments 
 #' @author Jesper R. Gadin
 #' @keywords detection

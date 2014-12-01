@@ -4,31 +4,61 @@
 \alias{DetectedAI}
 \alias{DetectedAI-class}
 \alias{DetectedAI-method}
+\alias{referenceFrequency}
+\alias{referenceFrequency,DetectedAI-method}
+\alias{thresholdCountSample}
+\alias{thresholdCountSample,DetectedAI-method}
+\alias{thresholdDeltaFrequency}
+\alias{thresholdDeltaFrequency,DetectedAI-method}
+\alias{thresholdFrequency}
+\alias{thresholdFrequency,DetectedAI-method}
+\alias{thresholdPvalue}
+\alias{thresholdPvalue,DetectedAI-method}
 \title{DetectedAI class}
+\usage{
+referenceFrequency(x, ...)
+
+\S4method{referenceFrequency}{DetectedAI}(x, return.class = "array")
+
+thresholdFrequency(x, ...)
+
+\S4method{thresholdFrequency}{DetectedAI}(x, return.class = "array")
+
+thresholdCountSample(x, ...)
+
+\S4method{thresholdCountSample}{DetectedAI}(x, return.class = "array")
+
+thresholdDeltaFrequency(x, ...)
+
+\S4method{thresholdDeltaFrequency}{DetectedAI}(x, return.class = "array")
+
+thresholdPvalue(x, ...)
+
+\S4method{thresholdPvalue}{DetectedAI}(x, return.class = "array")
+}
 \arguments{
 \item{x}{ASEset object or list of ASEsets}
 
-\item{TxDb}{A \code{transcriptDb} object}
-
 \item{...}{pass arguments to internal functions}
+
+\item{return.class}{type of class returned eg. "list or ""array".}
 }
 \value{
-An object of class DetectedAI containing all data to make report.
+An object of class DetectedAI containing logics for thresholds of interest.
 }
 \description{
-Object that holds results from a global AI analysis including reference bias
-estimations and AI detection.
+Object that holds results from AI detection.
 }
 \details{
-The DetectedAI-class contains summaries needed to create an AI-report
+The DetectedAI-class contains
 }
 \examples{
 data(ASEset)
 a <- ASEset
-gba <- gba(a)
+dai <- detectAI(a)
 
 #summary(gba)
-#write.tables(gba)
+#write.tables(dai)
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen
