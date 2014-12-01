@@ -3,19 +3,17 @@ NULL
 
 #' DetectedAI class
 #' 
-#' Object that holds results from a global AI analysis including reference bias
-#' estimations and AI detection.
+#' Object that holds results from AI detection.
 #'
-#' The DetectedAI-class contains summaries needed to create an AI-report
+#' The DetectedAI-class contains 
 #'
 #' @name DetectedAI-class
 #' @rdname DetectedAI-class
 #' @aliases DetectedAI-class DetectedAI DetectedAI-method
 #' @docType class
 #' @param x ASEset object or list of ASEsets
-#' @param TxDb A \code{transcriptDb} object
 #' @param ... pass arguments to internal functions
-#' @return An object of class DetectedAI containing all data to make report.
+#' @return An object of class DetectedAI containing logics for thresholds of interest.
 #'
 #'
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -24,10 +22,10 @@ NULL
 #'
 #' data(ASEset)
 #' a <- ASEset
-#' gba <- gba(a)
+#' dai <- detectAI(a)
 #' 
 #' #summary(gba)
-#' #write.tables(gba)
+#' #write.tables(dai)
 #'
 #' @exportClass DetectedAI
 NULL
@@ -38,4 +36,84 @@ setClass("DetectedAI", contains = "SummarizedExperiment",
 	representation(
 		strand = "character"))
 
+
+#' @rdname DetectedAI-class
+#' @export 
+setGeneric("referenceFrequency", function(x, ...) {
+    standardGeneric("referenceFrequency")
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setMethod("referenceFrequency", signature(x = "DetectedAI"), function(x,
+	return.class="array") {
+
+	if(return.class=="array"){
+		return(assays(x)[["reference.frequency"]])
+	}
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setGeneric("thresholdFrequency", function(x, ...) {
+    standardGeneric("thresholdFrequency")
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setMethod("thresholdFrequency", signature(x = "DetectedAI"), function(x,
+	return.class="array") {
+
+	if(return.class=="array"){
+		return(assays(x)[["threshold.frequency"]])
+	}
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setGeneric("thresholdCountSample", function(x, ...) {
+    standardGeneric("thresholdCountSample")
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setMethod("thresholdCountSample", signature(x = "DetectedAI"), function(x,
+	return.class="array") {
+
+	if(return.class=="array"){
+		return(assays(x)[["threshold.count.sample"]])
+	}
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setGeneric("thresholdDeltaFrequency", function(x, ...) {
+    standardGeneric("thresholdDeltaFrequency")
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setMethod("thresholdDeltaFrequency", signature(x = "DetectedAI"), function(x,
+	return.class="array") {
+
+	if(return.class=="array"){
+		return(assays(x)[["threshold.delta.frequency"]])
+	}
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setGeneric("thresholdPvalue", function(x, ...) {
+    standardGeneric("thresholdPvalue")
+})
+
+#' @rdname DetectedAI-class
+#' @export 
+setMethod("thresholdPvalue", signature(x = "DetectedAI"), function(x,
+	return.class="array") {
+
+	if(return.class=="array"){
+		return(assays(x)[["threshold.pvalue"]])
+	}
+})
 

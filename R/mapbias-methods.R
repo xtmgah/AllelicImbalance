@@ -297,4 +297,59 @@ setMethod("randomRef", signature(x = "ASEset"), function(x, inferGenotypes=FALSE
 
 })
 
+#' mapBias for reference allele 
+#' 
+#' Create a matrix of bias for the reference allele
+#' 
+#' select the expected frequency for the reference allele
+#' 
+#' @name mapBiasRef
+#' @rdname mapBiasRef
+#' @aliases mapBiasRef,ASEset-method
+#' @docType methods
+#' @param x \code{ASEset} object
+#' @param ... internal arguments
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords mapbias
+#' @examples
+#' 
+#' #load example data
+#' data(ASEset.sim)
+#' a <- ASEset.sim
+#'
+#' mat <- mapBiasRef(a) 
+#'
+NULL
+
+#' @rdname mapBiasRef
+#' @export
+setGeneric("mapBiasRef", function(x,... ){
+    standardGeneric("mapBiasRef")
+})
+
+#' @rdname mapBiasRef
+#' @export
+setMethod("mapBiasRef", signature(x = "ASEset"), function(x){
+
+	#check presence of mapBias array
+    if (!("mapBias" %in% names(assays(x)))) {
+		stop("column name 'ref' in mcols(x) is required")
+		stop(paste("genotype matrix is not present as assay in",
+				   " ASEset object, see '?inferGenotypes' ",
+				  )) 
+	}
+
+	#check presence of reference allele
+	if(!("ref" %in% colnames(mcols(x)))){
+		stop("column name 'ref' in mcols(x) is required")
+	}
+
+	matrix(aperm(mapBias(x, return.class="array"),c(3,2,1))[aperm(array(matrix(
+		x@variants, ncol=length(x@variants),
+		 nrow=nrow(x), byrow=TRUE) == mcols(x)[,"ref"]
+	 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
+	],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
+
+})
+
 

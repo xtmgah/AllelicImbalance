@@ -95,7 +95,7 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 	acounts <- alleleCounts(x, strand=strand, return.class="array")
 	acounts[array(!hetFilt(x), dim=c(nrow(x), ncol(x), 4))] <- 0
 	allele.count.tot <- apply(acounts, c(1,2), sum)
-	t.c.s  <- array(allele.count.tot,dim=c(nrow(x),ncol(x),length(threshold.count.sample))) < 
+	t.c.s  <- !array(allele.count.tot,dim=c(nrow(x),ncol(x),length(threshold.count.sample))) < 
 					aperm(array(threshold.count.sample,
 						dim=c(length(threshold.count.sample),nrow(x),ncol(x) )),
 					c(2,3,1))
@@ -110,19 +110,13 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 	dimnames(thr.freq.ret) <- list(rownames(fr),colnames(fr),paste(threshold.frequency))
 
 	#delta freq array (move to mapbias methods)
-	biasmatRef <- matrix(aperm(mapBias(x, return.class="array"),c(3,2,1))[aperm(array(matrix(
-		x@variants, ncol=length(x@variants),
-		 nrow=nrow(x), byrow=TRUE) == mcols(x)[,"ref"]
-	 ,dim=c(nrow(x), length(x@variants), ncol=ncol(x))),c(2,3,1))
-	],ncol=ncol(x),nrow=nrow(x), byrow=TRUE, dimnames=list(rownames(x),colnames(x)))
+	biasmatRef <- mapBiasRef(x)
 
 	fr2 <- fr
 	fr2[is.na(fr2)] <- biasmatRef[is.na(fr2)] 
 
 	#make fr2 and biasmatRef to array dim 3
 	newDims <- length(min.delta.frequency)
-	#fr5 <- array(fr2,dim=c(nrow(x),ncol(x),newDims))
-	#biasmatRef2 <- array(biasmatRef,dim=c(nrow(x),ncol(x),newDims))
 
 	#to keep1 (fullfills cond min.delta.freq)
 	if(any(fr2<biasmatRef)){
