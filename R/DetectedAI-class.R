@@ -36,7 +36,6 @@ setClass("DetectedAI", contains = "SummarizedExperiment",
 	representation(
 		strand = "character"))
 
-
 #' @rdname DetectedAI-class
 #' @export 
 setGeneric("referenceFrequency", function(x, ...) {

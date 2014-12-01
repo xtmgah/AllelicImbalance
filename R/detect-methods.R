@@ -21,7 +21,7 @@
 #' inferGenotype(), set TRUE it should be used with as much samples as possible. If you split up the
 #' samples and run detectAI() on each sample separately, please make sure you have inferred 
 #' the genotypes in before hand, alternatively used the genotypes detected by another variantCaller
-#' or chip-genotypes.
+#' or chip-genotypes. Use ONLY biallelic genotypes.
 #'
 #' @name detectAI
 #' @rdname detectAI
@@ -32,14 +32,13 @@
 #' @param strand strand to infer from
 #' @param threshold.count.sample least amount of counts to try to infer allele
 #' @param threshold.frequency least fraction to classify (see details)
-#' @param return.type 'ref' ,'alt' or default: 'all'
 #' @param return.class class to return (atm only class 'logical')
 #' @param min.delta.frequency minimum of frequency difference from 0.5 (or mapbias adjusted value)
 #' @param max.pvalue pvalue over this number will be filtered out
 #' @param function.test At the moment the only available option is 'binomial.test'
 #' @param ... internal arguments 
 #' @author Jesper R. Gadin
-#' @keywords infer
+#' @keywords detection
 #' @examples
 #' 
 #' #load example data
@@ -58,13 +57,14 @@ setGeneric("detectAI", function(x, ...){
 #' @rdname detectAI
 #' @export
 setMethod("detectAI", signature(x = "ASEset"), function(x, 
-	return.class = "DetectedAI", return.type="all", strand = "*",
+	return.class = "DetectedAI", strand = "*",
 	threshold.frequency=0, threshold.count.sample=1,
 	min.delta.frequency=0, max.pvalue=0.05,
 	inferGenotype=FALSE,
 	random.ref=FALSE,
 	function.test="binom.test",
-	gc=TRUE) {
+	verbose=TRUE,
+	gc=FALSE) {
 
 	if(inferGenotype){
 		genotype(x) <- inferGenotypes(x,threshold.frequency = 0.05, return.allele.allowed ="bi")
@@ -84,14 +84,13 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 		mcols(x)[,"ref"] <- randomRef(x)
 	}
 
-	#main return class should be DetectedAI, but should also be able to return arrays or lists
-	#return.type may be logical or .. 
-
-	#make refFreq array (third dim has length 1 and softest condition)
+	#1) make refFreq array (third dim has length 1 and softest condition)
+	if(verbose){cat("calculating reference fractions\n")}
 	fr <- refFraction(x, strand=strand,
 			  threshold.count.sample= 1)[,,1]
 
-	#make t.c.s array
+	#2) make t.c.s array
+	if(verbose){cat("checking count thresholds\n")}
 	acounts <- alleleCounts(x, strand=strand, return.class="array")
 	acounts[array(!hetFilt(x), dim=c(nrow(x), ncol(x), 4))] <- 0
 	allele.count.tot <- apply(acounts, c(1,2), sum)
@@ -101,7 +100,14 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 					c(2,3,1))
 	dimnames(t.c.s) <- list(rownames(fr),colnames(fr),paste(threshold.count.sample))
 
-	#make thr.req array (if TRUE it fullfills the condition)
+	if(gc){
+		if(verbose){cat("removing and garbage collect temporary variables\n")}
+		rm(acounts,allele.count.tot)
+		gc()
+	}
+
+	#3) make thr.req array (if TRUE it fullfills the condition)
+	if(verbose){cat("checking frequency thresholds\n")}
 	newDims <- length(threshold.frequency)
 	thr.fr.freq <- array(fr,dim=c(nrow(x),ncol(x),newDims))
 	thr.freq <- aperm(array(threshold.frequency, dim=c(newDims,nrow(x),ncol(x))),c(2,3,1))
@@ -109,7 +115,14 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 	thr.freq.ret <- !(thr.fr.freq < thr.freq | thr.fr.freq > (1-thr.freq))
 	dimnames(thr.freq.ret) <- list(rownames(fr),colnames(fr),paste(threshold.frequency))
 
-	#delta freq array (move to mapbias methods)
+	if(gc){
+		if(verbose){cat("removing and garbage collect temporary variables\n")}
+		rm(newDims, thr.fr.freq, thr.freq)
+		gc()
+	}
+
+	#4) delta freq array 
+	if(verbose){cat("checking delta frequency thresholds\n")}
 	biasmatRef <- mapBiasRef(x)
 
 	fr2 <- fr
@@ -155,11 +168,14 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 	delta.freq <- tf.keep1 | tf.keep2
 	dimnames(delta.freq) <- list(rownames(fr),colnames(fr),paste(min.delta.frequency))
 
-	#select return type (better put this as method on the detectedAI class)
-	#if(return.type=="ref"){fr[fr<biasmatRef]<- NaN}
-	#if(return.type=="alt"){fr[fr>biasmatRef]<- NaN}
+	if(gc){
+		if(verbose){cat("removing and garbage collect temporary variables\n")}
+		rm(fr2,fr3,biasmatRef,tf.keep1,tf.keep2,newDims)
+		gc()
+	}
 
-	# p-value array
+	#5)  p-value array
+	if(verbose){cat("checking p-value thresholds\n")}
 	if(function.test=="binom.test" & !max.pvalue==1){
 		idx <- which(!is.na(fr))
 		arn <- arank(x,return.type="names",return.class="matrix") 
@@ -208,10 +224,18 @@ setMethod("detectAI", signature(x = "ASEset"), function(x,
 		pv.thr <- aperm(array(max.pvalue, dim=c(newDims,nrow(x),ncol(x))), c(2,3,1))
 		pv.thr.ret <- pv < pv.thr
 	
+		if(gc){
+			if(verbose){cat("removing and garbage collect temporary variables\n")}
+			rm(idx,arn,ac,mat2,mat1,allele1,allele2,biasmat1,biasAllele1,ml,pv,newDims,pv.thr)
+			gc()
+		}
+
 	}else{stop("function.test must be binom.test")}
 
 	if(return.class=="DetectedAI"){
+
 		#make DetectedAI object
+		if(verbose){cat("creating DetectedAI object\n")}
 		DetectedAIFromArray(
 			x, 
 			strand=strand,
