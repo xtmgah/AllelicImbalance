@@ -29,16 +29,9 @@ frequency_vs_threshold_variable_summary <- function(object,var="threshold.count.
 detectedAI_vs_threshold_variable_summary <- function(object,var="threshold.count.sample"){
 
 	#check if assay is present
-	fr <- assays(object)[["reference.frequency"]]
-	ar.var <- assays(object)[[var]]
-	ar.fr <- array(fr,dim=c(nrow(fr),ncol(fr),dim(ar.var)[3]),
-				  dimnames=list(rownames(object),colnames(object),NULL) )
 
-	is.na(ar.var) <- FALSE 
-	ar.fr[!ar.var] <- NA
+	apply(assays(object)[[var]],c(2, 3),sum,na.rm=TRUE)
 
-	#colSums(ar.fr,na.rm=TRUE)
-	apply(ar.fr,c(2, 3),mean,na.rm=TRUE)
 }
 
 
