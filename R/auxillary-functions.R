@@ -2254,3 +2254,15 @@ makeMaskedFasta <- function(fastaIn, fastaOut, posToReplace, splitOnSeqlevels=TR
 }
 
 
+
+gba <- function(pathBam,pathVcf,pathGFF=NULL){
+
+	#summarize counts
+	
+	#detectAI
+	
+}
+
+
+
+

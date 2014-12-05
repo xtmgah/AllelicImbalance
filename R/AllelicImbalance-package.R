@@ -105,6 +105,7 @@
 #' 
 #'
 #' @importFrom lattice barchart
+#' @importFrom lattice xyplot
 #' @importFrom lattice trellis.par.set
 #' @importFrom lattice panel.abline
 #' @importFrom lattice panel.barchart

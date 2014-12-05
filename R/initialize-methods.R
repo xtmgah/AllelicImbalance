@@ -488,6 +488,13 @@ DetectedAIFromArray <- function(
 	threshold.count.sample=NULL,
 	threshold.delta.frequency=NULL,
 	threshold.pvalue=NULL,
+
+	#reference.frequency.names=NULL,
+	threshold.frequency.names=NULL,
+	threshold.count.sample.names=NULL,
+	threshold.delta.frequency.names=NULL,
+	threshold.pvalue.names=NULL,
+
 	...){
 
 	sset <- SummarizedExperiment(
@@ -497,7 +504,7 @@ DetectedAIFromArray <- function(
 					threshold.count.sample=threshold.count.sample,
 					threshold.delta.frequency=threshold.delta.frequency,
 					threshold.pvalue=threshold.pvalue
-					), 
+					),
 				rowData = rowData(x), 
 				colData = colData(x)
 			) 
@@ -508,8 +515,16 @@ DetectedAIFromArray <- function(
 	#validObject(.Object)
 
 	#Return object
-	new("DetectedAI", sset, strand = strand)
+	new("DetectedAI", sset,
+		strand = strand,
+		#reference.frequency.names=reference.frequency.names,
+		threshold.frequency.names=threshold.frequency.names,
+		threshold.count.sample.names=threshold.count.sample.names,
+		threshold.delta.frequency.names=threshold.delta.frequency.names,
+		threshold.pvalue.names=threshold.pvalue.names
+	)
 }
+
 
 #' Initialize GlobalAnalysis
 #' 
@@ -536,7 +551,7 @@ NULL
 #' @rdname initialize-GlobalAnalysis
 #' @export 
 #setMethod("ReferenceBias","ReferenceBias", function(
-gba <- function(
+GAnalysis <- function(
 	x = "ASEset",
 	...
 	){
