@@ -112,6 +112,7 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
         cat("mapBiasExpMean\n")
         cat(class(mapBiasExpMean))
     }
+
     # check that at least one of the countList options are not null
     if (is.null(c(countListPlus, countListMinus, countListUnknown))) {
         stop("at least one of the countList options has to be specified")
@@ -284,7 +285,7 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL, 
-    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, 
+    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL
     verbose = FALSE, ...) {
     
    # if (verbose) {

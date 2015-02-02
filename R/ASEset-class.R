@@ -611,3 +611,17 @@ setMethod("countsPerSample", signature(x = "ASEset"), function(x,
 	}
 })
 
+#' @rdname ASEset-class
+#' @export 
+setGeneric("phase", function(x, ...){
+    standardGeneric("phase")
+})
+
+#' @rdname ASEset-class
+#' @export 
+#could be renamed to countsAllAlleles
+setMethod("phase", signature(x = "ASEset"), function(x, 
+	return.class = "matrix", allele = "ref") {
+
+})
+
