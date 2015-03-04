@@ -95,7 +95,7 @@ NULL
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus = NULL, 
-    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, 
+    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
     verbose = FALSE, ...) {
     
     if (verbose) {
@@ -260,6 +260,11 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
         assays[["mapBias"]] <- mapBiasExpMean
     }
     
+    # assign phase if user provides it
+    if (is.null(phase)) {
+        assays[["phase"]] <- phase
+    }
+
     if (is.null(colData)) {
         colData <- DataFrame(row.names = unlist(unique(lapply(countList, rownames))))
     }
@@ -285,7 +290,7 @@ ASEsetFromCountList <- function(rowData, countListUnknown = NULL, countListPlus 
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL, 
-    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL
+    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
     verbose = FALSE, ...) {
     
    # if (verbose) {
@@ -372,6 +377,11 @@ ASEsetFromArrays <- function(rowData, countsUnknown = NULL, countsPlus = NULL,
         assays[["mapBias"]] <- mapBiasExpMean
     }
     
+    # assign phase if user provides it
+    if (is.null(phase)) {
+        assays[["phase"]] <- phase
+    }
+
     if (is.null(colData)) {
         colData <- DataFrame(row.names = dimnames(assays[["countsUnknown"]])[[2]])
     }
