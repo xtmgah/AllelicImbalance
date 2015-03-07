@@ -242,7 +242,7 @@ impBamGAL <- function(UserDir, searchArea, readLength=150, reduce=FALSE, scanBam
         if (verbose) 
             cat(paste("Reading bam file", i, "with filename", basename(bamName)), 
                 "\n")  #Print information to the user
-        GappedAlign <- readGAlignmentsFromBam(bf, param = param)
+        GappedAlign <- readGAlignments(bf, param = param)
         
         BamGAL[[basename(bamName)]] <- GappedAlign
         
@@ -1432,8 +1432,8 @@ getAreaFromGeneNames <- function(genesymbols, OrgDb, leftFlank = 0, rightFlank =
 #' 
 #' #get counts at the three positions specified in GRvariants
 #' if(require(SNPlocs.Hsapiens.dbSNP.20120608)){
-#' updatedGRanges<-getSnpIdFromLocation(rowData(ASEset), SNPlocs.Hsapiens.dbSNP.20120608)
-#' rowData(ASEset)<-updatedGRanges
+#' updatedGRanges<-getSnpIdFromLocation(rowRanges(ASEset), SNPlocs.Hsapiens.dbSNP.20120608)
+#' rowRanges(ASEset)<-updatedGRanges
 #'}
 #' 
 #' @export getSnpIdFromLocation
@@ -2167,7 +2167,7 @@ ASEsetFromBam <- function(gr, pathToDir,PE=TRUE, flagsMinusStrand=c(83,163), fla
 #' @examples
 #'
 #' data(ASEset.sim)
-#' gr <- rowData(ASEset.sim) 
+#' gr <- rowRanges(ASEset.sim) 
 #' fastaIn <- system.file('extdata/hg19.chr17.subset.fa', package='AllelicImbalance')
 #' makeMaskedFasta(fastaIn=fastaIn, fastaOut="fastaOut",posToReplace=gr) 
 #' 
