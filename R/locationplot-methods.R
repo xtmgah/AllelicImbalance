@@ -337,6 +337,7 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
     }
 })
 
+
 #' glocationplot ASEset objects
 #' 
 #' plotting ASE effects over a specific genomic region using Gviz functionality
@@ -497,7 +498,7 @@ setMethod("glocationplot", signature(x = "ASEset"), function(x, type = "fraction
 		}
 		txTrack <- GeneRegionTrack(TxDb, 
 			start=start(GR), end=end(GR), 
-			chr=seqlevels(GR)
+			chromosome=seqlevels(GR)
 		)	   
 
         lst[[length(lst) + 1]] <- txTrack

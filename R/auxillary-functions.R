@@ -1621,20 +1621,20 @@ barplotLatticeFraction <- function(identifier, ...) {
 					  )
 					  #, rot = c(90, 0))
 	}
-	if(top.allele.criteria=="phase"){
-		df$group <- df$phase
+	if(e$top.allele.criteria=="phase"){
+		df$groups <- df$phase
 	}else{
-		df$group <- df$alleles
+		df$groups <- df$alleles
 	}
     
 	if(!e$middleLine) {
-		b <- barchart(values ~ sample, group = group, data = df, origin = 0, 
+		b <- barchart(values ~ sample, group = groups, data = df, origin = 0, 
 		    stack = TRUE, scales = scales, 
 			main = list(label=e$main, cex=e$cex.mainvec), 
 			ylab = e$ylab, xlab = e$xlab, 
 		    par.settings = parset)
 	}else if (e$middleLine) {
-		b <- barchart(values ~ sample, group = group, data = df, origin = 0, 
+		b <- barchart(values ~ sample, group = groups, data = df, origin = 0, 
 			stack = TRUE, scales = scales, 
 			main = list(label=e$main, cex=e$cex.mainvec), 
 			ylab = e$ylab, xlab = e$xlab, 
@@ -2111,7 +2111,7 @@ countAllelesFromBam <- function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, retu
 #' @param flagsMinusStrand flags that mark reads coming from minus strand
 #' @param flagsPlusStrand flags that mark reads coming from plus strand
 #' @author Jesper R. Gadin
-#' @keywords allelecount
+#' @keywords ASEset
 #' @examples
 #'
 #' data(GRvariants)
@@ -2163,7 +2163,7 @@ ASEsetFromBam <- function(gr, pathToDir,PE=TRUE, flagsMinusStrand=c(83,163), fla
 #' @param splitOnSeqlevels write on file for each seqlevel to save memory
 #' @param verbose makes function more talkative
 #' @author Jesper R. Gadin
-#' @keywords allelecount
+#' @keywords masked fasta reference
 #' @examples
 #'
 #' data(ASEset.sim)
@@ -2233,14 +2233,29 @@ makeMaskedFasta <- function(fastaIn, fastaOut, posToReplace, splitOnSeqlevels=TR
 
 
 
-gba <- function(pathBam,pathVcf,pathGFF=NULL){
+#' global analysis wrapper
+#' 
+#' A wrapper to make a global analysis based on paths for BAM, VCF and GFF files
+#' 
+#' @param pathBam path to bam file
+#' @param pathVcf path to vcf file
+#' @param pathGFF path to gff file
+#' @param verbose makes function more talkative
+#' @author Jesper R. Gadin
+#' @keywords global wrapper
+#' @examples
+#'
+#' #empty as function doesn't exist
+#' 
+#' @export 
+gba <- function(pathBam,pathVcf,pathGFF=NULL, verbose){
 
 	#summarize counts
 	
 	#detectAI
+
 	
 }
-
 
 
 

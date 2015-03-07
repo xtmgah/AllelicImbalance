@@ -6,43 +6,48 @@
 #'
 #' @name phaseMatrix2Array
 #' @rdname phaseMatrix2Array
-#' @aliases phaseMatrix2Array,ASEset-method
+#' @aliases phaseMatrix2Array,matrix-method
 #' @docType methods
-#' @param x \code{matrix} see examples 
+#' @param x matrix see examples 
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords phase
 #' @examples
 #' 
-#' #example phase matrix (simple form)
-#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(x)*ncol(x), replace=TRUE), p2, sep=""),
-#' 	nrow=nrow(x), ncol(x))
+#' #load data
+#' data(ASEset) 
+#' a <- ASEset
+#'
+#' #example phase matrix 
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
+#'
+#' ar <- phaseMatrix2Array(p)
 #' 
-#' phase(p) <- p
-#' ar <- phaseMatrix2Array(p )
-#' 
-#' @exportMethod phaseMatrix2Array
 NULL
 
 #' @rdname phaseMatrix2Array
+#' @export
 setGeneric("phaseMatrix2Array", function(x, ... 
 	){
     standardGeneric("phaseMatrix2Array")
 })
 
+#' @rdname phaseMatrix2Array
+#' @export
 setMethod("phaseMatrix2Array", signature(x = "matrix"),
 		function(x, ...
 	){
 
-		psplit <- strsplit(p, split="")
+		psplit <- strsplit(x, split="")
 		upsplit <- unlist(psplit)
 		mat <- as.integer(upsplit[seq(1, length(upsplit), by=3)])
 		pat <- as.integer(upsplit[seq(3, length(upsplit), by=3)])
 		phased <- as.integer(upsplit[seq(2, length(upsplit), by=3)]=="|")
 	
-		array(c(mat,pat,phased), dim=c(nrow(p), ncol(p), 3))
+		array(c(mat,pat,phased), dim=c(nrow(x), ncol(x), 3))
 
 })
 
@@ -54,35 +59,40 @@ setMethod("phaseMatrix2Array", signature(x = "matrix"),
 #'
 #' @name phaseArray2Matrix
 #' @rdname phaseArray2Matrix
-#' @aliases phaseArray2Matrix,ASEset-method
+#' @aliases phaseArray2Matrix,array-method
 #' @docType methods
-#' @param x \code{matrix} see examples 
+#' @param x array see examples 
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords phase
 #' @examples
 #' 
+#' #load data
+#' data(ASEset) 
+#' a <- ASEset
+#'
 #' #example phase matrix 
-#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(x)*ncol(x), replace=TRUE), p2, sep=""),
-#' 	nrow=nrow(x), ncol(x))
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
 #' 
-#' phase(p) <- p
 #' ar <- phaseMatrix2Array(p)
 #'
 #' #Convert back 
 #' mat <- phaseArray2Matrix(ar)
 #'
-#' @exportMethod phaseArray2Matrix
 NULL
 
 #' @rdname phaseArray2Matrix
+#' @export
 setGeneric("phaseArray2Matrix", function(x, ... 
 	){
     standardGeneric("phaseArray2Matrix")
 })
 
+#' @rdname phaseArray2Matrix
+#' @export
 setMethod("phaseArray2Matrix", signature(x = "array"),
 		function(x, ...
 	){
@@ -115,25 +125,32 @@ setMethod("phaseArray2Matrix", signature(x = "array"),
 #' @rdname fractionPlotDf
 #' @aliases fractionPlotDf,ASEset-method
 #' @docType methods
-#' @param x \code{matrix} see examples 
+#' @param x ASEset
+#' @param snp rownames identifier for ASEset or row number
+#' @param strand '+', '-' or '*'
+#' @param top.allele.criteria 'maxcount', 'ref' or 'phase'
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @keywords phase
+#' @keywords phase plotDf
 #' @examples
 #' 
 #' #test on example ASEset 
 #' data(ASEset)
-#' df <- fractionPlotDf(ASEset)
+#' a <- ASEset
+#' df <- fractionPlotDf(a, 1, strand="+")
 #'
-#' @exportMethod phaseArray2Matrix
+#' @exportMethod fractionPlotDf
 NULL
 
-#' @rdname phaseArray2Matrix
-setGeneric("fractionPlotDf", function(x, ... 
+#' @rdname fractionPlotDf
+#' @export
+setGeneric("fractionPlotDf", function(x, snp,  strand="*", top.allele.criteria="maxcount", ... 
 	){
     standardGeneric("fractionPlotDf")
 })
 
+#' @rdname fractionPlotDf
+#' @export
 setMethod("fractionPlotDf", signature(x = "ASEset"),
 		function(x, snp,  strand="*", top.allele.criteria="maxcount", ...
 	){
@@ -147,6 +164,10 @@ setMethod("fractionPlotDf", signature(x = "ASEset"),
 		snprow <- snp
 	}else if(class(snp)=="character"){
 		snprow <- which(rownames(x) %in% snp  )
+	}else{
+		# If the class of snp is not approprite there will be an informative error message from
+		# the base subset method.
+		snprow <- snp
 	}
 
 	afraction <- fraction(x[snprow], strand = strand, top.allele.criteria=top.allele.criteria)
@@ -204,6 +225,52 @@ setMethod("fractionPlotDf", signature(x = "ASEset"),
 	}
 	df
 
+})
+
+#' defaultPhase
+#' 
+#' used to populate the phase slot in an ASEset object
+#' 
+#' will set everything to 0
+#'
+#' @name defaultPhase
+#' @rdname defaultPhase
+#' @aliases defaultPhase,numeric-method
+#' @docType methods
+#' @param i number of rows
+#' @param j number of columns 
+#' @param ... arguments to forward to internal functions
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords phase
+#' @examples
+#' 
+#' 
+#' i <- 5
+#' j <- 10
+#' defaultPhase(i,j)
+#'
+NULL
+
+#' @rdname defaultPhase
+#' @export
+setGeneric("defaultPhase", function(i, ... ){
+    standardGeneric("defaultPhase")
+})
+
+
+#' @rdname defaultPhase
+#' @export
+setMethod("defaultPhase", signature("numeric"),
+		function(i, j, ...
+	){
+	#x is rows
+	#y is columns
+
+    p1 <- matrix(rep(0, i*j), nrow=i, ncol=j)
+    p2 <- matrix(rep(0, i*j), nrow=i, ncol=j)
+    matrix(paste(p1,rep("/", i*j), p2, sep=""),i, j)
+
+	
 })
 
 

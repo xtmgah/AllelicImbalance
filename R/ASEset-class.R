@@ -25,6 +25,14 @@ NULL
 #' the RNA-seq experiment under analysis has in fact been created so that
 #' correct strand information was obtained. The most functions will by default 
 #' have their strand argument set to '*'.
+#'
+#' The phase information is stored by the convention of 
+#' 'maternal chromosome|paternal chromosome', with 0 as reference allele and 1 
+#' as alternative allele. '|' when the phase is known and '/' when the phase is
+#' unknown. Internally the information will be stored as an three dimensional 
+#' array, dim 1 for SNPs, dim 2 for Samples and dim 3 which is fixed and stores 
+#' maternal chromosome, paternal chromosome and phased (1 equals TRUE).
+#'
 #' 
 #' @name ASEset-class
 #' @rdname ASEset-class
@@ -40,7 +48,8 @@ NULL
 #' @param verbose makes function more talkative
 #' @param return.type return 'names', rank or 'counts'
 #' @param return.class return 'list' or 'array'
-#' @param value value as replacement
+#' @param top.allele.criteria 'maxcount', 'ref' or 'phase'
+#' @param value replacement variable
 #' @param ... additional arguments
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
@@ -89,9 +98,6 @@ NULL
 #' 3rd dimension.} \item{verbose}{Makes function more talkative}
 #' \item{...}{arguments passed on to SummarizedExperiment constructor} }
 #'
-#' \describe{
-#'	The phase information is stored by the convention of 'maternal chromosome|paternal chromosome', with 0 as reference allele and 1 as alternative allele. '|' when the phase is known and '/' when the phase is unknown. Internally the information will be stored as an three dimensional array, dim 1 for SNPs, dim 2 for Samples and dim 3 which is fixed and stores maternal chromosome, paternal chromosome and phased (1 equals TRUE).
-#' }
 #'
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The
@@ -132,12 +138,12 @@ NULL
 #'
 #'
 #' #example phase matrix (simple form)
-#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(x)*ncol(x)),nrow=nrow(x), ncol(x))
-#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(x)*ncol(x), replace=TRUE), p2, sep=""),
-#' 	nrow=nrow(x), ncol(x))
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
 #' 
-#' phase(p) <- p
+#' phase(a) <- p
 #'
 #' @exportClass ASEset
 #' @exportMethod alleleCounts alleleCounts<- mapBias fraction arank
@@ -663,7 +669,7 @@ setMethod("phase", signature(x = "ASEset"), function(x,
 
 #' @rdname ASEset-class
 #' @export 
-setGeneric("phase<-", function(x, ...){
+setGeneric("phase<-", function(x, value){
     standardGeneric("phase<-")
 })
 

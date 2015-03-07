@@ -29,5 +29,7 @@ makeMaskedFasta(fastaIn=fastaIn, fastaOut="fastaOut",posToReplace=gr)
 \author{
 Jesper R. Gadin
 }
-\keyword{allelecount}
+\keyword{fasta}
+\keyword{masked}
+\keyword{reference}
 

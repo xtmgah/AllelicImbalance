@@ -57,6 +57,7 @@
 #' away pValues where the main allele has this frequency.
 #' @param legend.fill.size size of the fill/boxes in the legend (default:NULL)
 #' @param verbose Makes function more talkative
+#' @param top.allele.criteria 'maxcount', 'ref' or 'phase'
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The \code{\link{ASEset}} class which the barplot
