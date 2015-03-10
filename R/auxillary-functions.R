@@ -504,6 +504,7 @@ realCigarPositionsList <- function(RleCigarList) {
         
         cs <- cs[!names(cs) == "D"]
         cs <- cs[!names(cs) == "N"]
+
         
         cs
     })
