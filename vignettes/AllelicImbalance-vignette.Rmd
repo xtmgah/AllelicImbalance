@@ -29,4 +29,20 @@ exists several different methods for obtaining a bam file, and this section
 should just be considered an example. For further details we refer
 to the web-pages of tophat, bowtie, bwa and samtools found in the links section at the end of this document.
 
+```
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR009/ERR009135/*
+bowtie -q --best --threads 5 --sam hg19 +
+>      -1 ERR009135_1.fastq.gz -2 ERR009135_2.fastq.gz "ERR009135.sam"
+samtools view -S -b ERR009135.sam > ERR009135.bam
+```
+
+In the above code one paired-end RNA sequencing sample is downloaded and
+aligned to the human genome, then converted to bam using samtools. The
+resulting bam files can be the direct input to the AllelicImbalance package. Other
+aligners can be used as well, as long as bam files are provided as input. The
+example code following illustrates how to use the import mechanism on a
+chromosome 17-located subset of 20 RNA-seq experiments of HapMap samples. The
+output is an \Robject{ASEset} object containing allele counts for all
+heterozygote coding SNPs in the region.
+
 > "The fact that nature provides the techniques to study itself"
