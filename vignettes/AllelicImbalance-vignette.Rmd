@@ -21,9 +21,12 @@ enhancers, promoter regions, splicing and stability. Identifying this allelic
 imbalance is therefore of interest to the characterization of the genome and the
 aim of the AllelicImbalance package is to facilitate this.
 
-## Vignette Info
-
-Note the various macros within the `vignette` setion of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
+## Simple example of building an ASEset object
+In this section we will walk through the various ways an ASEset
+object can be created. The ASEset object has the SummarizedExperiment as parent class, and all functions you can apply on this class you can also apply on an ASEset. Although the preprocessing of RNA-seq data is not the
+primary focus of this package, it is a necessary step before analysis. There
+exists several different methods for obtaining a bam file, and this section
+should just be considered an example. For further details we refer
+to the web-pages of tophat, bowtie, bwa and samtools found in the links section at the end of this document.
 
 > "The fact that nature provides the techniques to study itself"
