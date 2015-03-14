@@ -2,13 +2,17 @@
 title: "AllelicImbalance Vignette"
 author: "Jesper R. Gådin and Lasse Folkersen"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  BiocStyle::pdf_document:
+    toc: true
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{AllelicImbalance Vignette}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
 
 This AllelicImbalance package contains functions for investigating
 allelic imbalance effects in RNA-seq data. Maternal and paternal
