@@ -45,4 +45,35 @@ chromosome 17-located subset of 20 RNA-seq experiments of HapMap samples. The
 output is an \Robject{ASEset} object containing allele counts for all
 heterozygote coding SNPs in the region.
 
-> "The fact that nature provides the techniques to study itself"
+```{r echo=TRUE, eval=FALSE}
+searchArea <- GRanges(seqnames = c("17"), ranges = IRanges(79478301, 79478361))
+pathToFiles <- system.file("extdata/ERP000101_subset", package = "AllelicImbalance")
+reads <- impBamGAL(pathToFiles, searchArea, verbose = FALSE)
+heterozygotePositions <- scanForHeterozygotes(reads, verbose = FALSE)
+countList <- getAlleleCounts(reads, heterozygotePositions, verbose = FALSE)
+a.simple <- ASEsetFromCountList(heterozygotePositions, countList)
+a.simple
+```
+
+## Building an ASEset object using Bcf files
+If more than a few genes and a few samples are analyzed we recommend
+that a SNP-call is instead made using the samtools mpileup function (see
+links section). The \Rfunction{scanForHeterozygotes} function is merely a simple 
+SNP-caller and it is not as computationally optimized as mpileup. In this bash
+code we download reference sequence for chromosome 17 and show how to generate
+mpileup calls on one of the HapMap samples that were described above.
+
+```
+wget ftp://hgdownload.cse.ucsc.edu/goldenPath/hg19/chromosomes/chr17.fa.gz
+samtools mpileup -uf hg19.fa ERR009135.bam | bcftools view -bvcg - > ERR009135.bcf
+```
+
+Samtools mpileup generates by default a Vcf file which contains SNP and short INDEL 
+positions. Piping the output to bcftools we get its binary equivalent (Bcf), which 
+takes less space and can be queried more effective. With the Bcf files the process 
+of generating an ASEset object starts with a call to the \Robject{impBcfGR} 
+function instead. This function will import the Bcf file containing all SNP calls 
+that were generated with the samtools mpileup function.
+
+
+> "Who is is the master if nature provides the techniques to study itself"
