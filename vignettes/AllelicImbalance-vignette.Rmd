@@ -9,6 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+
 This AllelicImbalance package contains functions for investigating
 allelic imbalance effects in RNA-seq data. Maternal and paternal
 alleles could be expected to show identical transcription rate, resulting in a
@@ -42,10 +43,11 @@ resulting bam files can be the direct input to the AllelicImbalance package. Oth
 aligners can be used as well, as long as bam files are provided as input. The
 example code following illustrates how to use the import mechanism on a
 chromosome 17-located subset of 20 RNA-seq experiments of HapMap samples. The
-output is an \Robject{ASEset} object containing allele counts for all
+output is an ASEset object containing allele counts for all
 heterozygote coding SNPs in the region.
 
-```{r echo=TRUE, eval=FALSE}
+```{r echo=TRUE, eval=TRUE}
+library(AllelicImbalance)
 searchArea <- GRanges(seqnames = c("17"), ranges = IRanges(79478301, 79478361))
 pathToFiles <- system.file("extdata/ERP000101_subset", package = "AllelicImbalance")
 reads <- impBamGAL(pathToFiles, searchArea, verbose = FALSE)
@@ -58,7 +60,7 @@ a.simple
 ## Building an ASEset object using Bcf files
 If more than a few genes and a few samples are analyzed we recommend
 that a SNP-call is instead made using the samtools mpileup function (see
-links section). The \Rfunction{scanForHeterozygotes} function is merely a simple 
+links section). The scanForHeterozygotes function is merely a simple 
 SNP-caller and it is not as computationally optimized as mpileup. In this bash
 code we download reference sequence for chromosome 17 and show how to generate
 mpileup calls on one of the HapMap samples that were described above.
@@ -71,9 +73,205 @@ samtools mpileup -uf hg19.fa ERR009135.bam | bcftools view -bvcg - > ERR009135.b
 Samtools mpileup generates by default a Vcf file which contains SNP and short INDEL 
 positions. Piping the output to bcftools we get its binary equivalent (Bcf), which 
 takes less space and can be queried more effective. With the Bcf files the process 
-of generating an ASEset object starts with a call to the \Robject{impBcfGR} 
+of generating an ASEset object starts with a call to the impBcfGR 
 function instead. This function will import the Bcf file containing all SNP calls 
 that were generated with the samtools mpileup function.
 
+```{r echo=TRUE, eval=TRUE}
+BcfGR <- impBcfGR(pathToFiles,searchArea,verbose=FALSE)
+countListBcf <- getAlleleCounts(reads, BcfGR,verbose=FALSE)
+a.bcf <- ASEsetFromCountList(BcfGR, countListBcf)
+```
+
+## Using strand information
+Many RNA-seq experiments do not yield useful information on the strand from
+which a given read was made. This is because they involve a step in which a
+double-stranded cDNA is created without tracking strand-information. Some
+RNA-seq setups do however give this information and in those cases it is important to
+keep track of strand in the ASE-experiment. The example data from above is
+from an experiment which created double-stranded cDNA before labelling and so the '+'
+and '-' information in it is arbitrary. However, if we assume that the
+information has strand information, then the correct procedure is as follows:
+
+
+```{r echo=TRUE, eval=TRUE}
+plus <- getAlleleCounts(reads, heterozygotePositions, strand="+",verbose=F) 
+minus <- getAlleleCounts(reads, heterozygotePositions, strand="-",verbose=F)
+
+a.stranded <-
+ASEsetFromCountList(
+heterozygotePositions,
+countListPlus=plus,
+countListMinus=minus
+)
+a.stranded
+```
+The main effect of doing this, is in the plotting functions which will separate
+reads from different strands if they are specified as done here. It is
+important, however, to make sure that the imported RNA-seq experiment does in
+fact have proper labeling and tracking of strand information before proceeding
+with this method.
+
+## Two useful helper functions
+At this stage it is worth highlighting two useful helper functions that both
+uses existing BioC annotation objects. One is the
+getAreaFromGeneNames which quickly retrieves the above mentioned
+searchArea when given just genesymbols as input. The other other is
+the getSnpIdFromLocation function which attempts to rename
+location-based SNP names to established rs-IDs in case they exist. These
+functions work as follows:
+
+```{r echo=TRUE, eval=TRUE}
+#Getting searchArea from genesymbol
+library(org.Hs.eg.db )
+searchArea<-getAreaFromGeneNames("ACTG1",org.Hs.eg.db)
+
+#Getting rs-IDs
+library(SNPlocs.Hsapiens.dbSNP.20120608)
+#seqlevels(a.simple) <- "chr17"
+gr <- rowRanges(a.simple)
+updatedGRanges<-getSnpIdFromLocation(gr, SNPlocs.Hsapiens.dbSNP.20120608)
+rowRanges(a.simple)<-updatedGRanges
+```
+
+## Adding phenotype data
+Typically an RNA-seq experiment will include additional information about each
+sample. It is an advantage to include this information when creating an ASEset
+because it can be used for subsequent highlights or subsetting in plotting and
+analysis functions.
+
+```{r echo=TRUE, eval=TRUE}
+#simulate phenotype data
+pdata <- DataFrame(
+	Treatment=sample(c("ChIP", "Input"),length(reads),replace=TRUE),
+	Gender=sample(c("male", "female"),length(reads),replace=TRUE), 
+	row.names=paste("individual",1:length(reads),sep=""))
+
+#make new ASEset with pdata
+a.new <- ASEsetFromCountList(
+		heterozygotePositions,
+		countList,
+		colData=pdata)
+
+#add to existing object
+colData(a.simple) <- pdata
+```
+
+## Statistical analysis of an ASEset object
+One of the simplest statistical test for use in allelic imbalance analysis is
+the chi-square test. This test assumes that the uncertainty of ASE is represented by a normal distribution around an expected mean (i.e 0.5 for equal expression). A significant result suggests an ASE event. Every strand is tested independently. 
+
+
+```{r echo=TRUE, eval=TRUE}
+#use a subset for tests
+a2 <- a.stranded[,5:10]
+#two types of tests
+binom.test(a2,"+")
+chisq.test(a2,"-")
+```
+
+## Plotting of an ASEset object
+The barplot function for ASEset objects
+plots the read count of each allele in each sample. This is useful for getting a very
+detailed view of individual SNPs in few samples. As can be seen below, four
+samples from the HapMap data contains a strong imbalance at the chr17:79478331
+position on the plus strand. By default the p-value is calculated by a
+chi-square test. To use other test results the arguments testValue and
+testValue2 can be used. When the counts for one allele are below 5 for
+one allele the chi-square test returns NA. This is why there is no P-value above the first bar in the example below.
+
+```{r echo=TRUE, eval=TRUE}
+barplot(a.stranded[1],strand="+")
+
+#use other test
+btp <- binom.test(a.stranded[1],"+")
+
+barplot(a.stranded[1],strand="+", testValue=btp)
+```
+
+Another example of plotting that is useful is the one invoked with the plotting
+type argument "fraction". This plotting mechanism is
+useful to illustrate more SNPs and more samples in less space than the standard
+plot. As can be seen here several other samples are not heterozygote at the
+chr17:79478331 location.
+
+```{r echo=TRUE, eval=TRUE}
+barplot(a.simple,type="fraction")
+```
+
+A typical question would be to ask why certain heterozygote samples have allele
+specific expression. The argument sampleColour argument allows for
+different highligts such as illustrated here below for gender. This could also
+be used to highlight based on genotype of proximal non-coding SNPs if available.
+
+```{r echo=TRUE, eval=TRUE}
+sampleColour<-rep("palevioletred",ncol(a.simple))
+sampleColour[colData(a.simple)[,"Gender"]%in%"male"] <- "blue"
+
+barplot(a.simple[1],type="fraction",sampleColour=sampleColour)
+```
+
+
+## Plot with annotation
+It is often of interest to combine the RNA
+sequencing data with genomic annotation information from online databases. For
+this purpose there is a function to extract variant specific annotation such as
+gene, exon, transcript and CDS.
+
+```{r echo=TRUE, eval=TRUE}
+library(org.Hs.eg.db)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+
+barplot(a.simple[1],OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+```
+
+## locationplot
+Finally a given gene or set of proximal genes will often have several SNPs close
+to each other. It is of interest to investigate all of them together, in
+connection with annotation information. This can be done using the
+locationplot function. This function in its simplest form just plot
+all the SNPs in an ASEset distributed by genomic location. Additionally it
+contains methods for including gene-map information through the arguments
+OrgDb and TxDb.
+
+```{r echo=TRUE, eval=TRUE}
+#using count type
+locationplot(a.simple,type="count")
+
+#use annotation
+locationplot(a.simple,OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+```
+
+## Conclusion
+In conclusion we hope that you will find this package useful in the
+investigation of the genetics of RNA-seq experiments. The various import
+functions should assist in the task of actually retrieving allele counts for
+specific nucleotide positions from all RNA-seq reads, including the non-trivial
+cases of intron-spanning reads. Likewise, the statistical analysis and plotting
+functions should be helpful in discovering any allele specific expression
+patterns that might be found in your data.
+
+## Links
+[link](www.rstudio.com)
+
+Bowtie
+[link](http://bowtie-bio.sourceforge.net)
+
+BWA
+[link](http://bio-bwa.sourceforge.net/)
+
+Samtools
+[link](http://samtools.sourceforge.net/)
+
+Samtools pileup
+[link](http://samtools.sourceforge.net/mpileup.shtml)
+
 
 > "Who is is the master if nature provides the techniques to study itself"
+
+
+
+## Session Info
+```{r echo=TRUE, eval=TRUE}
+sessionInfo()
+```
