@@ -84,16 +84,14 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
     xlab = TRUE, legend.colnames = "", las.ylab = 1, las.xlab = 2, cex.main = 1, 
     cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6, add = FALSE, 
     lowerLeftCorner = c(0, 0), size = c(1, 1), addHorizontalLine = 0.5, add.frame = TRUE, 
-    filter.pValue.fraction = 0.99, legend.fill.size=1,legend.interspace=1, verbose = FALSE, 
+    filter.pValue.fraction = 0.99,  legend.fill.size=1, legend.interspace=1, verbose = FALSE, 
 	top.allele.criteria="maxcount", ...) {
     
     # catch useful graphical parameters that can be used to later add onto plot. This
     # list will be retireved by using 'glst <- barplot(x)'
     graphParamList <- list()
     
-    
     x <- height
-    
     
     # check type
     okPlotTypes <- c("fraction", "count")
@@ -1313,7 +1311,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
             }
             
             # writing the name of each Snp on top of the plot(within frame)
-            text(x = 0.5, y = 1.02, label = snp, xpd = TRUE)
+            text(x = 0.5, y = 1.02, label = snp, xpd = TRUE, cex = cex.main)
             
             # add horizontal line at 0.5
             if (!is.null(addHorizontalLine)) {
