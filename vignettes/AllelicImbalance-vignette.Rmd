@@ -13,7 +13,7 @@ vignette: >
 ```{r style, echo = FALSE, results = 'asis'}
 BiocStyle::markdown()
 ```
-
+#Introduction
 This AllelicImbalance package contains functions for investigating
 allelic imbalance effects in RNA-seq data. Maternal and paternal
 alleles could be expected to show identical transcription rate, resulting in a
@@ -31,9 +31,12 @@ Load AllelicImbalance
 library(AllelicImbalance)
 ```
 
+# ASEset
+The ASEset object is the central class of objects in the AllelicImbalance package. The ASEset object has the SummarizedExperiment as parent class, and all functions you can apply on this class you can also apply on an ASEset.
+
 ## Simple example of building an ASEset object
 In this section we will walk through the various ways an ASEset
-object can be created. The ASEset object has the SummarizedExperiment as parent class, and all functions you can apply on this class you can also apply on an ASEset. Although the preprocessing of RNA-seq data is not the
+object can be created. Although the preprocessing of RNA-seq data is not the
 primary focus of this package, it is a necessary step before analysis. There
 exists several different methods for obtaining a bam file, and this section
 should just be considered an example. For further details we refer
@@ -166,6 +169,27 @@ a.new <- ASEsetFromCountList(
 colData(a.simple) <- pdata
 ```
 
+## Adding phase information
+For some functionality phase information is necessary. In the AllelicImbalance package there is no functionality for the phasing, but e.g. samtools can provide phasing information. The phase information is often present in VCF-files. And the below lines show you how to access that information and transfer it to an ASEset. The ASEset follows the VCF-conventions on how to describe the phase, i.e. each patients phase will be described by e.g. the form "1|0","1|1" or "1/0". There the left hand number is the description of the maternal allele and the right hand number is the description of the paternal allele. If it is 0 the allele is the same as the reference allele, and if it is 1 it is the alternative allele. For "|" the phase is known and for "/" the phase is not known. Note, that in the AllelicImbalance package only bi-allelic expression is allowed.
+
+```{r echo=TRUE, eval=TRUE}
+#manually add the phase information
+#example phase matrix 
+rows <-nrow(a.simple)
+cols <- ncol(a.simple)
+p1 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
+p2 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
+p <- matrix(paste(p1,sample(c("|","|","/"), size=rows*cols, replace=TRUE), p2, sep=""),
+	nrow=rows, ncol=cols)
+phase(a.simple) <- p 
+
+#use the phase information from the Vcf file
+pathToVcf <- "somePath"
+#p <- phaseFromVcf(pathToVcf)
+phase(a.simple) <- p 
+```
+
+#Tests
 ## Statistical analysis of an ASEset object
 One of the simplest statistical test for use in allelic imbalance analysis is
 the chi-square test. This test assumes that the uncertainty of ASE is represented by a normal distribution around an expected mean (i.e 0.5 for equal expression). A significant result suggests an ASE event. Every strand is tested independently. 
@@ -179,7 +203,7 @@ binom.test(a2,"+")
 #chi-square test
 chisq.test(a2,"-")
 ```
-
+# Standard Graphics
 ## Plotting of an ASEset object
 The barplot function for ASEset objects
 plots the read count of each allele in each sample. This is useful for getting a very
@@ -225,10 +249,14 @@ sequencing data with genomic annotation information from online databases. For
 this purpose there is a function to extract variant specific annotation such as
 gene, exon, transcript and CDS.
 
-```{r echo=TRUE, eval=TRUE}
+```{r echo=TRUE, eval=TRUE, message=FALSE}
 library(org.Hs.eg.db)
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-barplot(a.simple[1],OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+barplot(a.simple[1],OrgDb=org.Hs.eg.db,
+			cex.main = 0.7,
+			ypos.annotation = 0.08,
+			annotation.interspace=1.3,
+			legend.interspace=1.5
+			)
 ```
 
 ## locationplot
@@ -240,14 +268,18 @@ all the SNPs in an ASEset distributed by genomic location. Additionally it
 contains methods for including gene-map information through the arguments
 OrgDb and TxDb.
 
-```{r echo=TRUE, eval=TRUE}
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 #using count type
-locationplot(a.simple,type="count")
+locationplot(a.simple,type="count", cex.main=0.7, cex.legend=0.4)
 #use annotation
-locationplot(a.simple,OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+a.simple.sorted <- sort(a.simple, decreasing=FALSE)
+locationplot(a.simple.sorted, OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
 ```
 
-## Conclusion
+#Grid Graphics
+
+# Conclusion
 In conclusion we hope that you will find this package useful in the
 investigation of the genetics of RNA-seq experiments. The various import
 functions should assist in the task of actually retrieving allele counts for
@@ -256,7 +288,7 @@ cases of intron-spanning reads. Likewise, the statistical analysis and plotting
 functions should be helpful in discovering any allele specific expression
 patterns that might be found in your data.
 
-## Links
+# Links
 [link](www.rstudio.com)
 
 Bowtie
@@ -275,8 +307,7 @@ Samtools pileup
 > "Who is is the master if nature provides the techniques to study itself"
 
 
-
-## Session Info
+# Session Info
 ```{r echo=TRUE, eval=TRUE}
 sessionInfo()
 ```
