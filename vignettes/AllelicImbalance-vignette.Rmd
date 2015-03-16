@@ -198,6 +198,7 @@ For some functionality phase information is necessary. In the AllelicImbalance p
 ```{r echo=TRUE, eval=TRUE}
 #manually add the phase information
 #example phase matrix 
+set.seed(1)
 rows <-nrow(a.simple)
 cols <- ncol(a.simple)
 p1 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
@@ -205,11 +206,17 @@ p2 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
 p <- matrix(paste(p1,sample(c("|","|","/"), size=rows*cols, replace=TRUE), p2, sep=""),
 	nrow=rows, ncol=cols)
 phase(a.simple) <- p 
+```
 
-#use the phase information from the Vcf file
+```{r echo=TRUE, eval=TRUE}
+#use the phase information from a Vcf file
 pathToVcf <- system.file("extdata/ERP000101_subset/ERP000101.vcf", package = "AllelicImbalance")
-p <- readGT(path, nucleotides=FALSE, param=ScanVcfParam(), row.names=TRUE)
-phase(a.simple) <- p 
+p <- readGT(pathToVcf)
+#The example Vcf file contains only 19 out of our 20 samples
+#So we have to subset and order
+a.subset <- a.simple[,colnames(a.simple) %in% colnames(p)]
+p.subset <- p[, colnames(p) %in% colnames(a.subset)]
+p.ordered <- p.subset[ , match(colnames(a.subset), colnames(p.subset))]
 ```
 
 #Tests
@@ -300,6 +307,91 @@ locationplot(a.simple.sorted, OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.kn
 ```
 
 #Grid Graphics
+To make use of the extra graphical flexibility that comes with grid graphics, 
+the AllelicImbalance package has now functions that can be integrate that
+environment. Another good reason for grid graphics is the Gviz package, which
+uses tracks to visualize genomic regions in a smart way. Below are examples
+on corresponging bar- and locationplots using the grid and Gviz
+evironment.
+
+##lbarplots
+The "l" in lbarplot comes from "lattice barplot". lattice is an R-package using
+grid graphics.
+
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+#access example ASEset data
+data(ASEset)
+
+#lbarplots with type "count" 
+lbarplot(ASEset, type="count")
+
+# lbarplots with type "fraction" 
+lbarplot(ASEset, type="fraction")
+```
+
+##glocationplots
+The "g" in glocationplot comes from "Gviz barplot". It is a wrapper to quickly 
+get an overview of ASE in a region.
+
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+#remember to set the genome
+genome(ASEset) <- "hg19"
+
+glocationplot(ASEset,strand='+')
+
+#for ASEsets with fewer SNPs the 'count' type plot is useful 
+glocationplot(ASEset[,1:5], type="count")
+```
+
+##Custom locationplots
+More flexibility and functionality from the Gviz package is accessed 
+if the tracks are constructed separately.
+
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+#access example read data
+x <- ASEset[,1:2]
+data(reads)
+r <- reads[1:2]
+genome(x) <- 'hg19'
+seqlevels(r, force=TRUE) <- seqlevels(x)
+
+GR <- GRanges(seqnames=seqlevels(x),
+ 		ranges=IRanges(start=min(start(x)),end=max(end(x))),
+ 		strand='+', genome=genome(x))
+
+deTrack <- ASEDAnnotationTrack(x, GR=GR, type='fraction',strand='+')
+covTracks <- CoverageDataTrack(x, BamList=r, strand='+') 
+lst <- c(deTrack,covTracks)
+sizes <- c(0.5,rep(0.5/length(covTracks),length(covTracks)))
+
+plotTracks(lst, from=min(start(x)), to=max(end(x)), 
+sizes=sizes, col.line = NULL, showId = FALSE, main='mainText', 
+cex.main=1, title.width=1, type='histogram')
+```
+
+##Top allele criteria
+The barplot with type='fraction' has the options to be visualized having 
+three different criterias for which allele or phased is the top allele. 
+
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+#bla
+```
+
+
+### The default maxcount criteria
+The default maxcount criteria is based on the rank for the total number of
+reads covering each allele, i.e. the allele covered the most will be on the top.
+
+### Reference allele information
+In previous sections it has been described how to import and store reference data
+in ASEset objects, here there will be an example of how that information can be
+used in a plot
+
+###Dealing with phased data in plots
+In previous sections it has been described how to import and store phased data
+in ASEset objects, here there will be an example of how that information can be
+used in a plot
+
 
 # Conclusion
 In conclusion we hope that you will find this package useful in the

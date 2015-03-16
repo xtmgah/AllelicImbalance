@@ -123,6 +123,9 @@
 #' @importClassesFrom Gviz DetailsAnnotationTrack
 #' @importClassesFrom Gviz GeneRegionTrack
 #' @importClassesFrom Gviz GenomeAxisTrack
+#'
+#' @importFrom Gviz plotTracks
+#' @export plotTracks
 #' 
 #' @importClassesFrom GenomicFeatures TxDb
 #' @importClassesFrom AnnotationDbi AnnotationDb

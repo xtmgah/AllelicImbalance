@@ -45,7 +45,7 @@ setMethod("phaseMatrix2Array", signature(x = "matrix"),
 		upsplit <- unlist(psplit)
 		mat <- as.integer(upsplit[seq(1, length(upsplit), by=3)])
 		pat <- as.integer(upsplit[seq(3, length(upsplit), by=3)])
-		phased <- as.integer(upsplit[seq(2, length(upsplit), by=3)]=="|")
+		phased <- as.integer(upsplit[seq.int(from=2, to=length(upsplit), by=3)]=="|")
 	
 		array(c(mat,pat,phased), dim=c(nrow(x), ncol(x), 3))
 
