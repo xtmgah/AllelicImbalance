@@ -207,8 +207,8 @@ p <- matrix(paste(p1,sample(c("|","|","/"), size=rows*cols, replace=TRUE), p2, s
 phase(a.simple) <- p 
 
 #use the phase information from the Vcf file
-pathToVcf <- "somePath"
-#p <- phaseFromVcf(pathToVcf)
+pathToVcf <- system.file("extdata/ERP000101_subset/ERP000101.vcf", package = "AllelicImbalance")
+p <- readGT(path, nucleotides=FALSE, param=ScanVcfParam(), row.names=TRUE)
 phase(a.simple) <- p 
 ```
 
@@ -216,7 +216,6 @@ phase(a.simple) <- p
 ## Statistical analysis of an ASEset object
 One of the simplest statistical test for use in allelic imbalance analysis is
 the chi-square test. This test assumes that the uncertainty of ASE is represented by a normal distribution around an expected mean (i.e 0.5 for equal expression). A significant result suggests an ASE event. Every strand is tested independently. 
-
 
 ```{r echo=TRUE, eval=TRUE}
 #use a subset for tests

@@ -104,6 +104,8 @@
 #' 
 #' @importFrom VariantAnnotation readVcf
 #' @export readVcf
+#' @importFrom VariantAnnotation readGT
+#' @export readGT
 #'
 #' @importFrom lattice barchart
 #' @importFrom lattice xyplot
