@@ -102,6 +102,8 @@
 #' @importFrom GenomicAlignments readGAlignmentPairs
 #' @importFrom GenomicAlignments cigarWidthAlongReferenceSpace
 #' 
+#' @importFrom VariantAnnotation readVcf
+#' @export readVcf
 #'
 #' @importFrom lattice barchart
 #' @importFrom lattice xyplot
