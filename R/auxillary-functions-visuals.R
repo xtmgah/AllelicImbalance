@@ -86,17 +86,14 @@ legendBarplot <- function(lowerLeftCorner, size, rownames, colnames, boxsize=1, 
 #' the function is preferably called from within the AllelicImbalance barplot method.
 #' 
 #' 
+#' @param strand strand, "+", "-", "*" or "both"
+#' @param snp integer for the described snp
 #' @param lowerLeftCorner position of the plot to add legend to (default c(0,0))
-#' @param size scale the plot, default is 1
-#' @param rownames rownames in legend
-#' @param colnames colnames in legend
-#' @param boxsize size of each box fill
-#' @param boxspace space inbetween the box fill
-#' @param fgCol color for allele1
-#' @param bgCol color for allele2
-#' @param ylegendPos placement of the legend within the plot for y
-#' @param xlegendPos placement of the legend within the plot for x
-#' @param cex size of legend text
+#' @param annDfPlus annotation dataframe plus strand
+#' @param annDfMinus annotation dataframe minus strand
+#' @param cex size of annotation text
+#' @param ypos relative y-axis position for the annotation text 
+#' @param interspace space between each annotation block
 #' @author Jesper R. Gadin
 #' @keywords annotation barplot
 #' @examples

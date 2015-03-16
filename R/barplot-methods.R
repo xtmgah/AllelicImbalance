@@ -45,6 +45,9 @@
 #' @param cex.ylab set ylab label size
 #' @param cex.xlab set xlab label size
 #' @param cex.legend set legend label size
+#' @param cex.annotation size of annotation text
+#' @param ypos.annotation relative ypos for annotation text
+#' @param annotation.interspace space between annotation text
 #' @param legend.interspace set legend space between fills and text
 #' @param add \code{boolean} indicates if a new device should be started
 #' @param lowerLeftCorner integer that is only useful when \code{add}=TRUE
