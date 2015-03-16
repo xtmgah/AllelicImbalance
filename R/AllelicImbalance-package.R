@@ -111,6 +111,7 @@
 #' @importFrom lattice xyplot
 #' @importFrom lattice trellis.par.set
 #' @importFrom lattice panel.abline
+#' @importFrom lattice panel.text
 #' @importFrom lattice panel.barchart
 # @importFrom gridExtra grid.arrange
 #'

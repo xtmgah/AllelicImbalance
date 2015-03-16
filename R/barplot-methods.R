@@ -1397,3 +1397,46 @@ setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     b
 }) 
 
+#' topalleleexample ASEset objects
+#' 
+#' used as a visual example to the top allele criteria
+#' 
+#' shows what is top and what is down
+#' 
+#' @name ASEset-topalleleexample
+#' @aliases ASEset-topalleleexample topalleleexample topalleleexample,ASEset-method
+#' @docType methods
+#' @param x "missing", and so no argument is given
+#' @author Jesper R. Gadin
+#' @keywords topallele
+#' @examples
+#' 
+#' data(ASEset)
+#' topalleleexample(ASEset[1])
+#' 
+#' @export topalleleexample
+
+setGeneric("topalleleexample", function(x) {standardGeneric("topalleleexample")})
+    
+setMethod("topalleleexample", signature(x = "missing"), function() {
+
+	df <- data.frame(value=c(0.5,0.5,0.5,0.5),sample=c("sample1","sample1","sample2","sample2"), group=c("grp1","grp2","grp1","grp2"))
+	df <- df[1:2,]
+
+	barchart(
+		value~sample,data=df,
+		groups=group,
+		ylim=c(0,1), cex=0.8, ylab="fraction",
+		xlab="samples",
+		horizontal=F, stack=T, 
+		col=c("ivory","ivory"),
+		panel=function(x,y,...){
+			panel.barchart(x,y,...)
+			panel.text(x, 0.75, labels=c("top"), cex=2, font=2)
+			panel.text(x, 0.25, labels=c("bottom"),cex=2, font=2)
+			panel.abline=0.5
+			}
+	) 
+
+}) 
+
