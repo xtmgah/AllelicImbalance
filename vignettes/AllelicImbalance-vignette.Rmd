@@ -203,9 +203,9 @@ rows <-nrow(a.simple)
 cols <- ncol(a.simple)
 p1 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
 p2 <- matrix(sample(c(1,0),replace=TRUE, size=rows*cols), nrow=rows, ncol=cols)
-p <- matrix(paste(p1,sample(c("|","|","/"), size=rows*cols, replace=TRUE), p2, sep=""),
+phase.mat <- matrix(paste(p1,sample(c("|","|","/"), size=rows*cols, replace=TRUE), p2, sep=""),
 	nrow=rows, ncol=cols)
-phase(a.simple) <- p 
+phase(a.simple) <- phase.mat 
 ```
 
 ```{r echo=TRUE, eval=TRUE}
@@ -217,6 +217,26 @@ p <- readGT(pathToVcf)
 a.subset <- a.simple[,colnames(a.simple) %in% colnames(p)]
 p.subset <- p[, colnames(p) %in% colnames(a.subset)]
 p.ordered <- p.subset[ , match(colnames(a.subset), colnames(p.subset))]
+```
+
+##Adding reference and alternative allele information
+The reference and alternative alleles are stored in the meta-columns
+and can be accessed and set through the mcols() function. All functions
+that require reference or alternative allele will check
+in the meta-columns "ref" or "alt" for that information.
+
+```{r echo=TRUE, eval=TRUE}
+#from simulated data
+mcols(a.simple)[,"ref"] <- c("T","C","G")
+
+#from reference genome
+data(ASEset.sim)
+fasta <- system.file('extdata/hg19.chr17.subset.fa', package='AllelicImbalance')
+a.ref <- refAllele(ASEset.sim,fasta=fasta) 
+
+#infer and set alternative allele
+alt <- inferAltAllele(a.simple)
+mcols(a.simple)[,"alt"] <- alt
 ```
 
 #Tests
@@ -232,6 +252,7 @@ binom.test(a2,"+")
 #chi-square test
 chisq.test(a2,"-")
 ```
+
 # Standard Graphics
 ## Plotting of an ASEset object
 The barplot function for ASEset objects
@@ -381,7 +402,6 @@ the top fraction only covers 50%, but in general it can be anywhere between
 topalleleexample()
 ```
 
-
 ### The default maxcount criteria
 The default maxcount criteria is based on the rank for the total number of
 reads covering each allele, i.e. the allele covered the most will be on the top.
@@ -391,11 +411,21 @@ In previous sections it has been described how to import and store reference dat
 in ASEset objects, here there will be an example of how that information can be
 used in a plot
 
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+data(ASEset)
+mcols(ASEset)[,"alt"] <- inferAltAllele(ASEset)
+barplot(ASEset[1], type="fraction", strand="+", top.allele.criteria="ref")
+```
+
 ###Dealing with phased data in plots
 In previous sections it has been described how to import and store phased data
 in ASEset objects, here there will be an example of how that information can be
 used in a plot
 
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+phase(ASEset) <- phase.mat 
+barplot(ASEset[1], type="fraction", strand="+", top.allele.criteria="phase")
+```
 
 # Conclusion
 In conclusion we hope that you will find this package useful in the
