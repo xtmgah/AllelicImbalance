@@ -274,3 +274,147 @@ setMethod("defaultPhase", signature("numeric"),
 })
 
 
+#' regionSummary
+#' 
+#' Gives a summary of AI-consistency for a transcript
+#'
+#' From a given set of e.g. transcripts exon ranges the function will return
+#' a summary for the sum of all exons. Phase information is required.
+#'
+#' @name regionSummary
+#' @rdname regionSummary
+#' @aliases regionSummary,numeric-method
+#' @docType methods
+#' @param x ASEset object
+#' @param gr GenomicRanges object to summmarize over
+#' @param ... arguments to forward to internal functions
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords summary
+#' @examples
+#' 
+#' data(ASEset) 
+#' a <- ASEset
+#' # Add phase
+#' set.seed(1)
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
+#' 
+#' phase(a) <- p
+#'
+#' # in this example every snp is on its own exon
+#' txGR <- granges(a)
+#' t <- regionSummary(a, txGR)
+#'
+NULL
+
+#' @rdname regionSummary
+#' @export
+setGeneric("regionSummary", function(x, ... ){
+    standardGeneric("regionSummary")
+})
+
+
+#' @rdname regionSummary
+#' @export
+setMethod("regionSummary", signature("ASEset"),
+		function(x, gr, strand="*", ...
+	){
+
+		#needs alternative allele
+		if(!"alt" %in% colnames(mcols(x))){
+			stop("function needs mcols(x)[['alt']] to be set")				
+		}
+
+		#make overlap and subset based on gr
+		hits <- findOverlaps(x,gr)
+		x <- x[queryHits(hits),]
+
+		fr <- fraction(x, top.allele.criteria="phase")
+
+		#need information of which are heterozygotes and homozygotes
+		if(is.null(genotype(x))){
+			genotype(x) <- inferGenotypes(x, return.allele.allowed="bi")
+		}
+		fr.het.filt <- hetFilt(x)
+		fr.f <- fr
+		fr.f[!t(fr.het.filt)] <- NaN
+
+		maternalAllele <- function(x){
+		
+			mat <- phase(x,return.class="array")[,,1]
+			ref <- mcols(x)[["ref"]]
+			alt <- mcols(x)[["alt"]]
+		
+			apply(t(mat),1,function(y){
+				
+				vec <- rep(NA,length(y))
+				if(any(y == 1)){
+					vec[y == 1] <- ref[y == 1]
+				}
+				if(any(y == 0)){
+					vec[y == 0] <- alt[y == 0]
+				}
+				vec
+			})
+			
+		}
+
+		mallele <- maternalAllele(x)
+		mbias <- mapBias(x, return.class="array")
+
+		#for loop (for now)
+		vmat <- matrix(x@variants, byrow=TRUE,ncol=length(x@variants),nrow=ncol(x))
+		mbias.values <- matrix(NA, ncol=ncol(x), nrow=nrow(x))
+		for (i in 1:nrow(mbias)){
+			it.mbias <- mbias[i,,]
+			it.mallele <- mallele[i,]
+			mat.mallele <- matrix(it.mallele, ncol=length(x@variants), nrow=nrow(vmat))
+			tf <- mat.mallele == vmat
+			mbias.values[i,] <- it.mbias[tf]
+		}
+
+		tf <- fr.f > t(mbias.values)
+		tf2 <- fr.f < t(mbias.values)
+		fr.up.filt <- tf
+		fr.down.filt <- tf2
+
+		pv <- binom.test(x,strand)
+
+		p.up.filt <- pv
+		p.up.filt[!tf] <- NA
+		p.down.filt <- pv
+		p.down.filt[!tf2] <- NA
+
+		ai.down <- apply(tf2,1,sum, na.rm=TRUE)
+		ai.up <- apply(tf,1,sum, na.rm=TRUE)
+
+		fr.d <- abs(fr.f - t(mbias.values))
+
+		hets <- apply(t(filt),1,sum)
+		homs <- apply(t(!filt),1,sum)
+
+		mean.fr <- apply(fr.f, 1, mean, na.rm=TRUE)
+		sd.fr <- apply(fr.f, 1, sd, na.rm=TRUE)
+		mean.delta <- apply(fr.d, 1, mean, na.rm=TRUE)
+		sd.delta <- apply(fr.d, 1, sd, na.rm=TRUE)
+
+		#dir.up <- apply(fr.f,1,function(x){sum(mean(x, na.rm=TRUE)>0.5)})
+		#dir.down <- apply(fr.f,1,function(x){sum(mean(x, na.rm=TRUE)<0.5)})
+
+		#return data frame
+		data.frame(
+				hets=hets,
+				homs=homs,
+				mean.fr=mean.fr,
+				sd.fr=sd.fr,
+				mean.delta=mean.delta,
+				sd.delta=sd.delta,
+				ai.up=ai.up,
+				ai.down=ai.down
+				)
+})
+
+
+

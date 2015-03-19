@@ -427,6 +427,16 @@ phase(ASEset) <- phase.mat
 barplot(ASEset[1], type="fraction", strand="+", top.allele.criteria="phase")
 ```
 
+# Summary functions
+The regionSummary function can be used to investigate if there is a consistent imbalance in the same direction over a region (e.g. a transcript). 
+
+```{r echo=TRUE, eval=TRUE, message=FALSE}
+# in this example every snp is on its own exon
+txGR <- granges(x)
+regionSummary(ASEset, txGR)
+```
+
+
 # Conclusion
 In conclusion we hope that you will find this package useful in the
 investigation of the genetics of RNA-seq experiments. The various import
@@ -437,7 +447,6 @@ functions should be helpful in discovering any allele specific expression
 patterns that might be found in your data.
 
 # Links
-[link](www.rstudio.com)
 
 Bowtie
 [link](http://bowtie-bio.sourceforge.net)
