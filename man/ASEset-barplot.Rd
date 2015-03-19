@@ -9,11 +9,12 @@
 \usage{
 barplot(height, ...)
 
-\S4method{barplot}{ASEset}(height, type = "count", sampleColour = NULL,
-  legend = TRUE, pValue = TRUE, strand = "*", testValue = NULL,
-  testValue2 = NULL, OrgDb = NULL, TxDb = NULL,
+\S4method{barplot}{ASEset}(height, type = "count", sampleColour.top = NULL,
+  sampleColour.bot = NULL, legend = TRUE, pValue = TRUE, strand = "*",
+  testValue = NULL, testValue2 = NULL, OrgDb = NULL, TxDb = NULL,
   annotationType = c("gene", "exon", "transcript"), main = NULL,
-  ylim = NULL, yaxis = TRUE, xaxis = FALSE, ylab = TRUE, xlab = TRUE,
+  ylim = NULL, yaxis = TRUE, xaxis = FALSE, ylab = TRUE,
+  ylab.text = "reads", xlab.text = "samples", xlab = TRUE,
   legend.colnames = "", las.ylab = 1, las.xlab = 2, cex.main = 1,
   cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6,
   add = FALSE, lowerLeftCorner = c(0, 0), size = c(1, 1),
@@ -29,8 +30,6 @@ barplot(height, ...)
 \item{...}{for simpler generics when extending function}
 
 \item{type}{'count' or 'fraction'}
-
-\item{sampleColour}{User specified colours}
 
 \item{legend}{Display legend}
 
@@ -58,6 +57,10 @@ barplot(height, ...)
 \item{xaxis}{wheter the x-axis is to be displayed or not}
 
 \item{ylab}{showing labels for the tic marks}
+
+\item{ylab.text}{ylab text}
+
+\item{xlab.text}{xlab text}
 
 \item{xlab}{showing labels for the tic marks}
 
@@ -105,6 +108,8 @@ away pValues where the main allele has this frequency.}
 \item{ypos.annotation}{relative ypos for annotation text}
 
 \item{annotation.interspace}{space between annotation text}
+
+\item{sampleColour}{User specified colours}
 }
 \description{
 Generates barplots for ASEset objects. Two levels of plotting detail are

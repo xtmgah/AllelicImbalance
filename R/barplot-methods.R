@@ -1113,19 +1113,19 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
     invisible(graphParamList)
 })
 
-#' lbarplot ASEset objects
+#' gbarplot ASEset objects
 #' 
-#' Generates lbarplots for ASEset objects. Two levels of plotting detail are
-#' provided: a detailed lbarplot of read counts by allele useful for fewer
-#' samples and SNPs, and a less detailed lbarplot of the fraction of imbalance,
+#' Generates gbarplots for ASEset objects. Two levels of plotting detail are
+#' provided: a detailed gbarplot of read counts by allele useful for fewer
+#' samples and SNPs, and a less detailed gbarplot of the fraction of imbalance,
 #' useful for more samples and SNPs.
 #' 
 #' This function serves the same purpose as the normal barplot, but with
 #' trellis graphics using lattice, to be able to integrate well with Gviz track
 #' functionality.
 #' 
-#' @name ASEset-lbarplot
-#' @aliases ASEset-lbarplot lbarplot lbarplot,ASEset-method
+#' @name ASEset-gbarplot
+#' @aliases ASEset-gbarplot gbarplot gbarplot,ASEset-method
 #' @docType methods
 #' @param x An \code{ASEset} object
 #' @param type 'count' or 'fraction'
@@ -1133,23 +1133,23 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 #' @param verbose Makes function more talkative
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin
-#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the lbarplot
+#' @seealso \itemize{ \item The \code{\link{ASEset}} class which the gbarplot
 #' function can be called up on.  \item The \code{\link{barplot}} non trellis
 #' barplot.  }
-#' @keywords lbarplot
+#' @keywords gbarplot
 #' @examples
 #' 
 #' data(ASEset)
-#' lbarplot(ASEset[1])
+#' gbarplot(ASEset[1])
 #' 
-#' @exportMethod lbarplot
+#' @exportMethod gbarplot
 
-setGeneric("lbarplot", function(x, type = "count", strand = "*", 
+setGeneric("gbarplot", function(x, type = "count", strand = "*", 
     verbose = FALSE, ...) {
-    standardGeneric("lbarplot")
+    standardGeneric("gbarplot")
 })
 
-setMethod("lbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "*", 
+setMethod("gbarplot", signature(x = "ASEset"), function(x, type = "count", strand = "*", 
     usePhase=FALSE, verbose = FALSE, ...) {
 
     if (length(list(...)) == 0) {

@@ -344,7 +344,7 @@ setMethod("locationplot", signature(x = "ASEset"), function(x, type = "fraction"
 #' 
 #' The glocationplot methods visualises the distribution of ASE over a larger
 #' region on one chromosome. It takes and ASEset object as well as additional
-#' information on plot type (see \code{\link{lbarplot}}), strand type (see
+#' information on plot type (see \code{\link{gbarplot}}), strand type (see
 #' \code{\link{getAlleleCounts}}), Annotation tracks are created from the Gviz
 #' packageh. It is obviously important to make sure that the genome build used
 #' is set correctly, e.g. 'hg19'.

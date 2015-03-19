@@ -335,18 +335,18 @@ environment, visit this [link](https://www.stat.auckland.ac.nz/~paul/grid/grid.h
 uses tracks to visualize genomic regions in a smart way. Below are examples
 for the bar- and locationplot versions using the grid, having an extra "g" as prefix in the function name.  
 
-##lbarplot
+##gbarplot
 The standard barplot function offers a lot 
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
 #access example ASEset data
 data(ASEset)
 
-#lbarplots with type "count" 
-lbarplot(ASEset, type="count")
+#gbarplots with type "count" 
+gbarplot(ASEset, type="count")
 
-# lbarplots with type "fraction" 
-lbarplot(ASEset, type="fraction")
+# gbarplots with type "fraction" 
+gbarplot(ASEset, type="fraction")
 ```
 
 ##glocationplot
