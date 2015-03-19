@@ -13,7 +13,7 @@ topalleleexample(x)
 \item{x}{"missing", and so no argument is given}
 }
 \description{
-used as a visual example to the top allele criteria
+used as a visual example to the top.fraction.criteria
 }
 \details{
 shows what is top and what is down

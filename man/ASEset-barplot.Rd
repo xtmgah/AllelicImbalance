@@ -21,7 +21,7 @@ barplot(height, ...)
   addHorizontalLine = 0.5, add.frame = TRUE,
   filter.pValue.fraction = 0.99, legend.fill.size = 1,
   legend.interspace = 1, verbose = FALSE,
-  top.allele.criteria = "maxcount", cex.annotation = 0.7,
+  top.fraction.criteria = "maxcount", cex.annotation = 0.7,
   ypos.annotation = 0, annotation.interspace = 1, ...)
 }
 \arguments{
@@ -101,7 +101,7 @@ away pValues where the main allele has this frequency.}
 
 \item{verbose}{Makes function more talkative}
 
-\item{top.allele.criteria}{'maxcount', 'ref' or 'phase'}
+\item{top.fraction.criteria}{'maxcount', 'ref' or 'phase'}
 
 \item{cex.annotation}{size of annotation text}
 

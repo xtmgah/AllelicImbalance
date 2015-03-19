@@ -62,7 +62,7 @@
 #' away pValues where the main allele has this frequency.
 #' @param legend.fill.size size of the fill/boxes in the legend (default:NULL)
 #' @param verbose Makes function more talkative
-#' @param top.allele.criteria 'maxcount', 'ref' or 'phase'
+#' @param top.fraction.criteria 'maxcount', 'ref' or 'phase'
 #' @param ... for simpler generics when extending function
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The \code{\link{ASEset}} class which the barplot
@@ -91,7 +91,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
     cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6, add = FALSE, 
     lowerLeftCorner = c(0, 0), size = c(1, 1), addHorizontalLine = 0.5, add.frame = TRUE, 
     filter.pValue.fraction = 0.99,  legend.fill.size=1, legend.interspace=1, verbose = FALSE, 
-	top.allele.criteria="maxcount", cex.annotation=0.7, ypos.annotation=0, annotation.interspace=1,
+	top.fraction.criteria="maxcount", cex.annotation=0.7, ypos.annotation=0, annotation.interspace=1,
 	...) {
     
     # catch useful graphical parameters that can be used to later add onto plot. This
@@ -1015,7 +1015,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
             fgColHere <- fgCol
             #tmp <- alleleCounts(x, strand)[[snp]][samples, , drop = FALSE]
             
-			df <- fractionPlotDf(x, snp, strand=strand, top.allele.criteria=top.allele.criteria)
+			df <- fractionPlotDf(x, snp, strand=strand, top.fraction.criteria=top.fraction.criteria)
             # check for zeroRows
             if (sum(df$na=="no")==0) {
                 zeroRows <- TRUE
@@ -1178,8 +1178,8 @@ setMethod("gbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     if (!exists("deAnnoPlot", envir = e, inherits = FALSE)) {
         e$deAnnoPlot <- FALSE
     }
-    if (!exists("top.allele.criteria", envir = e, inherits = FALSE)) {
-        e$top.allele.criteria <- "maxcount"
+    if (!exists("top.fraction.criteria", envir = e, inherits = FALSE)) {
+        e$top.fraction.criteria <- "maxcount"
     }
 
 	for (i in 1:nrow(x)) {
@@ -1196,7 +1196,7 @@ setMethod("gbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 				middleLine=e$middleLine,
 				deAnnoPlot=e$deAnnoPlot,
 				cex.mainvec=e$cex.mainvec,
-				top.allele.criteria=e$top.allele.criteria)
+				top.fraction.criteria=e$top.fraction.criteria)
 		} else if (type == "count") {
 			b <- barplotLatticeCounts(
 				identifier = name, 
@@ -1215,7 +1215,7 @@ setMethod("gbarplot", signature(x = "ASEset"), function(x, type = "count", stran
 
 #' topalleleexample ASEset objects
 #' 
-#' used as a visual example to the top allele criteria
+#' used as a visual example to the top.fraction.criteria
 #' 
 #' shows what is top and what is down
 #' 

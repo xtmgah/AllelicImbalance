@@ -395,11 +395,11 @@ data(ASEset)
 
 #using reference allele information
 mcols(ASEset)[,"alt"] <- inferAltAllele(ASEset)
-barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.allele.criteria="ref")
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="ref")
 
 #using phase information
 phase(ASEset) <- phase.mat 
-barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.allele.criteria="phase")
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="phase")
 ```
 
 # Summary functions
