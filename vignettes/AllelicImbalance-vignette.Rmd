@@ -193,7 +193,7 @@ colData(a.simple) <- pdata
 ```
 
 ## Adding phase information
-For some functionality phase information is necessary. In the AllelicImbalance package there is no functionality for the phasing, but e.g. samtools can provide phasing information. The phase information is often present in VCF-files. And the below lines show you how to access that information and transfer it to an ASEset. The ASEset follows the VCF-conventions on how to describe the phase, i.e. each patients phase will be described by e.g. the form "1|0","1|1" or "1/0". There the left hand number is the description of the maternal allele and the right hand number is the description of the paternal allele. If it is 0 the allele is the same as the reference allele, and if it is 1 it is the alternative allele. For "|" the phase is known and for "/" the phase is not known. Note, that in the AllelicImbalance package only bi-allelic expression is allowed.
+For some functionality phase information is necessary. Phasing can be obtained from many external sources e.g. samtools. The phase information is often present in VCF-files. And the lines below show how to access that information and transfer it to an ASEset. The ASEset follows the VCF-conventions on how to describe the phase, i.e. each patients phase will be described by the established notation of the form "1|0","1|1" or "1/0". There the left number is the description of the maternal allele and the right number is the description of the paternal allele. If it is 0 the allele is the same as the reference allele, and if it is 1 it is the alternative allele. For "|" the phase is known and for "/" the phase is not known. Note, that in the AllelicImbalance package only bi-allelic expression is allowed.
 
 ```{r echo=TRUE, eval=TRUE}
 #manually add the phase information
@@ -265,11 +265,11 @@ testValue2 can be used. When the counts for one allele are below 5 for
 one allele the chi-square test returns NA. This is why there is no P-value above the first bar in the example below.
 
 ```{r echo=TRUE, eval=TRUE}
-barplot(a.stranded[1], strand="+", legend.interspace=2)
+barplot(a.stranded[1], strand="+", xlab.text="", legend.interspace=2)
 
 #set own computed p-values
 btp <- binom.test(a.stranded[1],"+")
-barplot(a.stranded[1],strand="+", testValue=btp, legend.interspace=2)
+barplot(a.stranded[1], strand="+", testValue=btp, xlab.text="", legend.interspace=2)
 ```
 
 Another example of plotting that is useful is the one invoked with the plotting
@@ -303,6 +303,7 @@ gene, exon, transcript and CDS.
 library(org.Hs.eg.db)
 barplot(a.simple[1],OrgDb=org.Hs.eg.db,
 			cex.main = 0.7,
+			xlab.text="",
 			ypos.annotation = 0.08,
 			annotation.interspace=1.3,
 			legend.interspace=1.5
@@ -321,23 +322,21 @@ OrgDb and TxDb.
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 #using count type
-locationplot(a.simple,type="count", cex.main=0.7, cex.legend=0.4)
+locationplot(a.stranded, strand="-", type="count", cex.main=0.7, cex.legend=0.4)
 #use annotation
-a.simple.sorted <- sort(a.simple, decreasing=FALSE)
-locationplot(a.simple.sorted, OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
+a.stranded.sorted <- sort(a.stranded, decreasing=FALSE)
+locationplot(a.stranded.sorted, strand="-", OrgDb=org.Hs.eg.db,TxDb=TxDb.Hsapiens.UCSC.hg19.knownGene)
 ```
 
 #Grid Graphics
 To make use of the extra graphical flexibility that comes with grid graphics, 
-the AllelicImbalance package has now functions that can be integrate that
-environment. Another good reason for grid graphics is the Gviz package, which
+the AllelicImbalance package has now functions that can be integrated in that
+environment, visit this [link](https://www.stat.auckland.ac.nz/~paul/grid/grid.html) for more information. Another good reason for grid graphics is the Gviz package, which
 uses tracks to visualize genomic regions in a smart way. Below are examples
-on corresponging bar- and locationplots using the grid and Gviz
-evironment.
+for the bar- and locationplot versions using the grid, having an extra "g" as prefix in the function name.  
 
-##lbarplots
-The "l" in lbarplot comes from "lattice barplot". lattice is an R-package using
-grid graphics.
+##lbarplot
+The standard barplot function offers a lot 
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
 #access example ASEset data
@@ -350,7 +349,7 @@ lbarplot(ASEset, type="count")
 lbarplot(ASEset, type="fraction")
 ```
 
-##glocationplots
+##glocationplot
 The "g" in glocationplot comes from "Gviz barplot". It is a wrapper to quickly 
 get an overview of ASE in a region.
 
@@ -369,11 +368,9 @@ More flexibility and functionality from the Gviz package is accessed
 if the tracks are constructed separately.
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
-#access example read data
-x <- ASEset[,1:2]
-data(reads)
+#subset ASEset and reads
+x <- ASEset[1:2]
 r <- reads[1:2]
-genome(x) <- 'hg19'
 seqlevels(r, force=TRUE) <- seqlevels(x)
 
 GR <- GRanges(seqnames=seqlevels(x),
@@ -385,46 +382,24 @@ covTracks <- CoverageDataTrack(x, BamList=r, strand='+')
 lst <- c(deTrack,covTracks)
 sizes <- c(0.5,rep(0.5/length(covTracks),length(covTracks)))
 
-plotTracks(lst, from=min(start(x)), to=max(end(x)), 
-sizes=sizes, col.line = NULL, showId = FALSE, main='mainText', 
-cex.main=1, title.width=1, type='histogram')
+plotTracks(lst, from=min(start(x)), to=max(end(x)), sizes=sizes, col.line = NULL, showId = FALSE, main = 'main', cex.main = 1, title.width = 1, type = 'histogram')
 ```
 
 ##Top allele criteria
-The barplot with type='fraction' has the options to be visualized having 
-three different criterias for which allele or phased is the top allele.
-For clarity, what is defined as the top fraction is the fraction starting
-from 1 and going downwards, as can be seen in the figure below. In this case
-the top fraction only covers 50%, but in general it can be anywhere between
-100% to 0%. 
+The barplot with type='function' can be visualized according to three different allele sorting criteria. The default behaviour is just to shown the allele with highest overall abundance in the upper half of the plot. This works well for most single SNP investigations. For more complex situations, however, it can be essential to keep track of phase information. This is done either through the reference allele sorting function, or even better, through consistently showing the maternal allele on top. When phase is know, this is essential to compare effect-directions of different coding SNPs
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
-topalleleexample()
-```
 
-### The default maxcount criteria
-The default maxcount criteria is based on the rank for the total number of
-reads covering each allele, i.e. the allele covered the most will be on the top.
-
-### Reference allele information
-In previous sections it has been described how to import and store reference data
-in ASEset objects, here there will be an example of how that information can be
-used in a plot
-
-```{r echo=TRUE, eval=TRUE, message=FALSE}
+#load data
 data(ASEset)
+
+#using reference allele information
 mcols(ASEset)[,"alt"] <- inferAltAllele(ASEset)
-barplot(ASEset[1], type="fraction", strand="+", top.allele.criteria="ref")
-```
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.allele.criteria="ref")
 
-###Dealing with phased data in plots
-In previous sections it has been described how to import and store phased data
-in ASEset objects, here there will be an example of how that information can be
-used in a plot
-
-```{r echo=TRUE, eval=TRUE, message=FALSE}
+#using phase information
 phase(ASEset) <- phase.mat 
-barplot(ASEset[1], type="fraction", strand="+", top.allele.criteria="phase")
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.allele.criteria="phase")
 ```
 
 # Summary functions
@@ -432,8 +407,9 @@ The regionSummary function can be used to investigate if there is a consistent i
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
 # in this example every snp is on its own exon
-txGR <- granges(x)
-regionSummary(ASEset, txGR)
+txGR <- granges(ASEset)
+rs <- regionSummary(ASEset, txGR)
+head(rs)
 ```
 
 

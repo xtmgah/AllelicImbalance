@@ -286,6 +286,7 @@ setMethod("defaultPhase", signature("numeric"),
 #' @aliases regionSummary,numeric-method
 #' @docType methods
 #' @param x ASEset object
+#' @param strand can be "+", "-" or "*"
 #' @param gr GenomicRanges object to summmarize over
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -331,7 +332,7 @@ setMethod("regionSummary", signature("ASEset"),
 		hits <- findOverlaps(x,gr)
 		x <- x[queryHits(hits),]
 
-		fr <- fraction(x, top.allele.criteria="phase")
+		fr <- fraction(x, strand=strand, top.allele.criteria="phase")
 
 		#need information of which are heterozygotes and homozygotes
 		if(is.null(genotype(x))){
@@ -392,8 +393,8 @@ setMethod("regionSummary", signature("ASEset"),
 
 		fr.d <- abs(fr.f - t(mbias.values))
 
-		hets <- apply(t(filt),1,sum)
-		homs <- apply(t(!filt),1,sum)
+		hets <- apply(t(fr.het.filt),1,sum)
+		homs <- apply(t(!fr.het.filt),1,sum)
 
 		mean.fr <- apply(fr.f, 1, mean, na.rm=TRUE)
 		sd.fr <- apply(fr.f, 1, sd, na.rm=TRUE)
@@ -405,8 +406,8 @@ setMethod("regionSummary", signature("ASEset"),
 
 		#return data frame
 		data.frame(
-				hets=hets,
-				homs=homs,
+				het=hets,
+				hom=homs,
 				mean.fr=mean.fr,
 				sd.fr=sd.fr,
 				mean.delta=mean.delta,
