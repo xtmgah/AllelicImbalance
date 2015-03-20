@@ -55,33 +55,19 @@ NULL
 #' #cex.main=1, title.width=1, type='histogram')
 #' 
 #'
-#' @importFrom Gviz DetailsAnnotationTrack
-#' @importFrom Gviz AnnotationTrack
-#' @importFrom Gviz DataTrack
-#' @importFrom Gviz plotTracks
-#' @importFrom Gviz GeneRegionTrack
-#' 
-#' @importClassesFrom Gviz DataTrack
-#' @importClassesFrom Gviz AnnotationTrack
-#' @importClassesFrom Gviz DetailsAnnotationTrack
-#' @importClassesFrom Gviz GeneRegionTrack
-#'
-#' @exportMethod ASEDAnnotationTrack
-#' @exportMethod CoverageDataTrack
 NULL
 
-# @export plotTracks
-
-##' @rdname ASEset-gviztrack
-# setGeneric('plotTracks')
 
 #' @rdname ASEset-gviztrack
+#' @export
 setGeneric("ASEDAnnotationTrack", function(x, GR = rowRanges(x), type = "fraction", 
     strand = "*", trackName = paste("deTrack", type), verbose = TRUE, 
     ...) {
     standardGeneric("ASEDAnnotationTrack")
 })
 
+#' @rdname ASEset-gviztrack
+#' @export
 setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowRanges(x), 
     type = "fraction", strand = "*",  trackName = paste("deTrack", 
         type), verbose = TRUE, ...) {
@@ -192,9 +178,12 @@ setMethod("ASEDAnnotationTrack", signature(x = "ASEset"), function(x, GR = rowRa
 })
 
 #' @rdname ASEset-gviztrack
+#' @export
 setGeneric("CoverageDataTrack", function(x, GR = rowRanges(x), BamList = NULL, strand = NULL, 
     start = NULL, end = NULL, trackNameVec = NULL, meanCoverage=FALSE, verbose = TRUE, ...) {
     standardGeneric("CoverageDataTrack")
+#' @rdname ASEset-gviztrack
+#' @export
 })
 setMethod("CoverageDataTrack", signature(x = "ASEset"), function(x, GR = rowRanges(x), 
 	 BamList = NULL, strand = "*", start = NULL, end = NULL, trackNameVec = NULL,

@@ -14,7 +14,7 @@ barplot(height, ...)
   testValue = NULL, testValue2 = NULL, OrgDb = NULL, TxDb = NULL,
   annotationType = c("gene", "exon", "transcript"), main = NULL,
   ylim = NULL, yaxis = TRUE, xaxis = FALSE, ylab = TRUE,
-  ylab.text = "reads", xlab.text = "samples", xlab = TRUE,
+  ylab.text = NULL, xlab.text = "samples", xlab = TRUE,
   legend.colnames = "", las.ylab = 1, las.xlab = 2, cex.main = 1,
   cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6,
   add = FALSE, lowerLeftCorner = c(0, 0), size = c(1, 1),
@@ -30,6 +30,10 @@ barplot(height, ...)
 \item{...}{for simpler generics when extending function}
 
 \item{type}{'count' or 'fraction'}
+
+\item{sampleColour.top}{User specified colours for top fraction}
+
+\item{sampleColour.bot}{User specified colours for bottom fraction}
 
 \item{legend}{Display legend}
 
@@ -108,8 +112,6 @@ away pValues where the main allele has this frequency.}
 \item{ypos.annotation}{relative ypos for annotation text}
 
 \item{annotation.interspace}{space between annotation text}
-
-\item{sampleColour}{User specified colours}
 }
 \description{
 Generates barplots for ASEset objects. Two levels of plotting detail are

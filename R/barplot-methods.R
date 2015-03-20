@@ -21,7 +21,8 @@
 #' @docType methods
 #' @param height An \code{ASEset} object
 #' @param type 'count' or 'fraction'
-#' @param sampleColour User specified colours
+#' @param sampleColour.top User specified colours for top fraction
+#' @param sampleColour.bot User specified colours for bottom fraction
 #' @param legend Display legend
 #' @param pValue Display p-value
 #' @param strand four options, '+', '-', 'both' or '*'
@@ -86,7 +87,7 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
     sampleColour.top = NULL, sampleColour.bot = NULL, legend = TRUE, pValue = TRUE, strand = "*", testValue = NULL, 
     testValue2 = NULL, OrgDb = NULL, TxDb = NULL, annotationType = c("gene", "exon", 
         "transcript"), main = NULL, ylim = NULL, yaxis = TRUE, xaxis = FALSE, ylab = TRUE,
-											 ylab.text="reads", xlab.text="samples",
+											 ylab.text=NULL, xlab.text="samples",
     xlab = TRUE, legend.colnames = "", las.ylab = 1, las.xlab = 2, cex.main = 1, 
     cex.pValue = 0.7, cex.ylab = 0.7, cex.xlab = 0.7, cex.legend = 0.6, add = FALSE, 
     lowerLeftCorner = c(0, 0), size = c(1, 1), addHorizontalLine = 0.5, add.frame = TRUE, 
@@ -671,8 +672,11 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                 }
 
 
-		#set y and x labs
-		title(ylab=ylab.text, xlab=xlab.text)
+			#set y and x labs
+			if(is.null(ylab.text)){
+				ylab.text <- "reads"
+			}
+			title(ylab=ylab.text, xlab=xlab.text)
 
             }
             
@@ -997,6 +1001,9 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
             }
 
 			#set y and x labs
+			if(is.null(ylab.text)){
+				ylab.text <- "reads"
+			}
 			title(ylab=ylab.text, xlab=xlab.text)
         }
     } else if (type == "fraction") {
@@ -1105,6 +1112,9 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
                 #}
             }
 			#set y and x labs
+			if(is.null(ylab.text)){
+				ylab.text <- "fraction"
+			}
 			title(ylab=ylab.text, xlab=xlab.text)
         }
 
@@ -1213,46 +1223,45 @@ setMethod("gbarplot", signature(x = "ASEset"), function(x, type = "count", stran
     b
 }) 
 
-#' topalleleexample ASEset objects
-#' 
-#' used as a visual example to the top.fraction.criteria
-#' 
-#' shows what is top and what is down
-#' 
-#' @name ASEset-topalleleexample
-#' @aliases ASEset-topalleleexample topalleleexample topalleleexample,ASEset-method
-#' @docType methods
-#' @param x "missing", and so no argument is given
-#' @author Jesper R. Gadin
-#' @keywords topallele
-#' @examples
-#' 
-#' data(ASEset)
-#' topalleleexample(ASEset[1])
-#' 
-#' @export topalleleexample
-
-setGeneric("topalleleexample", function(x) {standardGeneric("topalleleexample")})
-    
-setMethod("topalleleexample", signature(x = "missing"), function() {
-
-	df <- data.frame(value=c(0.5,0.5,0.5,0.5),sample=c("sample1","sample1","sample2","sample2"), group=c("grp1","grp2","grp1","grp2"))
-	df <- df[1:2,]
-
-	barchart(
-		value~sample,data=df,
-		groups=group,
-		ylim=c(0,1), cex=0.8, ylab="fraction",
-		xlab="samples",
-		horizontal=F, stack=T, 
-		col=c("ivory","ivory"),
-		panel=function(x,y,...){
-			panel.barchart(x,y,...)
-			panel.text(x, 0.75, labels=c("top"), cex=2, font=2)
-			panel.text(x, 0.25, labels=c("bottom"),cex=2, font=2)
-			panel.abline=0.5
-			}
-	) 
-
-}) 
-
+##' topalleleexample ASEset objects
+##' 
+##' used as a visual example to the top.fraction.criteria
+##' 
+##' shows what is top and what is down
+##' 
+##' @name ASEset-topalleleexample
+##' @aliases ASEset-topalleleexample topalleleexample topalleleexample,ASEset-method
+##' @docType methods
+##' @param x "missing", and so no argument is given
+##' @author Jesper R. Gadin
+##' @keywords topallele
+##' @examples
+##' 
+##' data(ASEset)
+##' topalleleexample()
+##' 
+##' @export topalleleexample
+#setGeneric("topalleleexample", function(x) {standardGeneric("topalleleexample")})
+#    
+#setMethod("topalleleexample", signature(x = "missing"), function() {
+#
+#	df <- data.frame(value=c(0.5,0.5,0.5,0.5),sample=c("sample1","sample1","sample2","sample2"), group=c("grp1","grp2","grp1","grp2"))
+#	df <- df[1:2,]
+#
+#	barchart(
+#		value~sample,data=df,
+#		groups=group,
+#		ylim=c(0,1), cex=0.8, ylab="fraction",
+#		xlab="samples",
+#		horizontal=F, stack=T, 
+#		col=c("ivory","ivory"),
+#		panel=function(x,y,...){
+#			panel.barchart(x,y,...)
+#			panel.text(x, 0.75, labels=c("top"), cex=2, font=2)
+#			panel.text(x, 0.25, labels=c("bottom"),cex=2, font=2)
+#			panel.abline=0.5
+#			}
+#	) 
+#
+#}) 
+#

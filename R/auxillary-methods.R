@@ -303,6 +303,9 @@ setMethod("defaultPhase", signature("numeric"),
 #' 	nrow=nrow(a), ncol(a))
 #' 
 #' phase(a) <- p
+#' 
+#' #add alternative allele information
+#' mcols(a)[["alt"]] <- inferAltAllele(a)
 #'
 #' # in this example every snp is on its own exon
 #' txGR <- granges(a)
