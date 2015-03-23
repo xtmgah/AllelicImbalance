@@ -1041,7 +1041,7 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*",
 # counts
 
 
-#' scanForHeterozygotes
+#' scanForHeterozygotes.old
 #' 
 #' Identifies the positions of SNPs found in BamGR reads.
 #' 
@@ -1063,7 +1063,7 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*",
 #' sample. This is useful if sequencing errors are suspected to be common.
 #' @param maxReads max number of reads of one list-element allowed
 #' @param verbose logical indicating if process information should be displayed
-#' @return \code{scanForHeterozygotes} returns a GRanges object with the SNPs
+#' @return \code{scanForHeterozygotes.old} returns a GRanges object with the SNPs
 #' for the BamList object that was used as input.
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The \code{\link{getAlleleCounts}} which is a
@@ -1072,10 +1072,10 @@ getAlleleCounts <- function(BamList, GRvariants, strand = "*",
 #' @examples
 #' 
 #' data(reads)
-#' s <- scanForHeterozygotes(reads,verbose=FALSE)
+#' s <- scanForHeterozygotes.old(reads,verbose=FALSE)
 #' 
-#' @export scanForHeterozygotes
-scanForHeterozygotes <- function(BamList, minimumReadsAtPos = 20, maximumMajorAlleleFrequency = 0.9, 
+#' @export scanForHeterozygotes.old
+scanForHeterozygotes.old <- function(BamList, minimumReadsAtPos = 20, maximumMajorAlleleFrequency = 0.9, 
     minimumBiAllelicFrequency = 0.9, maxReads = 15000, verbose = TRUE) {
     
     # if just one element of, make list (which is a convenient way of handling this

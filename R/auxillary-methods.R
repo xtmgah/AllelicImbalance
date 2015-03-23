@@ -420,7 +420,7 @@ setMethod("regionSummary", signature("ASEset"),
 				)
 })
 
-#' scanForHeterozygotes2
+#' scanForHeterozygotes
 #' 
 #' Identifies the positions of SNPs found in BamGR reads.
 #' 
@@ -436,13 +436,16 @@ setMethod("regionSummary", signature("ASEset"),
 #' common allele. Setting this parameter lower will minimise the SNP calls
 #' resulting from technical read errors, at the cost of missing loci with
 #' potential strong ASE
+#' @param minimumMinorAlleleFrequency minimum frequency allowed for the second most
+#' common allele. Setting this parameter higher will minimise the SNP calls
+#' resulting from technical read errors, at the cost of missing loci with
+#' potential strong ASE
 #' @param minimumBiAllelicFrequency minimum frequency allowed for the first and
 #' second most common allele. Setting a Lower value for this parameter will
 #' minimise the identification of loci with three or more alleles in one
 #' sample. This is useful if sequencing errors are suspected to be common.
-#' @param maxReads max number of reads of one list-element allowed
 #' @param verbose logical indicating if process information should be displayed
-#' @return \code{scanForHeterozygotes2} returns a GRanges object with the SNPs
+#' @return \code{scanForHeterozygotes} returns a GRanges object with the SNPs
 #' for the BamList object that was used as input.
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @seealso \itemize{ \item The \code{\link{getAlleleCounts}} which is a
@@ -451,11 +454,11 @@ setMethod("regionSummary", signature("ASEset"),
 #' @examples
 #' 
 #' data(reads)
-#' s <- scanForHeterozygotes2(reads,verbose=FALSE)
+#' s <- scanForHeterozygotes(reads,verbose=FALSE)
 #' 
-#' @export scanForHeterozygotes2
-scanForHeterozygotes2 <- function(BamList, minimumReadsAtPos = 20,
-	maximumMajorAlleleFrequency = 0.9, minimumMinorAlleleFrequency = 0.1, 
+#' @export scanForHeterozygotes
+scanForHeterozygotes <- function(BamList, minimumReadsAtPos = 20,
+	maximumMajorAlleleFrequency = 0.90, minimumMinorAlleleFrequency = 0.1, 
     minimumBiAllelicFrequency = 0.9, verbose = TRUE) {
     
     # if just one element of, make list (which is a convenient way of handling this
@@ -504,10 +507,6 @@ scanForHeterozygotes2 <- function(BamList, minimumReadsAtPos = 20,
         }
     }
     
-    # check that we dont create a too large and memory-consuming matrix
-    if (sum(unlist(lapply(BamList, length)) > maxReads) > 0) {
-        stop("you may consume too much memory. If there is plenty of memory, then increase maxReads to allow more reads")
-    }
     
     RangedData <- GRanges()
     chromosomeLevels <- unique(unlist(lapply(BamList, function(x) {
@@ -557,51 +556,54 @@ scanForHeterozygotes2 <- function(BamList, minimumReadsAtPos = 20,
 		}
 	}	
 
-	mat <- apply(ar, c(1,3),sum, na.rm=TRUE)
-
-	allele.count.tot <- apply(mat, 1, sum)
-
-	#set allele.count.tot to NaN for all values not passing threshold
-	#this is to indicate that we do not have enough reads to say anything
+	#mat <- apply(ar, c(1,3),sum, na.rm=TRUE)
+	allele.count.tot <- apply(ar, c(1,2), sum)
 	tf <- allele.count.tot  < minimumReadsAtPos
-	allele.count.tot[tf] <- NaN
+	allele.count.tot[tf] <- NA
+
 
 	#make frequency array
-	mat2 <- mat * array(as.vector(1/allele.count.tot),dim=dim(mat))
-	TFl <- apply(mat2, c(1), function(x){
-		if(!any(is.na(x))){
-			order <- x[order(x, decreasing = TRUE)]
-			MajorAlleleFrequency <- order[1]
-			MinorAlleleFrequency <- order[2]
-			 if (MinorAlleleFrequency >= minimumMinorAlleleFrequency) {
-			  if (MajorAlleleFrequency <= maximumMajorAlleleFrequency) {
-				if ((MinorAlleleFrequency + MajorAlleleFrequency) > minimumBiAllelicFrequency) {
-				  TRUE
-				} else {
-				  FALSE
-				}
-			  } else {
-				FALSE
-			  }
-			} else {
-			  FALSE
-			}
-		  }else{
-			  FALSE
-		}
-	 }
-	)
+	ar2 <- ar * array(as.vector(1/allele.count.tot),dim=dim(ar))
+	ar2[is.na(ar2)] <- 0
+
+	#rank alleles
+	rank <- t(apply(apply(ar,c(1,3),sum, na.rm=TRUE),
+					1, function(x){rank(x,ties.method="first")}))
+
+	ar.rank1 <- array(rank==4, dim=c(nrow(ar2), dim(ar2)[3], ncol=ncol(ar2)))
+	ar.rank2 <- array(rank==3, dim=c(nrow(ar2), dim(ar2)[3], ncol=ncol(ar2)))
+
+	#rearrange to be able to subset
+	ar.rank1 <- aperm(ar.rank1, c(1,3,2))
+	ar.rank2 <- aperm(ar.rank2, c(1,3,2))
+
+	#rearrange to be able to transform back
+	ar3 <- aperm(ar2, c(3,2,1))
+	ar.rank1b <- aperm(ar.rank1, c(3,2,1))
+	ar.rank2b <- aperm(ar.rank2, c(3,2,1))
+
+	#subset ref allele frequencies
+	maj.al.fr <- aperm(array(ar3[ar.rank1b],dim=dim(ar2)[2:1], 
+					   dimnames=dimnames(ar2)[2:1]),c(2,1))
+					   
+	min.al.fr <- aperm(array(ar3[ar.rank2b],dim=dim(ar2)[2:1], 
+					   dimnames=dimnames(ar2)[2:1]),c(2,1))
+
+	#check conditions
+	tf1 <- apply(!min.al.fr <= minimumMinorAlleleFrequency,1,any)
+	tf2 <- apply(!maj.al.fr >= maximumMajorAlleleFrequency,1,any)
+	tf3 <- apply(((min.al.fr + maj.al.fr) >= minimumBiAllelicFrequency),1,any)
+
+	toBeReturned <- my_IGPOI[tf1&tf2&tf3]
     
-	RangedData <- my_IGPOI[TFl]
-    
-   # Add a Snp name based on position
-    if (!(length(RangedData) == 0)) {
-        names(RangedData) <- paste("chr", seqnames(RangedData), "_", start(RangedData), 
+    #add an SNP name based on position
+    if (!(length(toBeReturned) == 0)) {
+        names(toBeReturned) <- paste("chr", seqnames(toBeReturned), "_", start(toBeReturned), 
             sep = "")
         
     }
 
-    return(RangedData)
+    return(toBeReturned)
 }
 
 
