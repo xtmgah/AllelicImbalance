@@ -1,3 +1,6 @@
+#'@include ASEset-class.R
+NULL
+
 #' phaseMatrix2Array
 #' 
 #' used to convert the phase from the visually friendly matrix to array.
@@ -429,6 +432,10 @@ setMethod("regionSummary", signature("ASEset"),
 #' search by modifying the minimumReadsAtPos, maximumMajorAlleleFrequency and
 #' minimumBiAllelicFrequency arguments.
 #' 
+#' @name ASEset-scanForHeterozygotes
+#' @rdname ASEset-scanForHeterozygotes
+#' @aliases ASEset-scanForHeterozygotes scanForHeterozygotes scanForHeterozygotes,ASEset-method
+#' @docType methods
 #' @param BamList A \code{GAlignmentsList object}
 #' @param minimumReadsAtPos minimum number of reads required to call a SNP at a
 #' given position
@@ -445,6 +452,7 @@ setMethod("regionSummary", signature("ASEset"),
 #' minimise the identification of loci with three or more alleles in one
 #' sample. This is useful if sequencing errors are suspected to be common.
 #' @param verbose logical indicating if process information should be displayed
+#' @param ... argument to pass on
 #' @return \code{scanForHeterozygotes} returns a GRanges object with the SNPs
 #' for the BamList object that was used as input.
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -456,10 +464,20 @@ setMethod("regionSummary", signature("ASEset"),
 #' data(reads)
 #' s <- scanForHeterozygotes(reads,verbose=FALSE)
 #' 
-#' @export scanForHeterozygotes
-scanForHeterozygotes <- function(BamList, minimumReadsAtPos = 20,
-	maximumMajorAlleleFrequency = 0.90, minimumMinorAlleleFrequency = 0.1, 
-    minimumBiAllelicFrequency = 0.9, verbose = TRUE) {
+NULL
+
+#' @rdname ASEset-scanForHeterozygotes
+#' @export
+setGeneric("scanForHeterozygotes", function(BamList, ...){
+    standardGeneric("scanForHeterozygotes")
+})
+
+#' @rdname ASEset-scanForHeterozygotes
+#' @export
+setMethod("scanForHeterozygotes", signature(BamList = "GAlignmentsList"), 
+		  function(BamList, minimumReadsAtPos = 20,
+			maximumMajorAlleleFrequency = 0.90, minimumMinorAlleleFrequency = 0.1, 
+			minimumBiAllelicFrequency = 0.9, verbose = TRUE) {
     
     # if just one element of, make list (which is a convenient way of handling this
     # input type)
@@ -604,7 +622,207 @@ scanForHeterozygotes <- function(BamList, minimumReadsAtPos = 20,
     }
 
     return(toBeReturned)
-}
+})
+
+#' Import Bam
+#' 
+#' Imports a specified genomic region from a bam file using a GenomicRanges
+#' object as search area.
+#' 
+#' These functions are wrappers to import bam files into R and store them into
+#' either GRanges, GAlignments or GappedAlignmentpairs objects.
+#' 
+#' It is recommended to use the impBamGAL() which takes information of gaps
+#' into account. If searchArea consists of overlapping ranges or ranges with 
+#' an inter-distance shorter than the read length some reads may be imported
+#' multiple times. To avoid this set option reduce=TRUE and if the searchArea
+#' symbolises SNPs, then set readLength to the length of reads in sequencing.
+#'
+#' If the sequence data is strand-specific you may want to set XStag=TRUE. The
+#' strand specific information will then be stored in the meta columns with
+#' column name 'XS'.
+#' 
+#' @name import-bam
+#' @rdname import-bam
+#' @aliases import-bam impBamGAL impBamGRL
+#' @docType methods
+#' @param UserDir The relative or full path of folder containing bam files.
+#' @param searchArea A \code{GenomicRanges object} that contains the regions of
+#' interest
+#' @param XStag Setting \code{XStag=TRUE}, if the XS-tag is present the strand 
+#' specific information will be placed in the mcols slot 'XS'
+#' @param readLength length of sequence reads (default: 150)
+#' @param reduce booleon to hinder importing same read multiple times
+#' (see the details section)
+#' @param scanBamFlag set scanBamFlag using scanBamFlag()
+#' @param verbose Setting \code{verbose=TRUE} gives details of procedure during
+#' function run.
+#' @return \code{impBamGRL} returns a GRangesList object containing the RNA-seq
+#' reads in the region defined by the \code{searchArea} argument.
+#' \code{impBamGAL} returns a list with GAlignments objects containing the
+#' RNA-seq reads in the region defined by the \code{searchArea} argument.
+#' \code{funImpBamGAPL} returns a list with GappedAlignmentPairs object
+#' containing the RNA-seq reads in the region defined by the \code{searchArea}
+#' argument.
+#' @note A typical next step after the import of bam files is to obtain SNP
+#' information. This can be done either with the \code{\link{impBcfGRL}} and
+#' \code{\link{getAlleleCounts}} functions. Alternatively the
+#' \code{\link{scanForHeterozygotes}} function provides R-based functionality
+#' for identifying heterozygote coding SNPs.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @seealso \itemize{ \item The \code{\link{impBcfGRL}} for importing Bcf
+#' files.  }
+#' @keywords bam import
+#' @examples
+#' 
+#' #Declare searchArea
+#' searchArea <- GRanges(seqnames=c('17'), ranges=IRanges(79478301,79478361))
+#' 
+#' #Relative or full path  
+#' pathToFiles <- system.file('extdata/ERP000101_subset', 
+#'									package='AllelicImbalance')
+#' 
+#' reads <- impBamGAL(pathToFiles,searchArea,verbose=FALSE)
+#' 
+#' @export impBamGAL
+NULL
+
+#' @rdname import-bam
+#' @export
+setGeneric("impBamGAL", function(UserDir, searchArea, ...){
+    standardGeneric("impBamGAL")
+})
+
+#' @rdname import-bam
+#' @export
+setMethod("scanForHeterozygotes", 
+	signature(UserDir = "character", "ANY"), 
+	function(UserDir, searchArea, readLength=150, reduce=FALSE, 
+						scanBamFlag=NULL, verbose = TRUE, ...) {
+    # Set parameters
+    which <- searchArea  
+	
+	#to not risk import reads multiple times
+	if(reduce){
+		which <- reduce(which+readLength)
+	}
+	#A character vector naming the fields to return. scanBamWhat() returns a 
+	#vector of available fields. Fields are described on the scanBam help page.
+    what <- scanBamWhat()  
+
+	if(is.null(scanBamFlag)){
+		flag <- scanBamFlag()
+	}else{
+		flag <- scanBamFlag
+	}
+
+	#store ScanBamParam in param.
+    param <- ScanBamParam(flag = flag, which = which, what = what)  
+    
+    # Point to correct directory and create a BamFileList object
+    bamDir <- normalizePath(UserDir)
+    allFiles <- list.files(bamDir, full.names = TRUE)
+    bamFiles <- allFiles[grep(".bam$", allFiles)]
+    if (length(bamFiles) == 0) {
+        stop(paste("No bam files found in", bamDir))
+    }
+    if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+        if (verbose) {
+            cat(paste("The bam files in UserDir are required to also have",
+				".bam.bai index files.", 
+                " Trying to run indexBam function on each", "\n"), )
+        }
+        indexBam(bamFiles)
+        if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+            stop("The bam files in UserDir are required to also have", 
+				 ".bam.bai index files.")
+        } else {
+            if (verbose) {
+                cat(paste("Succesfully indexed all bamFiles in UserDir", 
+				UserDir, 
+                  "\n"))
+            }
+        }
+    }
+    # store all the .bam paths in a BamFile.
+    bamFilesList <- BamFileList(bamFiles)
+    
+    # check that sequences in searchArea are actually found in the bam files
+    header <- scanBamHeader(bamFiles)
+    checkSeqNameExists <- function(bamHeader, requestedSeqNames) {
+        as.character(requestedSeqNames) %in% names(bamHeader[["targets"]])
+    }
+    if (!all(unlist(lapply(header, checkSeqNameExists, seqnames(searchArea))))){
+        # not all searchArea requested seq-names found in bam files. 
+        # report and stop
+        seqNotFoundErrors <- lapply(header, checkSeqNameExists, 
+									seqnames(searchArea))
+        seqNotFounds <- vector()
+        for (sampleName in names(seqNotFoundErrors)) {
+            seqNotFounds <- c(seqNotFounds,
+							  as.character(seqnames(
+								searchArea)[!seqNotFoundErrors[[sampleName]]]))
+        }
+
+        stop(paste("The following seq name(s) not found in the bam files:", 
+		   paste(sort(unique(seqNotFounds)), 
+           collapse = ", ")))
+    }
+    
+    # Loop through, open scanBam, store in GRList and then close each object in
+    # the BamFileList object.
+    i <- 1
+    BamGRL <- GRangesList()
+    for (bamName in names(bamFilesList)) {
+        # Description
+        bf <- bamFilesList[[bamName]]
+        open(bf)
+        if (verbose) {
+            cat(paste("Reading bam file", i, "with filename", basename(bamName))
+				, "\n")
+        }
+        bam <- scanBam(bf, param = param)
+        # Description
+        for (rangeName in names(bam)) {
+            
+            # if NA values your in trouble. That means the read didnt map
+            ranges <- 
+				IRanges(
+					start = bam[[rangeName]][["pos"]], 
+					width = cigarWidthAlongReferenceSpace(
+								bam[[rangeName]][["cigar"]]))
+            GRangeBam <- 
+				GRanges(seqnames = as.character(bam[[rangeName]][["rname"]]), 
+						ranges = ranges, 
+						strand = bam[[rangeName]][["strand"]], 
+						names = bam[[rangeName]][["qname"]], 
+						flag = bam[[rangeName]][["flag"]],
+						cigar = bam[[rangeName]][["cigar"]], 
+						mapq = bam[[rangeName]][["mapq"]],
+						mpos = bam[[rangeName]][["mpos"]], 
+						isize = bam[[rangeName]][["isize"]],
+						seq = bam[[rangeName]][["seq"]], 
+						qual = bam[[rangeName]][["qual"]])
+            # This way of merging the different chromosomes to the same 
+            # GRangeObject is maybe not the best way. Later try to store them in
+            #  a separate list, and then unlist before importing to GrangeBam 
+            # Store GRangeBam in BamGRL (which is the GRange List object)
+            if (basename(bamName) %in% names(BamGRL)) {
+                BamGRL[[basename(bamName)]] <- 
+					c(BamGRL[[basename(bamName)]], GRangeBam)
+            } else {
+                BamGRL[[basename(bamName)]] <- GRangeBam
+            }
+        }
+        if (verbose) {
+            cat(paste("stored", basename(bamName), "in BamGRL"), "\n")
+        }
+        i <- 1 + i
+        gc()
+        close(bf)
+    }
+    return(BamGRL)
+})
 
 
 
