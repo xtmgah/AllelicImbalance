@@ -49,7 +49,7 @@ reads <- impBcfGRL(pathToFiles, searchArea, verbose=FALSE)
 Jesper R. Gadin, Lasse Folkersen
 }
 \seealso{
-\itemize{ \item The \code{\link{impBamGRL}} for importing bam files
+\itemize{ \item The impBamGRL for importing bam files
 \item The \code{\link{getAlleleCounts}} for how to get allele(SNP) counts
 \item The \code{\link{scanForHeterozygotes}} for how to find possible
 heterozygote positions }

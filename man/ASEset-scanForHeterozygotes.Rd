@@ -18,6 +18,8 @@ scanForHeterozygotes(BamList, ...)
 \arguments{
 \item{BamList}{A \code{GAlignmentsList object}}
 
+\item{...}{argument to pass on}
+
 \item{minimumReadsAtPos}{minimum number of reads required to call a SNP at a
 given position}
 
