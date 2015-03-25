@@ -745,7 +745,7 @@ setMethod("impBamGAL", signature(UserDir = "character"),
         if (verbose) 
             cat(paste("Reading bam file", i, "with filename", basename(bamName)), 
                 "\n")  #Print information to the user
-        GappedAlign <- readGAlignmentsFromBam(bf, param = param)
+        GappedAlign <- readGAlignments(bf, param = param)
         
         BamGAL[[basename(bamName)]] <- GappedAlign
         
