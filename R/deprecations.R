@@ -323,3 +323,189 @@ realCigarPositionsList.old <- function(RleCigarList) {
     })
 }
 
+#####
+# Kept for performance comparions
+# will be removed in short
+#####
+#' scanForHeterozygotes-old
+#' 
+#' Identifies the positions of SNPs found in BamGR reads.
+#' 
+#' This function scans all reads stored in a \code{GAlignmentsList} for
+#' possible heterozygote positions. The user can balance the sensitivity of the
+#' search by modifying the minimumReadsAtPos, maximumMajorAlleleFrequency and
+#' minimumBiAllelicFrequency arguments.
+#' 
+#' @rdname scanForHeterozygotes-old
+#' @param BamList A \code{GAlignmentsList object}
+#' @param minimumReadsAtPos minimum number of reads required to call a SNP at a
+#' given position
+#' @param maximumMajorAlleleFrequency maximum frequency allowed for the most
+#' common allele. Setting this parameter lower will minimise the SNP calls
+#' resulting from technical read errors, at the cost of missing loci with
+#' potential strong ASE
+#' @param minimumBiAllelicFrequency minimum frequency allowed for the first and
+#' second most common allele. Setting a Lower value for this parameter will
+#' minimise the identification of loci with three or more alleles in one
+#' sample. This is useful if sequencing errors are suspected to be common.
+#' @param maxReads max number of reads of one list-element allowed
+#' @param verbose logical indicating if process information should be displayed
+#' @return \code{scanForHeterozygotes.old} returns a GRanges object with the SNPs
+#' for the BamList object that was used as input.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @seealso \itemize{ \item The \code{\link{getAlleleCounts}} which is a
+#' function that count the number of reads overlapping a site.  }
+#' @keywords scan SNP heterozygote
+#' @examples
+#' 
+#' data(reads)
+#' s <- scanForHeterozygotes.old(reads,verbose=FALSE)
+#' 
+#' @export scanForHeterozygotes.old
+scanForHeterozygotes.old <- function(BamList, minimumReadsAtPos = 20, maximumMajorAlleleFrequency = 0.9, 
+    minimumBiAllelicFrequency = 0.9, maxReads = 15000, verbose = TRUE) {
+    
+    # if just one element of, make list (which is a convenient way of handling this
+    # input type)
+    if (class(BamList) == "GAlignments") {
+        BamList <- GAlignmentsList(BamList)
+    }
+    if (class(BamList) == "GRanges") {
+        BamList <- GRangesList(BamList)
+    }
+    
+    if (class(minimumReadsAtPos) != "numeric") 
+        stop(paste("minimumReadsAtPos must be of class numeric, not", class(minimumReadsAtPos)))
+    if (length(minimumReadsAtPos) != 1) 
+        stop(paste("minimumReadsAtPos must be of length 1, not", length(minimumReadsAtPos)))
+    if (class(maximumMajorAlleleFrequency) != "numeric") 
+        stop(paste("maximumMajorAlleleFrequency must be of class numeric, not", class(maximumMajorAlleleFrequency)))
+    if (length(maximumMajorAlleleFrequency) != 1) 
+        stop(paste("maximumMajorAlleleFrequency must be of length 1, not", length(maximumMajorAlleleFrequency)))
+    if (maximumMajorAlleleFrequency < 0 | maximumMajorAlleleFrequency > 1) 
+        stop("maximumMajorAlleleFrequency must be between 0 and 1")
+    if (class(minimumBiAllelicFrequency) != "numeric") 
+        stop(paste("minimumBiAllelicFrequency must be of class numeric, not", class(minimumBiAllelicFrequency)))
+    if (length(minimumBiAllelicFrequency) != 1) 
+        stop(paste("minimumBiAllelicFrequency must be of length 1, not", length(minimumBiAllelicFrequency)))
+    if (minimumBiAllelicFrequency < 0 | maximumMajorAlleleFrequency > 1) 
+        stop("minimumBiAllelicFrequency must be between 0 and 1")
+    if (class(verbose) != "logical") 
+        stop(paste("verbose must be of class logical, not", class(verbose)))
+    if (length(verbose) != 1) 
+        stop(paste("verbose must be of length 1, not", length(verbose)))
+    
+    # checking that BamList format is ok (has to be done quite carefully for the
+    # list-class gappedAlignments
+    if (class(BamList) == "GRangesList") 
+        stop("The use of GRangesList is not recommended. Use BamImpGAList or BamImpGAPList")
+    if (class(BamList) != "GAlignmentsList") 
+        stop("The class of the BamList has to be a GAlignmentsList")
+    
+    # checks specific for GAlignments
+    if (unique(unlist(lapply(BamList, class))) == "GAlignments") {
+        if (!all(unlist(lapply(BamList, function(x) {
+            all(c("cigar", "qwidth") %in% colnames(mcols(x)))
+        })))) {
+            stop("BamList given as GAlignmentsLists of GAlignments objects must contain mcols named qwidth and cigar")
+        }
+    }
+    
+    # check that we dont create a too large and memory-consuming matrix
+    if (sum(unlist(lapply(BamList, length)) > maxReads) > 0) {
+        stop("you may consume too much memory. If there is plenty of memory, then increase maxReads to allow more reads")
+    }
+    
+    RangedData <- GRanges()
+    chromosomeLevels <- unique(unlist(lapply(BamList, function(x) {
+        levels(droplevels(runValue(seqnames(x))))
+    })))
+    
+    for (chr in chromosomeLevels) {
+        if (verbose) 
+            cat(paste("Investigating chromosome", chr), "\n")
+        
+        BamListchr <- GAlignmentsList(mapply(function(x, y) {
+            x[y]
+        }, BamList, seqnames(BamList) == chr))
+        
+        
+        for (sample in 1:length(BamListchr)) {
+            if (verbose) 
+                cat(paste("Investigating sample", sample), "out of", length(BamListchr), 
+                  "\n")
+            
+            # extract samples
+            BamListHere <- BamListchr[[sample]]
+            
+            if (!(length(BamListHere) == 0)) {
+                
+                # then iterate over all reads
+                cigarRle <- cigarToRleList(mcols(BamListHere)[, "cigar"])
+                toKeep <- realCigarPositionsList(cigarRle)
+                
+                seq <- mcols(BamListHere)[, "seq"]
+                charList <- strsplit(as.character(seq), "")
+                
+                start <- start(BamListHere) - min(start(BamListHere)) + 1
+                
+                nw <- max(end(BamListHere)) - min(start(BamListHere)) + 2
+                
+                # populate matrix
+                new <- matrix(NA, nrow = max(end(BamListHere)) - min(start(BamListHere)) + 
+                  1, ncol = length(BamListHere))
+                for (i in 1:ncol(new)) {
+                  new[start[i]:(start[i] + length(toKeep[[i]]) - 1), i] <- charList[[i]][toKeep[[i]]]
+                  
+                }
+                
+                # set rownames
+                rownames(new) <- as.character(1:(nw - 1))
+                
+                new <- new[apply(!is.na(new), 1, sum) > minimumReadsAtPos, ]
+                
+                if (!nrow(new) == 0) {
+                  
+                  # tabulate countsPerPosition (cpp)
+                  cpp <- apply(new, 1, table)
+                  
+                  TFl <- unlist(lapply(cpp, function(x) {
+                    if (length(x) > 1) {
+                      
+                      MajorAlleleFrequency <- x[order(x, decreasing = TRUE)[1]]/sum(x)
+                      if (MajorAlleleFrequency < maximumMajorAlleleFrequency) {
+                        MinorAlleleFrequency <- x[order(x, decreasing = TRUE)[2]]/sum(x)
+                        if ((MinorAlleleFrequency + MajorAlleleFrequency) > minimumBiAllelicFrequency) {
+                          TRUE
+                        } else {
+                          FALSE
+                        }
+                      } else {
+                        FALSE
+                      }
+                    } else {
+                      FALSE
+                    }
+                  }))
+                  if (!all(!TFl)) {
+                    GR <- GRanges(ranges = IRanges(start = (as.numeric(names(cpp[TFl])) + 
+                      min(start(BamListHere)) - 1), width = 1), seqnames = chr)
+                    RangedData <- c(RangedData, GR)
+                  }
+                }
+            }
+        }
+    }
+    # merge from all individuals
+    RangedData <- unique(RangedData)
+    
+    # Add a Snp name based on position
+    if (!(length(RangedData) == 0)) {
+        names(RangedData) <- paste("chr", seqnames(RangedData), "_", start(RangedData), 
+            sep = "")
+        
+    }
+    return(RangedData)
+}
+
+

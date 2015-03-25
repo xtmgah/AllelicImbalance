@@ -1103,5 +1103,104 @@ function(BamList, GRvariants, strand = "*",
     }
 })
 
+#' Map Bias
+#' 
+#' an allele frequency array
+#' 
+#' This function will assume there is no bias that comes from the mapping of
+#' reads, and therefore create a matrix with expected frequency of 0.5 for each
+#' allele.
+#' 
+#' @name getDefaultMapBiasExpMean
+#' @rdname getDefaultMapBiasExpMean
+#' @aliases getDefaultMapBiasExpMean getDefaultMapBiasExpMean3D 
+#' getDefaultMapBiasExpMean,ANY-method getDefaultMapBiasExpMean3D,array-method
+#' @aliases getDefaultMapBiasExpMean getDefaultMapBiasExpMean3D
+#' @docType methods
+#' @param alleleCountList A \code{GRangesList object} containing read
+#' information
+#' @param ... parameters to pass on
+#' @return \code{getDefaultMapBiasExpMean} returns a matrix with a default
+#' expected mean of 0.5 for every element.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords mapping bias
+#' @examples
+#' 
+#' #load example data
+#' data(ASEset)
+#' #access SnpAfList
+#' alleleCountList <- alleleCounts(ASEset)
+#' #get default map bias exp mean
+#' matExpMean <- getDefaultMapBiasExpMean(alleleCountList)
+#' 
+#' 
+NULL
 
+#' @rdname getDefaultMapBiasExpMean
+#' @export
+setGeneric("getDefaultMapBiasExpMean", function(alleleCountList, ... 
+	){
+    standardGeneric("getDefaultMapBiasExpMean")
+})
+
+#' @rdname getDefaultMapBiasExpMean
+#' @export
+setGeneric("getDefaultMapBiasExpMean3D", function(alleleCountList, ... 
+	){
+    standardGeneric("getDefaultMapBiasExpMean3D")
+})
+
+#' @rdname getDefaultMapBiasExpMean
+#' @export
+setMethod("getDefaultMapBiasExpMean", signature(alleleCountList = "list"),
+ function(alleleCountList) {
+    
+    l <- lapply(alleleCountList, function(x) {
+        ap <- apply(x, 2, sum)
+        char <- names(sort(ap, decreasing = TRUE))[1:2]
+        
+        v <- rep(0, length(colnames(x)))
+        v[colnames(x) %in% char] <- 0.5
+        v
+    })
+    
+    MapBiasExpMean <- matrix(unlist(l), byrow = TRUE, nrow = length(alleleCountList), 
+        ncol = 4, dimnames = list(c(names(alleleCountList)), colnames(alleleCountList[[1]])))  # alleleCountList[[1]] assumes that in each list the colnames are the same.
+    MapBiasExpMean
+})
+
+
+#' @rdname getDefaultMapBiasExpMean
+#' @export
+setMethod("getDefaultMapBiasExpMean3D", signature(alleleCountList = "array"),
+function(alleleCountList) {
+   
+	if(class(alleleCountList)=="list"){
+		MapBiasExpMean <- getDefaultMapBiasExpMean(alleleCountList)
+		# make 3D array
+		MapBiasExpMean3D <- array(NA, c(length(alleleCountList),
+										length(unlist(unique(lapply(alleleCountList, 
+			rownames)))), 4))  #empty array
+		for (i in 1:length(unlist(unique(lapply(alleleCountList, rownames))))) {
+			MapBiasExpMean3D[, i, ] <- MapBiasExpMean
+		}
+	}
+	if(class(alleleCountList)=="array"){
+		# make 3D array
+		MapBiasExpMean3D <- alleleCountList
+		mapbiasmat <- t(apply(apply(alleleCountList,c(1,3),sum),
+					1, function(x){rank(x,ties.method="first")}))						
+		mapbiasmat[mapbiasmat==1] <- 0.5
+		mapbiasmat[mapbiasmat==2] <- 0.5
+		mapbiasmat[mapbiasmat==3] <- 0
+		mapbiasmat[mapbiasmat==4] <- 0
+
+		MapBiasExpMean3D <- array(NA, dim=c(nrow(mapbiasmat),dim(alleleCountList)[2],4))
+		for (i in 1:dim(alleleCountList)[2]) {
+			MapBiasExpMean3D[, i, ] <- mapbiasmat
+		}
+
+	}
+    MapBiasExpMean3D
+})
 
