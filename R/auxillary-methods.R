@@ -760,3 +760,132 @@ setMethod("impBamGAL", signature(UserDir = "character"),
     return(BamGAL)
 })
 
+
+
+#' Import Bcf Selection
+#' 
+#' Imports a selection of a bcf file or files specified by a GenomicRanges
+#' object as search area.
+#' 
+#' A wrapper to import bcf files into R in the form of GenomicRanges objects.
+#' 
+#' @name import-bcf
+#' @rdname import-bcf
+#' @aliases import-bcf impBcfGRL impBcfGR
+#' @param UserDir The relative or full path of folder containing bam files.
+#' @param searchArea A \code{GenomicRanges} object that contains the regions of
+#' interest
+#' @param verbose Setting \code{verbose=TRUE} gives details of the procedure
+#' during function run.
+#' @param ... parameters to pass on
+#' @return \code{BcfImpGRList} returns a GRangesList object.  \code{BcfImpGR}
+#' returns one GRanges object of all unique entries from one or more bcf files.
+#' @note Make sure there is a complementary index file \code{*.bcf.bci} for
+#' each bcf file in \code{UserDir}. If there is not, then the functions
+#' \code{impBcfGRL} and \code{impBcfGR} will try to create them.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @seealso \itemize{ \item The impBamGRL for importing bam files
+#' \item The \code{\link{getAlleleCounts}} for how to get allele(SNP) counts
+#' \item The \code{\link{scanForHeterozygotes}} for how to find possible
+#' heterozygote positions }
+#' @keywords bcf import
+#' @examples
+#' 
+#' #Declare searchArea
+#' searchArea <- GRanges(seqnames=c('17'), ranges=IRanges(79478301,79478361))
+#' 
+#' #Relative or full path  
+#' pathToFiles <- system.file('extdata/ERP000101_subset', package='AllelicImbalance')
+#' 
+#' #import
+#' reads <- impBcfGRL(pathToFiles, searchArea, verbose=FALSE)
+#' 
+#' 
+NULL
+
+#' @rdname import-bcf
+#' @export
+setGeneric("impBcfGRL", function(UserDir, ... 
+	){
+    standardGeneric("impBcfGRL")
+})
+
+#' @rdname import-bcf
+#' @export
+setMethod("impBcfGRL", signature(UserDir = "character"),
+	function(UserDir, searchArea = NULL, verbose = TRUE) {
+    
+    # Set parameters
+    if (is.null(searchArea)) {
+        param <- ScanBcfParam()
+    } else {
+        param <- ScanBcfParam(which = searchArea)
+    }
+    # Point to correct directory and create a BcfFileList object
+    bcfDir <- normalizePath(UserDir)  #Point to the directory containing your Bam files and its respective bam.bai files.
+    allFiles <- list.files(bcfDir, full.names = TRUE)  #list files in a folder.
+    bcfFiles <- allFiles[grep(".bcf$", allFiles)]  #list only the files ending in .bam .
+    if (length(bcfFiles) == 0) 
+        stop(paste("No bcf files were found in", UserDir))
+    
+    # bcfFilesList <- BcfFileList(bcfFiles) #store all the .bam paths in a BamFile.
+    if (!all(file.exists(paste(bcfFiles, ".bci", sep = "")))) {
+        if (verbose) 
+            cat("Did not find bci files for all bcf files. Trying the indexBcf function obtain these", 
+                "\n")
+        for (bcfFile in bcfFiles) {
+            indexBcf(bcfFile)
+        }
+        if (!all(file.exists(paste(bcfFiles, ".bci", sep = "")))) {
+            stop("The bcf files in UserDir are required to also have .bcf.bci index files. Run the indexBcf function in package Rsamtools on each bam file.")
+        }
+    }
+    
+    # Loop through, open scanBam, store in GRList and then close each object in the
+    # BamFileList object.
+    BcfGRL <- GRangesList()
+    for (i in 1:length(bcfFiles)) {
+        
+        bcf <- suppressWarnings(scanBcf(file = bcfFiles[i], param = param))
+        
+        # need to protect against empty bcf files
+        if (length(bcf[["POS"]]) == 0) {
+            GRangeBcf <- GRanges(seqnames = vector(), ranges = IRanges(start = vector(), 
+                width = vector()), ref = vector(), alt = vector(), qual = vector())
+            bcfName <- bcfFiles[i]
+            BcfGRL[[basename(bcfName)]] <- GRangeBcf
+            
+        } else {
+            # if they are not empty we just proceed as usual
+            ranges <- IRanges(start = bcf[["POS"]], width = 1L)
+            GRangeBcf <- GRanges(seqnames = as.character(bcf[["CHROM"]]), ranges = ranges, 
+                ref = bcf[["REF"]], alt = bcf[["ALT"]], qual = bcf[["QUAL"]])
+            # Store GRangeBam in BamGRL (which is the GRange List object)
+            bcfName <- bcfFiles[i]
+            BcfGRL[[basename(bcfName)]] <- GRangeBcf
+            if (verbose) 
+                cat(paste("stored", basename(bcfName), "in BcfGRL"), "\n")
+            gc()
+        }
+    }
+    return(BcfGRL)
+})
+
+#' @rdname import-bcf
+#' @export
+setGeneric("impBcfGR", function(UserDir, ... 
+	){
+    standardGeneric("impBcfGR")
+})
+
+#' @rdname import-bcf
+#' @export
+setMethod("impBcfGRL", signature(UserDir = "character"),
+	function(UserDir, searchArea = NULL, verbose = TRUE) {
+		BcfGRList <- impBcfGRL(UserDir, searchArea, verbose)
+		BcfGR <- do.call(c, unname(as.list(BcfGRList)))
+		BcfGR <- unique(BcfGR)
+		names(BcfGR) <- paste("chr", seqnames(BcfGR), "_", start(BcfGR), sep = "")
+		return(BcfGR)
+})
+

@@ -1,16 +1,34 @@
+#######################
 # Deprecated functions
+#######################
+
+#was deprecated 2015-03-25
+realCigarPositions <- function()
+{
+	    .Deprecated("realCigarPositions.old",msg="no longer serving any purpose in the AllelicImbalance package and is deprecated")
+}
+
+#was deprecated 2015-03-25
+realCigarPositionsList <- function()
+{
+	    .Deprecated("realCigarPositionsList.old",msg="no longer serving any purpose in the AllelicImbalance package and is deprecated")
+}
+
+#was deprecated 2015-03-25
+realCigarPosition <- function()
+{
+	    .Deprecated("realCigarPosition",msg="no longer serving any purpose in the AllelicImbalance package and is deprecated")
+}
 
 #was deprecated 2015-03-24 
 impBamGRL <- function()
 {
-	    .Deprecated("impBamGAL")
-    ## use new function, or remainder of myOldFunc
+	    .Deprecated("impBamGRL.old",msg="no longer serving any purpose in the AllelicImbalance package and is deprecated")
 }
 
 #in 2014
 getAlleleCount <- function() {
     .Deprecated("getAlleleCounts")
-    ## use new function, or remainder of myOldFunc
 }
 
 #' Import Bam-2
@@ -59,7 +77,7 @@ NULL
 
 
 #' @rdname import-bam-2
-impBamGRL <- function(UserDir, searchArea, verbose = TRUE) {
+impBamGRL.old <- function(UserDir, searchArea, verbose = TRUE) {
     # Set parameters
     which <- searchArea  #A GRanges, RangesList, RangedData, or missing object, from which a IRangesList instance will be constructed.
     what <- scanBamWhat()  #A character vector naming the fields to return. scanBamWhat() returns a vector of available fields. Fields are described on the scanBam help page.
@@ -151,3 +169,157 @@ impBamGRL <- function(UserDir, searchArea, verbose = TRUE) {
     }
     return(BamGRL)
 }
+
+
+
+#'@include ASEset-class.R
+NULL
+
+#' realCigarPosition
+#' 
+#' From a GAlignments calculate the real corresponding position for each read
+#' based on its cigar.
+#' 
+#' The main intention for these functions are to be the internal functions for
+#' \code{scanForHeterozygotes} and \code{getAlleleCount}.
+#' 
+#' @name cigar-utilities
+#' @rdname cigar-utilities
+#' @aliases cigar-utilities realCigarPosition realCigarPositions
+#' realCigarPositionsList
+#' @param RleCigar An \code{Rle} containing cigar information
+#' @param RleCigarList An \code{RleList} containing cigar information
+#' @param BpPos the absolute position on the chromosome of interest
+#' @return \code{realCigarPosition} returns the new position
+#' \code{realCigarPositions} returns a vector with the corrected positions to
+#' be subsetted from a read.  \code{realCigarPositionsList} returns a list
+#' where each element i a vector with the corrected positions to be subsetted
+#' from a read.
+#' @author Jesper R. Gadin
+#' @seealso \itemize{ \item The \code{\link{scanForHeterozygotes}} which is a
+#' function to find possible heterozygote sites in a
+#' \code{\link[GenomicAlignments]{GAlignmentsList}} object }
+#' @keywords internal
+#' @examples
+#' 
+#'   RleCigarList <-  cigarToRleList('3M4I93M')
+#'   BpPos <- 5
+#' 
+#'   newPos <- realCigarPosition(RleCigar=RleCigarList[[1]], BpPos)
+#'   newPositions <- realCigarPositions(RleCigar=RleCigarList[[1]])
+#'   newPositionsList <- realCigarPositionsList(RleCigarList=RleCigarList)
+#' @export realCigarPosition
+#' @export realCigarPositions
+#' @export realCigarPositionsList
+NULL
+
+#' @rdname cigar-utilities
+realCigarPosition <- function(RleCigar, BpPos) {
+    
+    # because of speed issues, checks are best performed outside this function.
+    if (!class(RleCigar) == "Rle") {
+        stop("class must be Rle")
+    }
+    
+    e <- as.character(RleCigar)
+    
+    # changeVector
+    v <- rep(0, length = length(e))
+    names(v) <- e
+    
+    v[e == "M"] <- 1
+    v[e == "I"] <- unlist(lapply(runLength(RleCigar)[runValue(RleCigar) == "I"], 
+        function(x) {
+            c(x + 1, rep(1, x - 1))
+        }))
+    # v[e=='D'] <- 0 #already zero v[e=='N'] <- 0 #already zero
+    
+    # sum all until interesting position
+    cs <- cumsum(v)
+    
+    if (names(cs[BpPos]) == "D") {
+        retPos <- 0
+    } else if (names(cs[BpPos]) == "N") {
+        retPos <- -1
+    } else {
+        retPos <- cs[BpPos]
+        names(retPos) <- NULL
+        if (retPos > sum(e == "M" | e == "I")) {
+            retPos <- -1  # the position went outside the read
+        }
+    }
+    retPos
+}
+
+
+
+#' @rdname cigar-utilities
+realCigarPositions.old <- function(RleCigar) {
+    # returns a vector that have order all positions to match with the cigar
+    
+    # because of speed issues, checks are best performed outside this function.
+    if (!class(RleCigar) == "Rle") {
+        stop("class must be Rle")
+    }
+    
+    
+    e <- as.character(RleCigar)
+    # make a new representation vector
+    v <- rep(0, length = length(e))
+    names(v) <- e
+    
+    v[e == "M"] <- 1
+    v[e == "I"] <- unlist(lapply(runLength(RleCigar)[runValue(RleCigar) == "I"], 
+        function(x) {
+            c(x + 1, rep(1, x - 1))
+        }))
+    # v[e=='D'] <- 0 v[e=='N'] <- 0
+    
+    # sum all until interesting position
+    cs <- cumsum(v)
+    
+    cs <- cs[!names(cs) == "D"]
+    cs <- cs[!names(cs) == "N"]
+
+	#remove matches overexeeding the length of the read
+	cs <- cs[!cs>length(v)]
+    
+    cs
+}
+
+
+#' @rdname cigar-utilities
+realCigarPositionsList.old <- function(RleCigarList) {
+    
+    # because of speed issues, checks are best performed outside this function.
+    if (!class(RleCigarList) == "CompressedRleList") {
+        stop("class must be Rle")
+    }
+    
+    lapply(RleCigarList, function(RleCigar) {
+        e <- as.character(RleCigar)
+        # make a new representation vector
+        v <- rep(0, length = length(e))
+        names(v) <- e
+        
+        v[e == "M"] <- 1
+        v[e == "I"] <- unlist(lapply(runLength(RleCigar)[runValue(RleCigar) == "I"], 
+            function(x) {
+                c(x + 1, rep(1, x - 1))
+            }))
+        # v[e=='D'] <- 0 v[e=='N'] <- 0
+        
+        # sum all until interesting position
+        cs <- cumsum(v)
+        
+        cs <- cs[!names(cs) == "D"]
+        cs <- cs[!names(cs) == "N"]
+
+        
+		#remove matches overexeeding the length of the read
+		cs <- cs[!cs>length(v)]
+
+        cs
+    })
+}
+

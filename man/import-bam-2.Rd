@@ -2,10 +2,11 @@
 % Please edit documentation in R/deprecations.R
 \name{import-bam-2}
 \alias{impBamGRL}
+\alias{impBamGRL.old}
 \alias{import-bam-2}
 \title{Import Bam-2}
 \usage{
-impBamGRL(UserDir, searchArea, verbose = TRUE)
+impBamGRL.old(UserDir, searchArea, verbose = TRUE)
 }
 \arguments{
 \item{UserDir}{The relative or full path of folder containing bam files.}
