@@ -30,7 +30,7 @@ getAlleleCount <- function() {
 #' 
 #' @name import-bam-2
 #' @rdname import-bam-2
-#' @aliases import-bam impBamGRL
+#' @aliases import-bam-2 impBamGRL
 #' @param UserDir The relative or full path of folder containing bam files.
 #' @param searchArea A \code{GenomicRanges object} that contains the regions of
 #' interest

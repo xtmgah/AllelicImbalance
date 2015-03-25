@@ -2,7 +2,6 @@
 % Please edit documentation in R/deprecations.R
 \name{import-bam-2}
 \alias{impBamGRL}
-\alias{import-bam}
 \alias{import-bam-2}
 \title{Import Bam-2}
 \usage{
