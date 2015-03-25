@@ -3,13 +3,14 @@
 \name{cigar-utilities}
 \alias{cigar-utilities}
 \alias{realCigarPosition}
+\alias{realCigarPosition.old}
 \alias{realCigarPositions}
 \alias{realCigarPositions.old}
 \alias{realCigarPositionsList}
 \alias{realCigarPositionsList.old}
 \title{realCigarPosition}
 \usage{
-realCigarPosition(RleCigar, BpPos)
+realCigarPosition.old(RleCigar, BpPos)
 
 realCigarPositions.old(RleCigar)
 
@@ -23,8 +24,8 @@ realCigarPositionsList.old(RleCigarList)
 \item{RleCigarList}{An \code{RleList} containing cigar information}
 }
 \value{
-\code{realCigarPosition} returns the new position
-\code{realCigarPositions} returns a vector with the corrected positions to
+realCigarPosition returns the new position
+realCigarPositions returns a vector with the corrected positions to
 be subsetted from a read.  \code{realCigarPositionsList} returns a list
 where each element i a vector with the corrected positions to be subsetted
 from a read.
@@ -41,9 +42,9 @@ The main intention for these functions are to be the internal functions for
 RleCigarList <-  cigarToRleList('3M4I93M')
   BpPos <- 5
 
-  newPos <- realCigarPosition(RleCigar=RleCigarList[[1]], BpPos)
-  newPositions <- realCigarPositions(RleCigar=RleCigarList[[1]])
-  newPositionsList <- realCigarPositionsList(RleCigarList=RleCigarList)
+  newPos <- realCigarPosition.old(RleCigar=RleCigarList[[1]], BpPos)
+  newPositions <- realCigarPositions.old(RleCigar=RleCigarList[[1]])
+  newPositionsList <- realCigarPositionsList.old(RleCigarList=RleCigarList)
 }
 \author{
 Jesper R. Gadin

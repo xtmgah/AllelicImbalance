@@ -16,7 +16,7 @@ impBcfGRL(UserDir, ...)
 
 impBcfGR(UserDir, ...)
 
-\S4method{impBcfGRL}{character}(UserDir, searchArea = NULL, verbose = TRUE,
+\S4method{impBcfGR}{character}(UserDir, searchArea = NULL, verbose = TRUE,
   ...)
 }
 \arguments{

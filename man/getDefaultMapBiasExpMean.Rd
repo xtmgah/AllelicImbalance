@@ -6,7 +6,7 @@
 \alias{getDefaultMapBiasExpMean,ANY-method}
 \alias{getDefaultMapBiasExpMean,list-method}
 \alias{getDefaultMapBiasExpMean3D}
-\alias{getDefaultMapBiasExpMean3D,array-method}
+\alias{getDefaultMapBiasExpMean3D,ANY-method}
 \title{Map Bias}
 \usage{
 getDefaultMapBiasExpMean(alleleCountList, ...)
@@ -15,7 +15,7 @@ getDefaultMapBiasExpMean3D(alleleCountList, ...)
 
 \S4method{getDefaultMapBiasExpMean}{list}(alleleCountList)
 
-\S4method{getDefaultMapBiasExpMean3D}{array}(alleleCountList)
+\S4method{getDefaultMapBiasExpMean3D}{ANY}(alleleCountList)
 }
 \arguments{
 \item{alleleCountList}{A \code{GRangesList object} containing read

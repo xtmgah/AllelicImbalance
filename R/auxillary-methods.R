@@ -880,7 +880,7 @@ setGeneric("impBcfGR", function(UserDir, ...
 
 #' @rdname import-bcf
 #' @export
-setMethod("impBcfGRL", signature(UserDir = "character"),
+setMethod("impBcfGR", signature(UserDir = "character"),
 	function(UserDir, searchArea = NULL, verbose = TRUE, ...) {
 		BcfGRList <- impBcfGRL(UserDir, searchArea, verbose)
 		BcfGR <- do.call(c, unname(as.list(BcfGRList)))
@@ -1114,7 +1114,7 @@ function(BamList, GRvariants, strand = "*",
 #' @name getDefaultMapBiasExpMean
 #' @rdname getDefaultMapBiasExpMean
 #' @aliases getDefaultMapBiasExpMean getDefaultMapBiasExpMean3D 
-#' getDefaultMapBiasExpMean,ANY-method getDefaultMapBiasExpMean3D,array-method
+#' getDefaultMapBiasExpMean,ANY-method getDefaultMapBiasExpMean3D,ANY-method
 #' @aliases getDefaultMapBiasExpMean getDefaultMapBiasExpMean3D
 #' @docType methods
 #' @param alleleCountList A \code{GRangesList object} containing read
@@ -1172,7 +1172,7 @@ setMethod("getDefaultMapBiasExpMean", signature(alleleCountList = "list"),
 
 #' @rdname getDefaultMapBiasExpMean
 #' @export
-setMethod("getDefaultMapBiasExpMean3D", signature(alleleCountList = "array"),
+setMethod("getDefaultMapBiasExpMean3D", signature(alleleCountList = "ANY"),
 function(alleleCountList) {
    
 	if(class(alleleCountList)=="list"){

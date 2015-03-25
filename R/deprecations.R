@@ -190,8 +190,8 @@ NULL
 #' @param RleCigar An \code{Rle} containing cigar information
 #' @param RleCigarList An \code{RleList} containing cigar information
 #' @param BpPos the absolute position on the chromosome of interest
-#' @return \code{realCigarPosition} returns the new position
-#' \code{realCigarPositions} returns a vector with the corrected positions to
+#' @return realCigarPosition returns the new position
+#' realCigarPositions returns a vector with the corrected positions to
 #' be subsetted from a read.  \code{realCigarPositionsList} returns a list
 #' where each element i a vector with the corrected positions to be subsetted
 #' from a read.
@@ -205,16 +205,14 @@ NULL
 #'   RleCigarList <-  cigarToRleList('3M4I93M')
 #'   BpPos <- 5
 #' 
-#'   newPos <- realCigarPosition(RleCigar=RleCigarList[[1]], BpPos)
-#'   newPositions <- realCigarPositions(RleCigar=RleCigarList[[1]])
-#'   newPositionsList <- realCigarPositionsList(RleCigarList=RleCigarList)
-#' @export realCigarPosition
-#' @export realCigarPositions
-#' @export realCigarPositionsList
+#'   newPos <- realCigarPosition.old(RleCigar=RleCigarList[[1]], BpPos)
+#'   newPositions <- realCigarPositions.old(RleCigar=RleCigarList[[1]])
+#'   newPositionsList <- realCigarPositionsList.old(RleCigarList=RleCigarList)
 NULL
 
 #' @rdname cigar-utilities
-realCigarPosition <- function(RleCigar, BpPos) {
+#' @export
+realCigarPosition.old <- function(RleCigar, BpPos) {
     
     # because of speed issues, checks are best performed outside this function.
     if (!class(RleCigar) == "Rle") {
@@ -254,6 +252,7 @@ realCigarPosition <- function(RleCigar, BpPos) {
 
 
 #' @rdname cigar-utilities
+#' @export
 realCigarPositions.old <- function(RleCigar) {
     # returns a vector that have order all positions to match with the cigar
     
@@ -289,6 +288,7 @@ realCigarPositions.old <- function(RleCigar) {
 
 
 #' @rdname cigar-utilities
+#' @export
 realCigarPositionsList.old <- function(RleCigarList) {
     
     # because of speed issues, checks are best performed outside this function.
@@ -442,7 +442,7 @@ scanForHeterozygotes.old <- function(BamList, minimumReadsAtPos = 20, maximumMaj
                 
                 # then iterate over all reads
                 cigarRle <- cigarToRleList(mcols(BamListHere)[, "cigar"])
-                toKeep <- realCigarPositionsList(cigarRle)
+                toKeep <- realCigarPositionsList.old(cigarRle)
                 
                 seq <- mcols(BamListHere)[, "seq"]
                 charList <- strsplit(as.character(seq), "")
