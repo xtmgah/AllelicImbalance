@@ -477,7 +477,7 @@ setGeneric("scanForHeterozygotes", function(BamList, ...){
 setMethod("scanForHeterozygotes", signature(BamList = "GAlignmentsList"), 
 		  function(BamList, minimumReadsAtPos = 20,
 			maximumMajorAlleleFrequency = 0.90, minimumMinorAlleleFrequency = 0.1, 
-			minimumBiAllelicFrequency = 0.9, verbose = TRUE) {
+			minimumBiAllelicFrequency = 0.9, verbose = TRUE, ...) {
     
     # if just one element of, make list (which is a convenient way of handling this
     # input type)
@@ -685,7 +685,7 @@ setGeneric("impBamGAL", function(UserDir, ...){
 #' @rdname import-bam
 #' @export
 setMethod("impBamGAL", signature(UserDir = "character"), 
-	function(UserDir, searchArea, XStag = FALSE, verbose = TRUE) {
+	function(UserDir, searchArea, XStag = FALSE, verbose = TRUE, ...) {
     # Set parameters
     which <- searchArea  #A GRanges, RangesList, RangedData, or missing object, from which a IRangesList instance will be constructed.
     what <- scanBamWhat()  #A character vector naming the fields to return. scanBamWhat() returns a vector of available fields. Fields are described on the scanBam help page.
@@ -771,7 +771,8 @@ setMethod("impBamGAL", signature(UserDir = "character"),
 #' 
 #' @name import-bcf
 #' @rdname import-bcf
-#' @aliases import-bcf impBcfGRL impBcfGR
+#' @aliases import-bcf impBcfGRL impBcfGR impBcfGRL,character-method impBcfGR,character-method
+#' @docType methods
 #' @param UserDir The relative or full path of folder containing bam files.
 #' @param searchArea A \code{GenomicRanges} object that contains the regions of
 #' interest
@@ -800,7 +801,6 @@ setMethod("impBamGAL", signature(UserDir = "character"),
 #' #import
 #' reads <- impBcfGRL(pathToFiles, searchArea, verbose=FALSE)
 #' 
-#' 
 NULL
 
 #' @rdname import-bcf
@@ -813,7 +813,7 @@ setGeneric("impBcfGRL", function(UserDir, ...
 #' @rdname import-bcf
 #' @export
 setMethod("impBcfGRL", signature(UserDir = "character"),
-	function(UserDir, searchArea = NULL, verbose = TRUE) {
+	function(UserDir, searchArea = NULL, verbose = TRUE, ...) {
     
     # Set parameters
     if (is.null(searchArea)) {
@@ -881,11 +881,227 @@ setGeneric("impBcfGR", function(UserDir, ...
 #' @rdname import-bcf
 #' @export
 setMethod("impBcfGRL", signature(UserDir = "character"),
-	function(UserDir, searchArea = NULL, verbose = TRUE) {
+	function(UserDir, searchArea = NULL, verbose = TRUE, ...) {
 		BcfGRList <- impBcfGRL(UserDir, searchArea, verbose)
 		BcfGR <- do.call(c, unname(as.list(BcfGRList)))
 		BcfGR <- unique(BcfGR)
 		names(BcfGR) <- paste("chr", seqnames(BcfGR), "_", start(BcfGR), sep = "")
 		return(BcfGR)
 })
+
+#' snp count data
+#' 
+#' Given the positions of known SNPs, this function returns allele counts from
+#' a BamGRL object
+#' 
+#' This function is used to retrieve the allele counts from specified positions
+#' in a set of RNA-seq reads. The \code{BamList} argument will typically have
+#' been created using the \code{impBamGAL} function on bam-files. The
+#' \code{GRvariants} is either a GRanges with user-specified locations or else
+#' it is generated through scanning the same bam-files as in \code{BamList} for
+#' heterozygote locations (e.g. using \code{scanForHeterozygotes}). The
+#' GRvariants will currently only accept locations having width=1,
+#' corresponding to bi-allelic SNPs. In the \code{strand} argument, specifying
+#' '*' is the same as retrieving the sum count of '+' and '-' reads
+#' (and unknown strand reads in case these are found in the bam file). '*' is
+#' the default behaviour and can be used when the RNA-seq experiments strand
+#' information is not available.
+#' 
+#' @name getAlleleCounts
+#' @rdname getAlleleCounts
+#' @aliases BamList getAlleleCounts getAlleleCounts,GAlignmentsList-method
+#' @docType methods
+#' @param BamList A \code{GAlignmentsList object} or \code{GRangesList object}
+#' containing data imported from a bam file
+#' @param GRvariants A \code{GRanges object} that contains positions of SNPs to
+#' retrieve
+#' @param strand A length 1 \code{character} with value  '+',
+#' '-', or '*'.  This argument determines if \code{getAlleleCounts} will
+#' retrieve counts from all reads, or only from reads marked as '+', '-' or '*'
+#' (unknown), respectively.
+#' @param return.class 'list' or 'array'
+#' @param verbose Setting \code{verbose=TRUE} makes function more talkative
+#' @param ... parameters to pass on
+#' @return \code{getAlleleCounts} returns a list of several data.frame objects,
+#' each storing the count data for one SNP.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @seealso \itemize{ \item The \code{\link{scanForHeterozygotes}} which is a
+#' function to find possible heterozygote sites in a
+#' \code{\link[GenomicAlignments]{GAlignmentsList}} object }
+#' @keywords SNP count
+#' @examples
+#' 
+#' #load example data
+#' data(reads)
+#' data(GRvariants)
+#' 
+#' 
+#' #get counts at the three positions specified in GRvariants
+#' alleleCount <- getAlleleCounts(BamList=reads,GRvariants,
+#' strand='*')
+#' 
+#' #if the reads had contained stranded data, these two calls would 
+#' #have given the correct input objects for getAlleleCounts
+#' alleleCountPlus <- getAlleleCounts(BamList=reads,GRvariants,
+#' strand='+')
+#' alleleCountMinus <- getAlleleCounts(BamList=reads,GRvariants,
+#' strand='-')
+#' 
+#' 
+NULL
+
+#' @rdname getAlleleCounts
+#' @export
+setGeneric("getAlleleCounts", function(BamList, ... 
+	){
+    standardGeneric("getAlleleCounts")
+})
+
+#' @rdname getAlleleCounts
+#' @export
+setMethod("getAlleleCounts", signature(BamList = "GAlignmentsList"),
+function(BamList, GRvariants, strand = "*",
+						return.class = "list", verbose = TRUE, ...) { 
+    
+    
+    if (!class(BamList) %in% c("GAlignments", "GAlignmentsList")) {
+        stop("BamList has to be of class GAlignments or GAlignmnetsList\n")
+    }
+    # if just one element of, make list (which is a convenient way of
+	# handling this input type)
+    # 
+    if (class(BamList) == "GAlignments") {
+        BamList <- GAlignmentsList(BamList)
+    }
+    
+    # check for strand name
+    if (!class(strand) == "character") {
+        stop("strand has to be of class character")
+    }
+    if (!length(strand) == 1) {
+        stop("strand has to be of length 1")
+    }
+    if (!sum(strand %in% c("+", "-", "*")) > 0) {
+        stop("strand parameter has to be either '+', '-' or '*' ")
+    }
+    
+    # if the user sent in the GRangesList for GRvariants,
+	# take out only the unique entries.
+    # 
+    if (class(GRvariants) == "GRangesList") {
+        GRvariants <- unique(unlist(GRvariants, use.names = FALSE)) 
+    }
+   
+	#if BamList is not list, make it a list
+	if(class(BamList)=="GAlignments"){
+		BamList <- GAlignmentsList(BamList)
+	}
+
+	#Drop seqlevels in BamList that are not in GRvariants
+	#seqlevels(BamList,force=TRUE) <- seqlevels(GRvariants)
+	seqinfo(GRvariants) <- merge(seqinfo(GRvariants), seqinfo(BamList))
+	seqlevels(GRvariants) <- seqlevelsInUse(GRvariants)
+
+
+    # check that seqlevels are the same
+   # if (!identical(seqlevels(BamList), seqlevels(GRvariants))) {
+   #     stop("!identical(seqlevels(BamList), seqlevels(GRvariants))\n")
+   # }
+    
+    # checking that GRvariants is ok
+    if (class(GRvariants) != "GRanges") 
+        stop(paste("GRvariants must be of class GRanges, not",
+				   class(GRvariants)))
+    if (length(GRvariants) == 0) 
+        stop("GRvariants was given as an empty GRanges object.",
+			 " There can be no Snps retrieved by getAlleleCount then")
+    if (any(width(GRvariants) != 1)) 
+        stop("GRvariants can contain only entries of width=1,",
+			 " corresponding to SNPs.")
+    
+    # checking that verbose is ok
+    if (class(verbose) != "logical") 
+        stop(paste("verbose must be of class logical, not", class(verbose)))
+    if (length(verbose) != 1) 
+        stop(paste("verbose must be of length 1, not", length(verbose)))
+    
+    # make row-names
+    if (sum(grepl("chr", seqnames(GRvariants))) > 0) {
+        snpNames <- paste(seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
+    } else {
+        snpNames <- paste("chr", seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
+    }
+    
+	# needs name, need a more general solution here
+	if(length(names(BamList)) == 0){
+		warning("no set names for list, new names will be sample1,2,3,etc")
+		names(BamList) <- paste("sample",1:length(BamList),sep="")
+	}
+
+	#empty array that handles only four nucleotides + one del columns
+    dimnames = list(snpNames, names(BamList), c("A", "C", "G", "T"))
+    ar1 <- array(NA, c(length(GRvariants), length(BamList), 4),
+				 dimnames = dimnames)  
+    
+    # use strand choice to only get reads from that strand
+    if (!strand == "*") {
+        BamList <- GAlignmentsList(mapply(function(x, y) {
+            x[y]
+        }, BamList, strand(BamList) == strand))
+    }
+    
+    for (j in 1:length(names(BamList))) {
+        sample <- names(BamList)[j]
+        if (verbose) 
+            cat("sample ", sample, "\n")
+        
+        gal <- BamList[[j]]
+		my_IGPOI <- GRvariants
+		seqlevels(gal) <- seqlevels(my_IGPOI) 
+		qseq <- mcols(gal)$seq
+        
+#        nuclpiles <- pileLettersAt(mcols(gal)[, "seq"], seqnames(gal), start(gal), 
+#            cigar(gal), GRvariants)
+#
+		nuclpiles <- pileLettersAt(qseq, seqnames(gal), start(gal), cigar(gal),
+							                                 my_IGPOI)
+        
+        # fill array
+        nstr <- strsplit(as.character(nuclpiles), "")
+        for (k in 1:length(GRvariants)) {
+            ar1[k, j, ] <- c(sum(nstr[[k]] %in% "A"), sum(nstr[[k]] %in% "C"), sum(nstr[[k]] %in% 
+                "G"), sum(nstr[[k]] %in% "T"))  
+        }
+        
+    }
+    
+    # check return.type argument
+    if (return.class == "list") {
+        alleleCountList <- list()
+        for (i in 1:nrow(ar1)) {
+            mat <- ar1[i, , ]
+			if(class(mat)=="integer"){
+				mat <- t(as.matrix(mat))
+			}
+            if (class(mat) == "numeric") {
+                mat <- t(mat)
+                colnames(mat) <- dimnames[[3]]
+            } else {
+                colnames(mat) <- dimnames[[3]]
+            }
+            rownames(mat) <- dimnames[[2]]
+            alleleCountList[[i]] <- mat
+        }
+        names(alleleCountList) <- dimnames[[1]]
+        alleleCountList
+    } else if (return.class == "array") {
+        ar1
+    } else {
+        cat("return.type unknown\n Nothing will be returned from function!")
+    }
+})
+
+
 

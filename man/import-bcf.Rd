@@ -3,6 +3,7 @@
 \docType{methods}
 \name{import-bcf}
 \alias{impBcfGR}
+\alias{impBcfGR,character-method}
 \alias{impBcfGRL}
 \alias{impBcfGRL,character-method}
 \alias{import-bcf}
@@ -10,11 +11,13 @@
 \usage{
 impBcfGRL(UserDir, ...)
 
-\S4method{impBcfGRL}{character}(UserDir, searchArea = NULL, verbose = TRUE)
+\S4method{impBcfGRL}{character}(UserDir, searchArea = NULL, verbose = TRUE,
+  ...)
 
 impBcfGR(UserDir, ...)
 
-\S4method{impBcfGRL}{character}(UserDir, searchArea = NULL, verbose = TRUE)
+\S4method{impBcfGRL}{character}(UserDir, searchArea = NULL, verbose = TRUE,
+  ...)
 }
 \arguments{
 \item{UserDir}{The relative or full path of folder containing bam files.}
