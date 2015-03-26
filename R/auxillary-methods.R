@@ -1474,7 +1474,7 @@ setGeneric("coverageMatrixListFromGAL", function(BamList, ...
 
 #' @rdname coverageMatrixListFromGAL
 #' @export
-setMethod("coverageMatrixListFromGAL", signature(BamList = "GRanges"),
+setMethod("coverageMatrixListFromGAL", signature(BamList = "GAlignmentsList"),
 function(BamList, strand = "*", ignore.empty.bam.row = TRUE) {
     
     # If having common start and end points for all gviz track objects the matrix

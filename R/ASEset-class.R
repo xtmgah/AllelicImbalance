@@ -694,30 +694,28 @@ setMethod("phase<-", signature(x = "ASEset"), function(x,value) {
 })
 
 #' @rdname ASEset-class
+#' @importFrom VariantAnnotation ref
 #' @export 
-setGeneric("ref", function(x, ... ){
-    standardGeneric("ref")
-})
+setGeneric("ref",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
 #could be renamed to countsAllAlleles
-setMethod("ref", signature(x = "ASEset"), function(x, ...) {
+setMethod("ref", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["ref"]]
 	
 })
 
 #' @rdname ASEset-class
+#' @importFrom VariantAnnotation ref<-
 #' @export 
-setGeneric("ref<-", function(x, value){
-    standardGeneric("ref<-")
-})
+setGeneric("ref<-",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
 #could be renamed to countsAllAlleles
-setMethod("ref<-", signature(x = "ASEset"), function(x,value) {
+setMethod("ref<-", signature(x = "ASEset"), function(x, value) {
 
 	if(class(value)=="character") {
 
@@ -731,30 +729,28 @@ setMethod("ref<-", signature(x = "ASEset"), function(x,value) {
 })
 
 #' @rdname ASEset-class
+#' @importFrom VariantAnnotation alt
 #' @export 
-setGeneric("alt", function(x, ... ){
-    standardGeneric("alt")
-})
+setGeneric("alt",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
 #could be renamed to countsAllAlleles
-setMethod("alt", signature(x = "ASEset"), function(x, ...) {
+setMethod("alt", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["alt"]]
 	
 })
 
 #' @rdname ASEset-class
+#' @importFrom VariantAnnotation alt<-
 #' @export 
-setGeneric("alt<-", function(x, value){
-    standardGeneric("alt<-")
-})
+setGeneric("alt<-",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
 #could be renamed to countsAllAlleles
-setMethod("alt<-", signature(x = "ASEset"), function(x,value) {
+setMethod("alt<-", signature(x = "ASEset"), function(x, value) {
 
 	if(class(value)=="character") {
 

@@ -237,15 +237,15 @@ allele will visit the meta-columns "ref" or "alt" to extract that information.
 #from simulated data
 ref(a.simple) <- c("G","T","C")
 
+#infer and set alternative allele
+alt <- inferAltAllele(a.simple)
+alt(a.simple) <- alt
+
 #from reference genome
 data(ASEset.sim)
 fasta <- system.file('extdata/hg19.chr17.subset.fa', package='AllelicImbalance')
 ref <- refAllele(ASEset.sim,fasta=fasta) 
 ref(ASEset.sim) <- ref
-
-#infer and set alternative allele
-alt <- inferAltAllele(ASEset.sim)
-alt(ASEset.sim) <- alt
 ```
 
 Using reference allele information when measuring the impact of mapping bias globally, can be

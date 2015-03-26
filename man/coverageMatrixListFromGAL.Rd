@@ -4,12 +4,11 @@
 \name{coverageMatrixListFromGAL}
 \alias{coverageMatrixListFromGAL}
 \alias{coverageMatrixListFromGAL,GAlignmentsList-method}
-\alias{coverageMatrixListFromGAL,GRanges-method}
 \title{coverage matrix of GAlignmentsList}
 \usage{
 coverageMatrixListFromGAL(BamList, ...)
 
-\S4method{coverageMatrixListFromGAL}{GRanges}(BamList, strand = "*",
+\S4method{coverageMatrixListFromGAL}{GAlignmentsList}(BamList, strand = "*",
   ignore.empty.bam.row = TRUE)
 }
 \arguments{
