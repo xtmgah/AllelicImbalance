@@ -1218,8 +1218,8 @@ function(alleleCountList) {
 #' 
 #' @name getAreaFromGeneNames
 #' @rdname getAreaFromGeneNames
-#' @aliases getAreaFromGeneNames getAreaFromGeneNames 
-#' getAreaFromGeneNames,character-method getAreaFromGeneNames,character-method
+#' @aliases getAreaFromGeneNames 
+#' getAreaFromGeneNames,character-method 
 #' @docType methods
 #' @param genesymbols A character vector that contains genesymbols of genes
 #' from which we wish to retrieve the coordinates
@@ -1328,5 +1328,112 @@ function(genesymbols, OrgDb, leftFlank = 0, rightFlank = 0,
     mcols(searchArea)[["revmap"]] <- NULL
     
     return(searchArea)
+})
+
+#' Get rsIDs from locations of SNP
+#' 
+#' Given a GRanges object of SNPs and a SNPlocs annotation, this function
+#' attempts to replace the names of the GRanges object entries with rs-IDs.
+#' 
+#' This function is used to try to identify the rs-IDs of SNPs in a GRanges
+#' object.
+#' 
+#' @name getSnpIdFromLocation
+#' @rdname getSnpIdFromLocation
+#' @aliases getSnpIdFromLocation 
+#' getSnpIdFromLocation,GRanges-method 
+#' @docType methods
+#' @param GR A \code{GRanges} that contains positions of SNPs to look up
+#' @param SNPloc A \code{SNPlocs object} containing information on SNP
+#' locations (e.g. SNPlocs.Hsapiens.dbSNP.xxxxxxxx)
+#' @param return.vector Setting \code{return.vector=TRUE} returns vector with
+#' rsIds
+#' @param verbose Setting \code{verbose=TRUE} makes function more talkative
+#' @param ... arguments to pass on
+#' @return \code{getSnpIdFromLocation} returns the same GRanges object it was
+#' given with, but with updated with rs.id information.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords SNP rs-id
+#' @examples
+#' 
+#' #load example data
+#' data(ASEset)
+#' 
+#' #get counts at the three positions specified in GRvariants
+#' if(require(SNPlocs.Hsapiens.dbSNP.20120608)){
+#' updatedGRanges<-getSnpIdFromLocation(rowRanges(ASEset), SNPlocs.Hsapiens.dbSNP.20120608)
+#' rowRanges(ASEset)<-updatedGRanges
+#'}
+#' 
+NULL
+
+#' @rdname getSnpIdFromLocation
+#' @export
+setGeneric("getSnpIdFromLocation", function(GR, ... 
+	){
+    standardGeneric("getSnpIdFromLocation")
+})
+
+#' @rdname getSnpIdFromLocation
+#' @export
+setMethod("getSnpIdFromLocation", signature(GR = "GRanges"),
+function(GR, SNPloc, return.vector = FALSE, verbose = TRUE) {
+   
+	#genome <- genome(GR)
+
+    if (class(GR) != "GRanges") 
+        stop(paste("GR must of class GRanges, not", class(GR)))
+    if (class(SNPloc) != "SNPlocs") 
+        stop(paste("SNPlocs must of class SNPlocs, not", class(SNPloc)))
+    if (!exists("getSNPlocs")) 
+        stop("There must exist a function called getSNPlocs, available from the SNPlocs.Hsapiens.dbSNP.xxxxxxx package. Try to load such package.")
+    
+    # add chr to seqnames if not present
+    if (length(grep("^chr", seqnames(GR))) != length(GR)) {
+        if (length(grep("^chr", seqnames(GR))) != 0) 
+            stop("seqnames must all begin with 'chr'. In the GR it seemed that some, but not all, seqnames began with chr. Please correct manually")
+        seqlevels(GR) <- paste("chr", seqlevels(GR), sep = "")
+        # seqnames(GR)<-seqnames
+    }
+    
+    # changing chr to ch to adapt to SNPloc
+    if (length(grep("^chr", seqnames(GR))) == length(GR)) {
+        # seqnames<-seqnames(GR)
+        seqlevels(GR) <- sub("^chr", "ch", seqlevels(GR))
+        # seqlevels(GR)<-as.character(unique(seqnames)) seqlevels(GR) <- levels(seqnames)
+        # seqnames(GR)<-seqnames
+    }
+    
+    
+    SNPlocThisChr <- getSNPlocs(seqlevels(GR), as.GRanges = TRUE, caching = FALSE)
+    
+    seqlevels(SNPlocThisChr, force = TRUE) <- seqlevels(GR)
+    # seqlengths(GR) <- seqlengths(SNPlocThisChr)
+	genome(SNPlocThisChr) <- genome(GR)
+    
+    overlaps <- findOverlaps(GR, SNPlocThisChr)
+    
+    if (verbose) 
+        cat(paste("Replacing position-based SNP name with rs-ID for", length(overlaps), 
+            "SNP(s)"), "\n")
+    
+    # replace name in GR for(i in 1:length(overlaps)){
+    # snp<-paste('rs',mcols(SNPlocThisChr[subjectHits(overlaps[i])])[,'RefSNP_id'],sep='')
+    # names(GR)[queryHits(overlaps[i])] <-snp }
+    
+    snp <- paste("rs", mcols(SNPlocThisChr[subjectHits(overlaps)])[, "RefSNP_id"], 
+        sep = "")
+    names(GR)[queryHits(overlaps)] <- snp
+    
+    # change back to chr from ch
+    seqlevels(GR) <- sub("^ch", "chr", seqlevels(GR))
+
+
+    if (return.vector) {
+        names(GR)
+    } else {
+        return(GR)
+    }
+    
 })
 
