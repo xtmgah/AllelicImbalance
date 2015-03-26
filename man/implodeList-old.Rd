@@ -17,7 +17,7 @@ help the propagation of e.g. graphical paramters
 }
 \examples{
 lst <- list(hungry='yes', thirsty='no')
-implodeList(lst)
+implodeList.old(lst)
 #the check ls()
  ls()
 }

@@ -1912,28 +1912,45 @@ function(fastaIn, fastaOut, posToReplace, splitOnSeqlevels=TRUE, verbose=TRUE){
 })
 
 
-##' global analysis wrapper
-##' 
-##' A wrapper to make a global analysis based on paths for BAM, VCF and GFF files
-##' 
-##' @param pathBam path to bam file
-##' @param pathVcf path to vcf file
-##' @param pathGFF path to gff file
-##' @param verbose makes function more talkative
-##' @author Jesper R. Gadin
-##' @keywords global wrapper
-##' @examples
-##'
-##' #empty as function doesn't exist
-##' 
-##' @export 
-#gba <- function(pathBam,pathVcf,pathGFF=NULL, verbose){
-#
-#	#summarize counts
-#	
-#	#detectAI
-#
-#	
-#}
-#
+#' global analysis wrapper
+#' 
+#' A wrapper to make a global analysis based on paths for BAM, VCF and GFF files
+#' 
+#' @name gba
+#' @rdname gba
+#' @aliases gba 
+#' gba,character-method 
+#' @docType methods
+#' @param pathBam path to bam file
+#' @param pathVcf path to vcf file
+#' @param pathGFF path to gff file
+#' @param verbose makes function more talkative
+#' @param ... arguments to pass on
+#' @author Jesper R. Gadin
+#' @keywords global wrapper
+#' @examples
+#'
+#' #empty as function doesn't exist
+#' 
+NULL
+
+#' @rdname gba
+#' @export
+setGeneric("gba", function(pathBam, ... 
+	){
+    standardGeneric("gba")
+})
+
+#' @rdname gba
+#' @export
+setMethod("gba", signature(pathBam = "character"),
+function(pathBam,pathVcf,pathGFF=NULL, verbose){
+
+	#summarize counts
+	
+	#detectAI
+
+	
+})
+
 

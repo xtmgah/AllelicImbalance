@@ -523,16 +523,17 @@ scanForHeterozygotes.old <- function(BamList, minimumReadsAtPos = 20, maximumMaj
 #' 
 #' help the propagation of e.g. graphical paramters 
 #' 
+#' @rdname implodeList-old
 #' @param x list of variables
 #' @author Jesper R. Gadin
 #' @keywords implode
 #' @examples
 #' 
 #' lst <- list(hungry='yes', thirsty='no')
-#' implodeList(lst)
+#' implodeList.old(lst)
 #' #the check ls()
 #'  ls()
-#' @export implodeList
+#' @export implodeList.old
 implodeList.old <- function(x) {
     oname <- deparse(substitute(x))
     eval(parse(text = paste0("for(i in 1:length(", oname, ")){assign(names(", oname, 
