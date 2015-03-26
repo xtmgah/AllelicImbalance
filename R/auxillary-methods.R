@@ -1437,3 +1437,311 @@ function(GR, SNPloc, return.vector = FALSE, verbose = TRUE) {
     
 })
 
+#' coverage matrix of GAlignmentsList
+#' 
+#' Get coverage per nucleotide for reads covering a region
+#' 
+#' a convenience function to get the coverage from a list of reads stored in
+#' GAlignmnetsList, and returns by default a list with one matrix, and
+#' information about the genomic start and stop positions.
+#' 
+#' @name coverageMatrixListFromGAL
+#' @rdname coverageMatrixListFromGAL
+#' @aliases coverageMatrixListFromGAL 
+#' coverageMatrixListFromGAL,GAlignmentsList-method 
+#' @docType methods
+#' @param BamList GAlignmentsList containing reads over the region to calculate
+#' coverage
+#' @param strand strand has to be '+' or '-'
+#' @param ignore.empty.bam.row argument not in use atm
+#' @param ... arguments to pass on
+#' @author Jesper R. Gadin
+#' @keywords coverage
+#' @examples
+#' 
+#' r <- reads
+#' seqlevels(r) <- '17'
+#' covMatList <- coverageMatrixListFromGAL(BamList=r, strand='+')
+#' 
+NULL
+
+#' @rdname coverageMatrixListFromGAL
+#' @export
+setGeneric("coverageMatrixListFromGAL", function(BamList, ... 
+	){
+    standardGeneric("coverageMatrixListFromGAL")
+})
+
+#' @rdname coverageMatrixListFromGAL
+#' @export
+setMethod("coverageMatrixListFromGAL", signature(BamList = "GRanges"),
+function(BamList, strand = "*", ignore.empty.bam.row = TRUE) {
+    
+    # If having common start and end points for all gviz track objects the matrix
+    # will start on the specific start regardless if there are reads in the bamList
+    # or not.
+    
+    # TODO, to conveniently access data without loading into memory, the bam file
+    # should be read again by using the argument BamPath.
+    
+    GAL <- BamList
+    
+    # Could be good with a check that the matrix is not longer than CNTNAP2 -
+    # 2300000bp long which is the longest gene But will wait with that.
+    pstrand = FALSE
+    mstrand = FALSE
+
+    if (!is.null(strand)) {
+        if (strand == "+") {
+            pstrand = TRUE
+        } else if (strand == "-") {
+            mstrand = TRUE
+        } else if (strand == "*") {
+            mstrand = TRUE
+            pstrand = TRUE
+        } else if (strand == "both") {
+            mstrand = TRUE
+            pstrand = TRUE
+        } else {
+            stop("strand has to be '+' or '-' if not NULL\n")
+        }
+    }
+    
+    if (!length(seqlevels(GAL)) == 1) {
+        stop("can only be one seq level\n")
+    }
+    
+    # get start and end before filtering on strand, will make things easier
+    # downstream.
+    suppressWarnings(bamStart <- min(min(start(GAL))))
+    suppressWarnings(bamEnd <- max(max(end(GAL))))
+    bamWidth <- bamEnd - bamStart + 1
+    
+    # if(is.null(start) | is.null(end)){
+    start <- bamStart
+    end <- bamEnd
+    width <- bamWidth
+    # }
+    
+    if (pstrand) {
+        GALp <- GAL[strand(GAL) == "+"]
+    }
+    if (mstrand) {
+        GALm <- GAL[strand(GAL) == "-"]
+    }
+    
+    if (pstrand) {
+        matP <- matrix(0, ncol = (width), nrow = length(GAL))
+    }
+    if (mstrand) {
+        matM <- matrix(0, ncol = (width), nrow = length(GAL))
+    }
+    if (pstrand) {
+        rownames(matP) <- names(GAL)
+    }
+    if (mstrand) {
+        rownames(matM) <- names(GAL)
+    }
+    ################################################## 
+    
+    covVecFromGA <- function(GA) {
+        mcols(GA) <- NULL
+        one <- unlist(grglist(GA))
+        covRle <- coverage(one)[[1]]
+        cov <- as.integer(window(covRle, start, end))
+        cov
+    }
+    
+    if (pstrand) {
+        for (i in 1:length(GALp)) {
+            matP[i, ] <- covVecFromGA(GALp[[i]])
+        }
+    }
+    if (mstrand) {
+        for (i in 1:length(GALm)) {
+            matM[i, ] <- covVecFromGA(GALm[[i]])
+        }
+    }
+    
+    # make mat from matP or matM
+    if (strand=="+") {
+        mat <- matP
+    }
+    if (strand=="-") {
+        mat <- matM
+    }
+    if (strand=="*") {
+        mat <- matM+matP
+    }
+    
+    if (strand=="both") {
+        mat <- list(plus=matP,minus=matM)
+    }
+
+    # store in a list
+    if (!is.null(strand)) {
+        retList <- list(mat, start, end)
+    } else {
+        stop("strand must be present")
+    }
+    # set name on list
+    if (!is.null(strand)) {
+        names(retList) <- c("mat", "start", "end")
+    } else {
+        stop("strand must be present")
+    }
+    
+    retList
+})
+
+#' alleleCounts from bam file
+#' 
+#' count alleles before creating ASEse.
+#' 
+#' counts the alleles in a bam file based on GRanges positions. 
+#' 
+#' 
+#' @name countAllelesFromBam
+#' @rdname countAllelesFromBam
+#' @aliases countAllelesFromBam 
+#' countAllelesFromBam,GRanges-method 
+#' @docType methods
+#' @param gr GRanges that contains SNPs of interest
+#' @param pathToDir path to directory of bam files
+#' @param flag specify one flag to use as filter, default is no filtering. 
+#' allowed flags are 99, 147, 83 and 163
+#' @param scanBamFlag set a custom flag to use as filter
+#' @param return.class type of class for the returned object
+#' @param verbose makes funciton more talkative
+#' @param ... arguments to pass on
+#' @author Jesper R. Gadin
+#' @keywords allelecount counting
+#' @examples
+#'
+#' data(GRvariants)
+#' gr <- GRvariants
+#'
+#' ##not run at the moment
+#' #pathToDir <- system.file('inst/extdata/ERP000101_subset', package='AllelicImbalance')
+#' #ar <- countAllelesFromBam(gr, pathToDir)
+#'  
+NULL
+
+#' @rdname countAllelesFromBam
+#' @export
+setGeneric("countAllelesFromBam", function(gr, ... 
+	){
+    standardGeneric("countAllelesFromBam")
+})
+
+#' @rdname countAllelesFromBam
+#' @export
+setMethod("countAllelesFromBam", signature(gr = "GRanges"),
+function(gr, pathToDir, flag=NULL, scanBamFlag=NULL, return.class="array", verbose=TRUE) {
+
+	bamDir <- normalizePath(pathToDir)
+	allFiles <- list.files(bamDir, full.names = TRUE)
+	bamFiles <- allFiles[grep(".bam$", allFiles)]
+	if (length(bamFiles) == 0) {
+		stop(paste("No bam files found in", bamDir))
+	}
+	if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+		if (verbose) {
+			cat(paste("The bam files in UserDir are required to also have", ".bam.bai index files.", 
+				" Trying to run indexBam function on each", "\n"), )
+		}
+		indexBam(bamFiles)
+		if (!all(file.exists(paste(bamFiles, ".bai", sep = "")))) {
+			stop("The bam files in UserDir are required to also have", ".bam.bai index files.")
+		} else {
+			if (verbose) {
+				cat(paste("Succesfully indexed all bamFiles in UserDir", UserDir, 
+				  "\n"))
+			}
+		}
+	}
+	
+	#scanBamFlag
+	if(is.null(scanBamFlag) & is.null(flag)){
+		flag <- scanBamFlag()
+	}
+	if(!is.null(scanBamFlag) ){
+		if(length(scanBamFlag)==2){
+			flag <- scanBamFlag
+		}else{
+			stop("scanBamFlag has to be the return values from scanBamFlag()")
+		}
+	}
+	#flags can be 99 147 83 or 163
+	if(length(flag)==1 & is.null(scanBamFlag)){
+		if(! (flag%in%c(99,147,83,163))){
+			stop(paste("flag values can only be 99 147 83 or 163",
+					   "the input flag value was", flag,sep=" "))
+		}
+		
+		if(flag==99){
+
+			flag=scanBamFlag( isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = TRUE,	
+					isMateMinusStrand = TRUE
+					)
+		}else if(flag==83){
+
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = TRUE,	
+					isMinusStrand = TRUE
+					)
+		}else if(flag==147){
+		
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = FALSE,	
+					isMinusStrand = TRUE
+					)
+		}else if(flag==163){
+		
+			flag=scanBamFlag(
+					isPaired = TRUE,
+					isProperPair = TRUE,
+					isFirstMateRead = FALSE,	
+					isMateMinusStrand = TRUE
+					)
+		}
+	}
+
+
+	if(verbose){
+		cat("sam flag used:",flag,"\n")
+	}
+	fls <- PileupFiles(bamFiles)
+	
+	countF <-
+		function(x){
+		x[["seq"]][-5,,1]
+
+	}                     
+
+	which <- gr
+	p1 <- ApplyPileupsParam(flag=flag,
+							which=which, 
+							minBaseQuality = 0L,
+							what="seq",
+							yieldBy = "position",
+							yieldAll=TRUE
+							)
+
+	res <- applyPileups(fls, countF, param=p1)
+
+	ar <- array(unlist(res), dim=c(4, length(fls), length(which)),
+				dimnames=list(c("A","C","G","T"), 
+							  names(fls), 
+							  names(which)))
+	ar <- aperm(ar,dim=c(3,2,1))
+	
+	ar
+})
+
