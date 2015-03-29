@@ -1997,7 +1997,12 @@ function(pathBam,pathVcf,pathGFF=NULL, verbose){
 #' #get counts at the three positions specified in GRvariants
 #' alleleQualityArray <- getAlleleQuality(BamList=reads,GRvariants)
 #' 
+#' #place in ASEset object
+#' alleleCountsArray <- getAlleleCounts(BamList=reads,GRvariants,
+#'                      strand='*', return.class="array")
 #' 
+#' 	a <- ASEsetFromArrays(GRvariants, countsUnknown = alleleCountsArray) 
+#' 	aquals(a) <- alleleQualityArray	
 NULL
 
 #' @rdname getAlleleQuality

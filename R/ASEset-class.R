@@ -603,7 +603,6 @@ setGeneric("countsPerSnp", function(x, ...){
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("countsPerSnp", signature(x = "ASEset"), function(x, 
 	return.class = "matrix", return.type="mean", strand = "*") {
 
@@ -628,7 +627,6 @@ setGeneric("countsPerSample", function(x, ...){
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("countsPerSample", signature(x = "ASEset"), function(x, 
 	return.class = "matrix", return.type="mean", strand = "*") {
 
@@ -653,7 +651,6 @@ setGeneric("phase", function(x, ...){
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("phase", signature(x = "ASEset"), function(x, 
 	return.class = "matrix" ) {
 
@@ -675,7 +672,6 @@ setGeneric("phase<-", function(x, value){
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("phase<-", signature(x = "ASEset"), function(x,value) {
 
 	if(class(value)=="matrix") {
@@ -700,7 +696,6 @@ setGeneric("ref",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("ref", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["ref"]]
@@ -714,7 +709,6 @@ setGeneric("ref<-",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("ref<-", signature(x = "ASEset"), function(x, value) {
 
 	if(class(value)=="character") {
@@ -735,7 +729,6 @@ setGeneric("alt",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
 setMethod("alt", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["alt"]]
@@ -762,4 +755,39 @@ setMethod("alt<-", signature(x = "ASEset"), function(x, value) {
 	
 	x
 })
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("aquals", function(x, ...){
+    standardGeneric("aquals")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("aquals", signature(x = "ASEset"), function(x) {
+		assays(x)[["aquals"]]
+})
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("aquals<-", function(x, value){
+    standardGeneric("aquals<-")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("aquals<-", signature(x = "ASEset"), function(x,value) {
+
+	if(class(value)=="array") {
+
+		if(!identical(dim(x),dim(value)[1:2])){
+			stop("dimension of value does not correspond to the values of object ASEset")	
+		}
+	
+		assays(x)[["aquals"]] <- value
+
+	}
+	x
+})
+
 

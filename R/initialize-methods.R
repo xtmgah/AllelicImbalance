@@ -96,7 +96,7 @@ NULL
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlus = NULL, 
-    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
+    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL, aqual = NULL,
     verbose = FALSE, ...) {
     
     if (verbose) {
@@ -266,6 +266,10 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
         assays[["phase"]] <- defaultPhase(snps,ind)
     }
 
+    if (is.null(aquals)) {
+        assays[["aquals"]] <- NULL
+    }
+
     if (is.null(colData)) {
         colData <- DataFrame(row.names = unlist(unique(lapply(countList, rownames))))
     }
@@ -291,7 +295,7 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL, 
-    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
+    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL, aquals = NULL,
     verbose = FALSE, ...) {
     
    # if (verbose) {
@@ -381,6 +385,10 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     # assign phase if user provides it
     if (is.null(phase)) {
         assays[["phase"]] <- defaultPhase(snps,ind)
+    }
+
+    if (is.null(aquals)) {
+        assays[["aquals"]] <- NULL
     }
 
     if (is.null(colData)) {
