@@ -2089,7 +2089,7 @@ function(BamList, GRvariants, fastq.format = "illumina.1.8",
 
 	#choose format
 	if(fastq.format=="illumina.1.8"){
-		dim3 <- c("!","\"","#","$","%","&","\'","(",")","*","+",",","-",".","\\","/","0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J")
+		dim3 <- c("!","\"","#","$","%","&","'","(",")","*","+",",","-",".","\\","/","0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J")
 	}
 
 
@@ -2110,31 +2110,43 @@ function(BamList, GRvariants, fastq.format = "illumina.1.8",
         if (verbose) 
             cat("sample ", sample, "\n")
         
+		my_IGPOI <- GRvariants
+
 		# + strand
         gal <- BamList[[j]][strand(BamList[[j]]) == "+"]
-		my_IGPOI <- GRvariants
+		seqlevels(gal) <- seqlevels(my_IGPOI) 
+        
+		nuclpiles <- pileLettersAt(mcols(gal)$qual, seqnames(gal), start(gal), cigar(gal),
+							                                 my_IGPOI)
+        # fill array
+        nstr <- factor(unlist(strsplit(as.character(nuclpiles), "")),
+					   levels=dim3, labels=dim3)
+		levels(nstr) <- dim3
+
+        for (k in 1:length(nuclpiles)) {
+			tbl <- table(factor(unlist(strsplit(as.character(nuclpiles[k]), "")),
+					   levels=dim3, labels=dim3))
+			ar1[k, j, names(tbl), "+"] <- as.integer(tbl)
+		
+        }
+
+		# - strand
+        gal <- BamList[[j]][strand(BamList[[j]]) == "-"]
 		seqlevels(gal) <- seqlevels(my_IGPOI) 
         
 		nuclpiles <- pileLettersAt(mcols(gal)$qual, seqnames(gal), start(gal), cigar(gal),
 							                                 my_IGPOI)
         
         # fill array
-		#indx <- Rle(rep(c(1:length(nuclpiles)),width(nuclpiles)))
         nstr <- factor(unlist(strsplit(as.character(nuclpiles), "")),
 					   levels=dim3, labels=dim3)
 		levels(nstr) <- dim3
-		#mtch <- match(nstr,levels(nstr))
 
-		#cumsum for subset
-		#indx.cs <- c(1,cumsum(runLength(indx))[-nrun(indx)])
         for (k in 1:length(nuclpiles)) {
 			tbl <- table(factor(unlist(strsplit(as.character(nuclpiles[k]), "")),
 					   levels=dim3, labels=dim3))
-			#tbl <- table(nstr[indx.cs[k]:runLength(indx)[k]])
-			ar1[k, j, names(tbl), "+"] <- as.integer(tbl)
-		
+			ar1[k, j, names(tbl), "-"] <- as.integer(tbl)
         }
-        
     }
     
 	if (return.class == "array") {
