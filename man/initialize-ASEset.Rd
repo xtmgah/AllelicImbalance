@@ -11,8 +11,9 @@ ASEsetFromCountList(rowRanges, countListUnknown = NULL,
   mapBiasExpMean = NULL, phase = NULL, verbose = FALSE, ...)
 
 ASEsetFromArrays(rowRanges, countsUnknown = NULL, countsPlus = NULL,
-  countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL,
-  phase = NULL, verbose = FALSE, ...)
+  countsMinus = NULL, colData = NULL, acounts = NULL,
+  mapBiasExpMean = NULL, phase = NULL, genotype = NULL, verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{rowRanges}{A \code{GenomicRanges object} that contains the variants of
@@ -43,6 +44,10 @@ dimension, samples in the 2nd dimension and variants in the 3rd dimension.}
 \item{countsPlus}{An array containing the countinformation}
 
 \item{countsMinus}{An array containing the countinformation}
+
+\item{acounts}{A 4-D array containing the countinformation, see details}
+
+\item{genotype}{matrix}
 }
 \value{
 \code{ASEsetFromCountList} returns an \code{ASEset} object.
@@ -51,15 +56,15 @@ dimension, samples in the 2nd dimension and variants in the 3rd dimension.}
 Functions to construct ASEset objects
 }
 \details{
-The resulting \code{ASEset} object is based on the
-\code{SummarizedExperiment}, and will therefore inherit the same accessors
+The resulting ASEset object is based on the
+SummarizedExperiment, and will therefore inherit the same accessors
 and ranges operations.
 
 If both countListPlus and countListMinus are given they will be used to
 calculate countListUnknown, which is the sum of the plus and minus strands.
 
 countListPlus, countListMinus and countListUnknown are
-i.e. the outputs from the \code{\link{getAlleleCounts}} function.
+i.e. the outputs from the getAlleleCounts function.
 }
 \note{
 \code{ASEsetFromCountList} requires the same input data as an

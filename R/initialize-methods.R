@@ -7,15 +7,15 @@ NULL
 #' 
 #' Functions to construct ASEset objects
 #' 
-#' The resulting \code{ASEset} object is based on the
-#' \code{SummarizedExperiment}, and will therefore inherit the same accessors
+#' The resulting ASEset object is based on the
+#' SummarizedExperiment, and will therefore inherit the same accessors
 #' and ranges operations.
 #' 
 #' If both countListPlus and countListMinus are given they will be used to 
 #' calculate countListUnknown, which is the sum of the plus and minus strands.
 #' 
 #' countListPlus, countListMinus and countListUnknown are
-#' i.e. the outputs from the \code{\link{getAlleleCounts}} function.
+#' i.e. the outputs from the getAlleleCounts function.
 #' 
 #' @name initialize-ASEset
 #' @rdname initialize-ASEset
@@ -31,6 +31,8 @@ NULL
 #' @param countsPlus An array containing the countinformation
 #' @param countsMinus An array containing the countinformation
 #' @param countsUnknown An array containing the countinformation
+#' @param acounts A 4-D array containing the countinformation, see details
+#' @param genotype matrix
 #' @param colData A \code{DataFrame} object containing sample specific data
 #' @param phase A \code{matrix} or an \code{array} containing phase information. 
 #' @param mapBiasExpMean A 3D \code{array} where the SNPs are in the 1st
@@ -281,7 +283,8 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL, 
-    countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
+    countsMinus = NULL, colData=NULL, acounts = NULL,  mapBiasExpMean = NULL, phase = NULL,
+	genotype = NULL,
     verbose = FALSE, ...) {
     
     # check that at least one of the countList options are not null
@@ -304,8 +307,8 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
 
     # choose a common countList by picking the first one, for dimension info
     countList <- get(countLists[1])
-    ind <- length(dimnames(countList)[[2]])
-    snps <- length(dimnames(countList)[[1]])
+    ind <- dim(countList)[2]
+    snps <- dim(countList)[1]
     
     # SimpleList init
     assays <- SimpleList()
@@ -328,10 +331,9 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
 		assays[["acounts"]] <- ar
 	}
 
-
     # assign mapBiasExpMean
     if (is.null(mapBiasExpMean)) {
-        assays[["mapBias"]] <- getDefaultMapBiasExpMean3D(assays[["countsUnknown"]])
+        assays[["mapBias"]] <- getDefaultMapBiasExpMean3D(ar)
     } else {
         assays[["mapBias"]] <- mapBiasExpMean
     }
@@ -339,20 +341,26 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     # assign phase if user provides it
     if (is.null(phase)) {
         assays[["phase"]] <- defaultPhase(snps,ind)
+    }else {
+        assays[["phase"]] <- phase
+	}
+    if (!is.null(genotype)) {
+        assays[["genotype"]] <- genotype
     }
 
     if (is.null(colData)) {
-        colData <- DataFrame(row.names = dimnames(assays[["countsUnknown"]])[[2]])
+        colData <- DataFrame(row.names = dimnames(ar)[[2]])
     }
 
-    sset <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData = colData, 
+    sset <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData=colData,
         ...)
     
     rownames(sset) <- rownames(countList)
     
     
     # use colnames in list matrices as variants
-    variants <- dimnames(assays[["countsUnknown"]])[[3]]    
+    #variants <- dimnames(assays[["countsUnknown"]])[[3]]    
+    variants <- c( "A",  "C", "G", "T")
     ASEset <- function(sset, variants) {
         # create object
         new("ASEset", sset, variants = variants)

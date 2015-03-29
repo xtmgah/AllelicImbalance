@@ -1951,4 +1951,77 @@ function(pathBam,pathVcf,pathGFF=NULL, verbose){
 	
 })
 
+#' update ASEset
+#' 
+#' converts old ASEsets to new ASEset objects
+#'
+#' It is not possible to convert back to an old version.
+#'
+#' @name ASEsetFromOldVersion
+#' @rdname ASEsetFromOldVersion
+#' @aliases ASEsetFromOldVersion 
+#' ASEsetFromOldVersion,ASEset-method 
+#' @docType methods
+#' @param x ASEset object
+#' @param ... passed on to ASEsetFromOldVersion function
+#' @author Jesper R. Gadin
+#' @keywords ASEset
+#' @examples
+#'
+#' #load an old example object
+#' data(ASEsetOld1)
+#'
+#' # convert to new version
+#' a <- ASEsetFromOldVersion(ASEsetOld1)
+#'  
+NULL
 
+#' @rdname ASEsetFromOldVersion
+#' @export
+setGeneric("ASEsetFromOldVersion", function(x, ... 
+	){
+    standardGeneric("ASEsetFromOldVersion")
+})
+
+#' @rdname ASEsetFromOldVersion
+#' @export
+setMethod("ASEsetFromOldVersion", signature(x = "ASEset"),
+ function(x) {
+
+	#prepare new merged 
+	ar <- array(0,dim=c(dim(x),4,2))
+
+	#take out old information
+	if(!is.null(assays(x)[["countsPlus"]])){
+		ar[,,,1] <- assays(x)[["countsPlus"]]
+	}
+	if(!is.null(assays(x)[["countsMinus"]])){
+		ar[,,,2] <- assays(x)[["countsMinus"]]
+	}
+	if(is.null(assays(x)[["countsPlus"]]) & is.null(assays(x)[["countsMinus"]])){
+		ar[,,,1] <- assays(x)[["countsUnknown"]]
+	}
+
+	#add names
+	rownames(ar) <-  rownames(x)
+	colnames(ar) <-  colnames(x)
+
+	#Stuff it back again
+	a <- ASEsetFromArrays(rowRanges(x), acounts = ar, colData=colData(x), mapBiasExpMean=NULL,
+					 genotype = NULL)
+
+	#add extra assays
+	if(!is.null(assays(x)[["genotype"]])){
+		genotype(a) <- assays(x)[["genotype"]]
+	}
+	if(!is.null(assays(x)[["phase"]])){
+		genotype(a) <- assays(x)[["phase"]]
+	}
+	if(!is.null(assays(x)[["mapBias"]])){
+		mapBias(a) <- assays(x)[["mapBias"]]
+	}
+
+	#return new version of object
+	a
+
+})

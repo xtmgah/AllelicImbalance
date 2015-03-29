@@ -33,6 +33,7 @@ Imports:
     GenomicFeatures,
     Gviz,
     lattice,
+	abind,
     seqinr,
     GenomeInfoDb,
 	VariantAnnotation

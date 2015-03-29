@@ -37,6 +37,8 @@
 #' @import GenomeInfoDb
 #' 
 #' 
+#' @importFrom abind adrop
+#'
 #' @importFrom IRanges IRanges
 #' @importFrom IRanges ranges
 #' @importFrom IRanges subsetByOverlaps
