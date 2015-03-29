@@ -165,67 +165,72 @@ setGeneric("alleleCounts", function(x, strand = "*", return.class="list") {
 setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 	return.class="list") {
 
-    if (!sum(strand %in% c("+", "-", "*")) > 0) {
-        stop("strand parameter has to be either '+', '-', '*' ")
+    if (!sum(strand %in% c("+", "-", "*", "both")) > 0) {
+        stop("strand parameter has to be either '+', '-', '*' or 'both' ")
     }
     
     if (strand == "+") {
-        el <- "countsPlus"
+        ar <- assays(x)[["acounts"]][,,,1]
     } else if (strand == "-") {
-        el <- "countsMinus"
+        ar <- assays(x)[["acounts"]][,,,2]
     } else if (strand == "*") {
-        el <- "countsUnknown"
+        ar <- assays(x)[["acounts"]][,,,1] + assays(x)[["acounts"]][,,,2]
+    } else if (strand == "both") {
+        ar <- assays(x)[["acounts"]]
     } else {
         stop("not existing strand option")
     }
     
-    # check if strand option is present as assay
-    if (!(el %in% names(assays(x)))) {
-		stop(paste("neither '+' '-' or '*'strand is present as assay in",
-				   " ASEset object"))
-    }
     
 	if(return.class=="array"){
-		if(el=="combine"){
-			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
-		}else{
-			ar <- assays(x)[[el]]
-		}
-		#add variant names (preferably this could take place during 
-		# initialization of the ASEset object)
 		dimnames(ar)[[3]]<- x@variants
+		dimnames(ar)[[4]]<- c("+","-")
 		ar
+
 	}else if(return.class=="list"){
 
-		if(el=="combine"){
-			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
+		
+		if(strand=="both"){
+			strands <- 2
+			alleleCountList2 <- list()	
 		}else{
-			ar <- assays(x)[[el]]
+			strands <- 1
 		}
+		for( j in 1:strands){
 
-		alleleCountList <- list()
+			alleleCountList <- list()
+		
+			for (i in 1:nrow(ar)) {
+				if(strand=="both"){
+					mat <- ar[i, , ,j]
+				}else{
+					mat <- ar[i, , ]
+				}
+				if (class(mat) == "integer") {
+					mat <- t(as.matrix(mat))
+				}
+				if (class(mat) == "numeric") {
+					mat <- t(mat)
+				}
+				colnames(mat) <- x@variants
+				rownames(mat) <- colnames(x)
 
-		for (i in 1:nrow(ar)) {
-			mat <- ar[i, , ]
-
-			if (class(mat) == "integer") {
-				mat <- t(as.matrix(mat))
+				alleleCountList[[i]] <- mat
 			}
-			if (class(mat) == "numeric") {
-				mat <- t(mat)
-			}
-			colnames(mat) <- x@variants
-			rownames(mat) <- colnames(x)
+			# add snp id
+			names(alleleCountList) <- rownames(x)
 
-			alleleCountList[[i]] <- mat
+			if(strand=="both"){
+				alleleCountList2[[j]] <- alleleCountList
+			}
 		}
-
-		# add snp id
-		names(alleleCountList) <- rownames(x)
 		
-		# return object
-		alleleCountList
-		
+		if(strand=="both"){
+			names(alleleCountList2) <- c("+","-")
+			alleleCountList2
+		}else{	
+			alleleCountList
+		}	
 	}else{
 		stop("return.class has to be 'list' or 'array'")
 	}

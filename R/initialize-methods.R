@@ -194,25 +194,8 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
         if (!length(dim(mapBiasExpMean)) == 3) {
             stop("mapBiasExpMean has to have three dimensions")
         }
+	}
         
-        #for (i in 1:(dim(m)[2])) {
-        #    # check that no snp and sample exceeds sum 1 frequency
-        #    if (!sum(!apply(m[, i, ], 1, sum) == 1) == 0) {
-        #        stop(paste("for each snp and sample the sum of allele frequencies must sum to one,\n\t\t\t\tfor sample element", 
-        #          i, "and snp nr", paste(which(!apply(m[, i, ], 1, sum) == 1), collapse = " "), 
-        #          "this was not fullfilled"))
-        #    }
-        #    # check for tri-allelic cases, which we dont allow as mapping biases.
-        #    if (!sum(!(apply((m[, i, ] > 0), 1, sum) == 2)) == 0) {
-        #        stop(paste("tri-allelic SNPs have not been implemented yet. Please write an email if this is of interest.\n \n\t\t\t\tTri-allelic case was found for sample nr", 
-        #          i, "and snp nr", paste(which(!apply((m[, i, ] > 0), 1, sum) == 
-        #            2), collapse = " ")))
-        #    }
-        #}
-    }
-    
-    
-    
     # choose a common countList by picking the first one, for dimension info
     countList <- get(countLists[1])
     ind <- length(unlist(unique(lapply(countList, rownames))))
@@ -228,7 +211,6 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
         for (i in 1:snps) {
             ar1[i, , ] <- countListPlus[[i]]
         }
-        assays[["countsPlus"]] <- ar1
     }
     # minus
     if (!is.null(countListMinus)) {
@@ -237,7 +219,6 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
         for (i in 1:snps) {
             ar2[i, , ] <- countListMinus[[i]]
         }
-        assays[["countsMinus"]] <- ar2
         
     }
     # unknown
@@ -247,13 +228,22 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
         for (i in 1:snps) {
             ar3[i, , ] <- countListUnknown[[i]]
         }
-        assays[["countsUnknown"]] <- ar3
-        
-    }else if((!is.null(countListMinus)) & (!is.null(countListPlus))){
-		#Calculate the non-stranded representative from the stranded data
-        assays[["countsUnknown"]] <- ar1+ar2
+
+	}	
+
+	ar <- array(0, c(snps, ind, 4, 2))  
+	if((is.null(countListMinus)) & (is.null(countListPlus))){
+		ar[,,,1] <- ar3
+	}else{
+		if(!is.null(countListPlus)){
+			ar[,,,1] <- ar1	
+		}
+		if(!is.null(countListMinus)){
+			ar[,,,2] <- ar2	
+		}
 	}
-    
+	assays[["acounts"]] <- ar
+
     # assign mapBiasExpMean
     if (is.null(mapBiasExpMean)) {
         assays[["mapBias"]] <- getDefaultMapBiasExpMean3D(countList)
@@ -294,27 +284,13 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL,
     verbose = FALSE, ...) {
     
-   # if (verbose) {
-   #     cat("rowRanges\n")
-   #     cat(class(rowRanges))
-   #     cat("countsPlus\n")
-   #     cat(class(countsPlus))
-   #     cat("countsMinus\n")
-   #     cat(class(countsMinus))
-   #     cat("countsUnknown\n")
-   #     cat(class(countsUnknown))
-   #     cat("colData\n")
-   #     cat(class(colData))
-   #     cat("mapBiasExpMean\n")
-   #     cat(class(mapBiasExpMean))
-   # }
     # check that at least one of the countList options are not null
-    if (is.null(c(countsPlus, countsMinus, countsUnknown))) {
+    if (is.null(c(countsPlus, countsMinus, countsUnknown, acounts))) {
         stop("at least one of the countList options has to be specified")
     }
     
-    countLists <- c("countsPlus", "countsMinus", "countsUnknown")[(c( 
-        !is.null(countsPlus), !is.null(countsMinus), !is.null(countsUnknown)))]
+    countLists <- c("countsPlus", "countsMinus", "countsUnknown", "acounts")[(c( 
+        !is.null(countsPlus), !is.null(countsMinus), !is.null(countsUnknown), !is.null(acounts)))]
     
     # check mapBiasExpMean
     if (!(is.null(mapBiasExpMean))) {
@@ -324,23 +300,8 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
         if (!length(dim(mapBiasExpMean)) == 3) {
             stop("mapBiasExpMean has to have three dimensions")
         }
-        
-        #for (i in 1:(dim(m)[2])) {
-        #    # check that no snp and sample exceeds sum 1 frequency
-        #    if (!sum(!apply(m[, i, ], 1, sum) == 1) == 0) {
-        #        stop(paste("for each snp and sample the sum of allele frequencies must sum to one,\n\t\t\t\tfor sample element", 
-        #          i, "and snp nr", paste(which(!apply(m[, i, ], 1, sum) == 1), collapse = " "), 
-        #          "this was not fullfilled"))
-        #    }
-        #    # check for tri-allelic cases, which we dont allow as mapping biases.
-        #    if (!sum(!(apply((m[, i, ] > 0), 1, sum) == 2)) == 0) {
-        #        stop(paste("tri-allelic SNPs have not been implemented yet. Please write an email if this is of interest.\n \n\t\t\t\tTri-allelic case was found for sample nr", 
-        #          i, "and snp nr", paste(which(!apply((m[, i, ] > 0), 1, sum) == 
-        #            2), collapse = " ")))
-        #    }
-        #}
-    }
-    
+	}    
+
     # choose a common countList by picking the first one, for dimension info
     countList <- get(countLists[1])
     ind <- length(dimnames(countList)[[2]])
@@ -349,28 +310,25 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     # SimpleList init
     assays <- SimpleList()
     
-    # plus
-    if (!is.null(countsPlus)) {
-		#empty array that handles only four nucleotides 
-        #ar1 <- array(NA, c(snps, ind, 4))  
-        #for (i in 1:snps) {
-        #    ar1[i, , ] <- countsPlus[[i]]
-        #}
-        assays[["countsPlus"]] <- countsPlus
-    }
-    # minus
-    if (!is.null(countsMinus)) {
-        assays[["countsMinus"]] <- countsMinus
-        
-    }
-    # unknown
-    if (!is.null(countsUnknown)) {
-        assays[["countsUnknown"]] <- countsUnknown
-        
-    }else if((!is.null(countsMinus)) & (!is.null(countsPlus))){
-		#Calculate the non-stranded representative from the stranded data
-        assays[["countsUnknown"]] <- countsPlus+countsMinus
+	if(!is.null(acounts)){
+		assays[["acounts"]] <- acounts
+	}else {
+		ar <- array(0, c(snps, ind, 4, 2)) 
+
+		if((is.null(countListMinus)) & (is.null(countListPlus))){
+			ar[,,,1] <- countsUnknown
+		}else{
+			if(!is.null(countListPlus)){
+				ar[,,,1] <- countsPlus	
+			}
+			if(!is.null(countListMinus)){
+				ar[,,,2] <- countsMinus	
+			}
+		}
+		assays[["acounts"]] <- ar
 	}
+
+
     # assign mapBiasExpMean
     if (is.null(mapBiasExpMean)) {
         assays[["mapBias"]] <- getDefaultMapBiasExpMean3D(assays[["countsUnknown"]])
