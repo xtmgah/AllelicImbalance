@@ -448,8 +448,8 @@ setMethod("barplot", signature(height = "ASEset"), function(height, type = "coun
 
     #fgCol <- hsv(rgb2hsv(col2rgb(sampleColour.bot))["h",])
     #bgCol <- hsv(rgb2hsv(col2rgb(sampleColour.top))["h",])
-    fgCol sampleColour.bot
-    bgCol sampleColour.top
+    fgCol <- sampleColour.bot
+    bgCol <- sampleColour.top
 
     if (type == "count") {
         # the intention of this is to be able to create barplots which show both the
