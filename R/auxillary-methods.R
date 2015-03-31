@@ -678,6 +678,9 @@ setGeneric("impBamGAL", function(UserDir, ...){
 #' @export
 setMethod("impBamGAL", signature(UserDir = "character"), 
 	function(UserDir, searchArea, files = NULL, XStag = FALSE, verbose = TRUE, ...) {
+
+	UserDir <- sub("/$", "", UserDir)
+
     # Set parameters
     which <- searchArea  #A GRanges, RangesList, RangedData, or missing object, from which a IRangesList instance will be constructed.
     what <- scanBamWhat()  #A character vector naming the fields to return. scanBamWhat() returns a vector of available fields. Fields are described on the scanBam help page.
@@ -691,7 +694,7 @@ setMethod("impBamGAL", signature(UserDir = "character"),
     # Point to correct directory and create a BamFileList object
     bamDir <- normalizePath(UserDir)  #Point to the directory containing your Bam files and its respective bam.bai files.
 
-	if(is.null(file)){
+	if(is.null(files)){
 		allFiles <- list.files(bamDir, full.names = TRUE)  #list files in a folder.
 		bamFiles <- allFiles[grep(".bam$", allFiles)]  #list only the files ending in .bam .
 	}else{
@@ -812,6 +815,9 @@ setGeneric("impBcfGRL", function(UserDir, ...
 #' @export
 setMethod("impBcfGRL", signature(UserDir = "character"),
 	function(UserDir, searchArea = NULL, verbose = TRUE, ...) {
+
+
+	UserDir <- sub("/$", "", UserDir)
     
     # Set parameters
     if (is.null(searchArea)) {
