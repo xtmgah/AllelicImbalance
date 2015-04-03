@@ -2009,3 +2009,208 @@ function(pathBam,pathVcf,pathGFF=NULL, verbose){
 #}
 #
 #
+
+#' snp quality data
+#' 
+#' Given the positions of known SNPs, this function returns allele quality from
+#' a BamGRL object
+#' 
+#' This function is used to retrieve the allele quality strings from specified positions
+#' in a set of RNA-seq reads. The \code{BamList} argument will typically have
+#' been created using the \code{impBamGAL} function on bam-files. The
+#' \code{GRvariants} is either a GRanges with user-specified locations or else
+#' it is generated through scanning the same bam-files as in \code{BamList} for
+#' heterozygote locations (e.g. using \code{scanForHeterozygotes}). The
+#' GRvariants will currently only accept locations having width=1,
+#' corresponding to bi-allelic SNPs. The strand type information will be kept in the
+#' returned object. If the strand is marked as unknown "*", it will be forced to the "+" 
+#' strand. 
+#'
+#' quaity information is extracted from the BamList object, and requires the presence of
+#' mcols(BamList)[["qual"]] to contain quality sequences.
+#' 
+#' @name getAlleleQuality
+#' @rdname getAlleleQuality
+#' @aliases BamList getAlleleQuality getAlleleQuality,GAlignmentsList-method
+#' @docType methods
+#' @param BamList A \code{GAlignmentsList object} or \code{GRangesList object}
+#' containing data imported from a bam file
+#' @param GRvariants A \code{GRanges object} that contains positions of SNPs to
+#' retrieve.
+#' @param fastq.format default 'illumina.1.8'
+#' @param return.class 'list' or 'array'
+#' @param verbose Setting \code{verbose=TRUE} makes function more talkative
+#' @param ... parameters to pass on
+#' @return \code{getAlleleQuality} returns a list of several data.frame objects,
+#' each storing the count data for one SNP.
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords allele quality
+#' @examples
+#' 
+#' #load example data
+#' data(reads)
+#' data(GRvariants)
+#' 
+#' #get counts at the three positions specified in GRvariants
+#' alleleQualityArray <- getAlleleQuality(BamList=reads,GRvariants)
+#' 
+#' #place in ASEset object
+#' alleleCountsArray <- getAlleleCounts(BamList=reads,GRvariants,
+#'                      strand='*', return.class="array")
+#' 
+#' 	a <- ASEsetFromArrays(GRvariants, countsUnknown = alleleCountsArray) 
+#' 	aquals(a) <- alleleQualityArray	
+NULL
+
+#' @rdname getAlleleQuality
+#' @export
+setGeneric("getAlleleQuality", function(BamList, ... 
+	){
+    standardGeneric("getAlleleQuality")
+})
+
+#' @rdname getAlleleQuality
+#' @export
+setMethod("getAlleleQuality", signature(BamList = "GAlignmentsList"),
+function(BamList, GRvariants, fastq.format = "illumina.1.8",
+						return.class = "array", verbose = TRUE, ...) { 
+
+	if(!return.class %in% c("array")){
+		stop("return.class has to be array")
+	}
+    
+    if (!class(BamList) %in% c("GAlignments", "GAlignmentsList")) {
+        stop("BamList has to be of class GAlignments or GAlignmnetsList\n")
+    }
+    # if just one element of, make list (which is a convenient way of
+	# handling this input type)
+    # 
+    if (class(BamList) == "GAlignments") {
+        BamList <- GAlignmentsList(BamList)
+    }
+    
+    # if the user sent in the GRangesList for GRvariants,
+	# take out only the unique entries.
+    # 
+    if (class(GRvariants) == "GRangesList") {
+        GRvariants <- unique(unlist(GRvariants, use.names = FALSE)) 
+    }
+   
+	#if BamList is not list, make it a list
+	if(class(BamList)=="GAlignments"){
+		BamList <- GAlignmentsList(BamList)
+	}
+
+	#Drop seqlevels in BamList that are not in GRvariants
+	#seqlevels(BamList,force=TRUE) <- seqlevels(GRvariants)
+	seqinfo(GRvariants) <- merge(seqinfo(GRvariants), seqinfo(BamList))
+	seqlevels(GRvariants) <- seqlevelsInUse(GRvariants)
+
+
+    # check that seqlevels are the same
+   # if (!identical(seqlevels(BamList), seqlevels(GRvariants))) {
+   #     stop("!identical(seqlevels(BamList), seqlevels(GRvariants))\n")
+   # }
+    
+    # checking that GRvariants is ok
+    if (class(GRvariants) != "GRanges") 
+        stop(paste("GRvariants must be of class GRanges, not",
+				   class(GRvariants)))
+    if (length(GRvariants) == 0) 
+        stop("GRvariants was given as an empty GRanges object.",
+			 " There can be no Snps retrieved by getAlleleCount then")
+    if (any(width(GRvariants) != 1)) 
+        stop("GRvariants can contain only entries of width=1,",
+			 " corresponding to SNPs.")
+    
+    # checking that verbose is ok
+    if (class(verbose) != "logical") 
+        stop(paste("verbose must be of class logical, not", class(verbose)))
+    if (length(verbose) != 1) 
+        stop(paste("verbose must be of length 1, not", length(verbose)))
+    
+    # make row-names
+    if (sum(grepl("chr", seqnames(GRvariants))) > 0) {
+        snpNames <- paste(seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
+    } else {
+        snpNames <- paste("chr", seqnames(GRvariants),
+						  "_", start(GRvariants), sep = "")
+    }
+    
+	# needs name, need a more general solution here
+	if(length(names(BamList)) == 0){
+		warning("no set names for list, new names will be sample1,2,3,etc")
+		names(BamList) <- paste("sample",1:length(BamList),sep="")
+	}
+
+	#choose format
+	if(fastq.format=="illumina.1.8"){
+		dim3 <- c("!","\"","#","$","%","&","'","(",")","*","+",",","-",".","\\","/","0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J")
+	}
+
+
+	#empty array that handles only four nucleotides + one del columns
+    dimnames = list(snpNames, names(BamList), dim3, c("+","-"))
+    ar1 <- array(NA, c(length(GRvariants), length(BamList), length(dim3), 2),
+				 dimnames = dimnames)  
+    
+    # force all "*" on "+" strand
+	un1 <- strand(BamList)=="*"
+	un2 <- any(un1) 
+	if(any(un2)){
+		strand(BamList)[un2][un1[un2]] <- "+"
+	}
+    
+    for (j in 1:length(names(BamList))) {
+        sample <- names(BamList)[j]
+        if (verbose) 
+            cat("sample ", sample, "\n")
+        
+		my_IGPOI <- GRvariants
+
+		# + strand
+        gal <- BamList[[j]][strand(BamList[[j]]) == "+"]
+		seqlevels(gal) <- seqlevels(my_IGPOI) 
+        
+		nuclpiles <- pileLettersAt(mcols(gal)$qual, seqnames(gal), start(gal), cigar(gal),
+							                                 my_IGPOI)
+        # fill array
+        nstr <- factor(unlist(strsplit(as.character(nuclpiles), "")),
+					   levels=dim3, labels=dim3)
+		levels(nstr) <- dim3
+
+        for (k in 1:length(nuclpiles)) {
+			tbl <- table(factor(unlist(strsplit(as.character(nuclpiles[k]), "")),
+					   levels=dim3, labels=dim3))
+			ar1[k, j, names(tbl), "+"] <- as.integer(tbl)
+		
+        }
+
+		# - strand
+        gal <- BamList[[j]][strand(BamList[[j]]) == "-"]
+		seqlevels(gal) <- seqlevels(my_IGPOI) 
+        
+		nuclpiles <- pileLettersAt(mcols(gal)$qual, seqnames(gal), start(gal), cigar(gal),
+							                                 my_IGPOI)
+        
+        # fill array
+        nstr <- factor(unlist(strsplit(as.character(nuclpiles), "")),
+					   levels=dim3, labels=dim3)
+		levels(nstr) <- dim3
+
+        for (k in 1:length(nuclpiles)) {
+			tbl <- table(factor(unlist(strsplit(as.character(nuclpiles[k]), "")),
+					   levels=dim3, labels=dim3))
+			ar1[k, j, names(tbl), "-"] <- as.integer(tbl)
+        }
+    }
+    
+	if (return.class == "array") {
+        ar1
+    } else {
+        cat("return.class unknown\n Nothing will be returned from function!")
+    }
+})
+
+
