@@ -28,6 +28,8 @@
 \alias{genotype<-,ASEset-method}
 \alias{mapBias}
 \alias{mapBias,ASEset-method}
+\alias{mapBias<-}
+\alias{mapBias<-,ASEset-method}
 \alias{phase}
 \alias{phase,ASEset-method}
 \alias{phase<-}
@@ -84,6 +86,10 @@ phase(x, ...)
 phase(x) <- value
 
 \S4method{phase}{ASEset}(x) <- value
+
+mapBias(x) <- value
+
+\S4method{mapBias}{ASEset}(x) <- value
 
 ref(x)
 

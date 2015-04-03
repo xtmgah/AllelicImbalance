@@ -165,67 +165,88 @@ setGeneric("alleleCounts", function(x, strand = "*", return.class="list") {
 setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 	return.class="list") {
 
-    if (!sum(strand %in% c("+", "-", "*")) > 0) {
-        stop("strand parameter has to be either '+', '-', '*' ")
+	#check if the ASEset object is missing acounts
+	#propose to update the probably old object
+	if(!"acounts" %in% names(assays(ASEset))){
+		stop(paste("your object is probably outdated,",
+				   " update your object using",
+				   " 'ASEsetFromOldVersion'", sep="")	)
+	}
+
+    if (!sum(strand %in% c("+", "-", "*", "both")) > 0) {
+        stop("strand parameter has to be either '+', '-', '*' or 'both' ")
     }
     
     if (strand == "+") {
-        el <- "countsPlus"
+        ar <- assays(x)[["acounts"]][,,,1, drop=FALSE]
+		ar <- adrop(ar,drop=4)
     } else if (strand == "-") {
-        el <- "countsMinus"
+        ar <- assays(x)[["acounts"]][,,,2, drop=FALSE]
+		ar <- adrop(ar,drop=4)
     } else if (strand == "*") {
-        el <- "countsUnknown"
+        ar1 <- assays(x)[["acounts"]][,,,1, drop=FALSE] 
+		ar2 <- assays(x)[["acounts"]][,,,2, drop=FALSE]
+		ar1 <- adrop(ar1,drop=4)
+		ar2 <- adrop(ar2,drop=4)
+		ar <- ar1+ar2
+    } else if (strand == "both") {
+        ar <- assays(x)[["acounts"]]
     } else {
         stop("not existing strand option")
     }
     
-    # check if strand option is present as assay
-    if (!(el %in% names(assays(x)))) {
-		stop(paste("neither '+' '-' or '*'strand is present as assay in",
-				   " ASEset object"))
-    }
     
 	if(return.class=="array"){
-		if(el=="combine"){
-			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
-		}else{
-			ar <- assays(x)[[el]]
-		}
-		#add variant names (preferably this could take place during 
-		# initialization of the ASEset object)
 		dimnames(ar)[[3]]<- x@variants
+		if (strand == "both") {
+			dimnames(ar)[[4]]<- c("+","-")
+		}
 		ar
+
 	}else if(return.class=="list"){
 
-		if(el=="combine"){
-			ar <- assays(x)[["countsPlus"]] + assays(x)[["countsMinus"]]
+		
+		if(strand=="both"){
+			strands <- 2
+			alleleCountList2 <- list()	
 		}else{
-			ar <- assays(x)[[el]]
+			strands <- 1
 		}
+		for( j in 1:strands){
 
-		alleleCountList <- list()
+			alleleCountList <- list()
+		
+			for (i in 1:nrow(ar)) {
+				if(strand=="both"){
+					mat <- ar[i, , ,j]
+				}else{
+					mat <- ar[i, , ]
+				}
+				if (class(mat) == "integer") {
+					mat <- t(as.matrix(mat))
+				}
+				if (class(mat) == "numeric") {
+					mat <- t(mat)
+				}
+				colnames(mat) <- x@variants
+				rownames(mat) <- colnames(x)
 
-		for (i in 1:nrow(ar)) {
-			mat <- ar[i, , ]
-
-			if (class(mat) == "integer") {
-				mat <- t(as.matrix(mat))
+				alleleCountList[[i]] <- mat
 			}
-			if (class(mat) == "numeric") {
-				mat <- t(mat)
-			}
-			colnames(mat) <- x@variants
-			rownames(mat) <- colnames(x)
+			# add snp id
+			names(alleleCountList) <- rownames(x)
 
-			alleleCountList[[i]] <- mat
+			if(strand=="both"){
+				alleleCountList2[[j]] <- alleleCountList
+			}
 		}
-
-		# add snp id
-		names(alleleCountList) <- rownames(x)
 		
-		# return object
-		alleleCountList
-		
+		if(strand=="both"){
+			names(alleleCountList2) <- c("+","-")
+			alleleCountList2
+		}else{	
+			alleleCountList
+		}	
 	}else{
 		stop("return.class has to be 'list' or 'array'")
 	}
@@ -688,6 +709,26 @@ setMethod("phase<-", signature(x = "ASEset"), function(x,value) {
 	
 	x
 })
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("mapBias<-", function(x, value){
+    standardGeneric("mapBias<-")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("mapBias<-", signature(x = "ASEset"), function(x,value) {
+
+	if(class(value)=="array") {
+		assays(x)[["mapBias"]] <- value
+	}else {
+		stop("class has to be array")
+	}
+	x
+})
+
+
 
 #' @rdname ASEset-class
 #' @importFrom VariantAnnotation ref
