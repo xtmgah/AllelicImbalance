@@ -233,18 +233,21 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
 
 	}	
 
-	ar <- array(0, c(snps, ind, 4, 2))  
+	#ar <- array(0, c(snps, ind, 4, 2))  
 	if((is.null(countListMinus)) & (is.null(countListPlus))){
-		ar[,,,1] <- ar3
+	#	ar[,,,1] <- ar3
+		assays[["countsPlus"]] <- ar3
 	}else{
 		if(!is.null(countListPlus)){
-			ar[,,,1] <- ar1	
+	#		ar[,,,1] <- ar1	
+			assays[["countsPlus"]] <- ar1
 		}
 		if(!is.null(countListMinus)){
-			ar[,,,2] <- ar2	
+	#		ar[,,,2] <- ar2	
+			assays[["countsMinus"]] <- ar2
 		}
 	}
-	assays[["acounts"]] <- ar
+	#assays[["acounts"]] <- ar
 
     # assign mapBiasExpMean
     if (is.null(mapBiasExpMean)) {
@@ -287,17 +290,17 @@ ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlu
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL, 
-    countsMinus = NULL, colData=NULL, acounts = NULL,  mapBiasExpMean = NULL, phase = NULL,
+    countsMinus = NULL, colData=NULL,  mapBiasExpMean = NULL, phase = NULL,
 	genotype = NULL, aquals = NULL,
     verbose = FALSE, ...) {
     
     # check that at least one of the countList options are not null
-    if (is.null(c(countsPlus, countsMinus, countsUnknown, acounts))) {
+    if (is.null(c(countsPlus, countsMinus, countsUnknown))) {
         stop("at least one of the countList options has to be specified")
     }
     
-    countLists <- c("countsPlus", "countsMinus", "countsUnknown", "acounts")[(c( 
-        !is.null(countsPlus), !is.null(countsMinus), !is.null(countsUnknown), !is.null(acounts)))]
+    countLists <- c("countsPlus", "countsMinus", "countsUnknown")[(c( 
+        !is.null(countsPlus), !is.null(countsMinus), !is.null(countsUnknown)))]
     
     # check mapBiasExpMean
     if (!(is.null(mapBiasExpMean))) {
@@ -312,27 +315,27 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     # choose a common countList by picking the first one, for dimension info
     countList <- get(countLists[1])
     ind <- dim(countList)[2]
+    ind.names <- dimnames(countList)[2]
     snps <- dim(countList)[1]
+    snps.names <- dimnames(countList)[1]
     
     # SimpleList init
     assays <- SimpleList()
     
-	if(!is.null(acounts)){
-		assays[["acounts"]] <- acounts
-	}else {
-		ar <- array(0, c(snps, ind, 4, 2)) 
+	ar <- array(0, c(snps, ind, 4, 2)) 
 
-		if((is.null(countListMinus)) & (is.null(countListPlus))){
-			ar[,,,1] <- countsUnknown
-		}else{
-			if(!is.null(countListPlus)){
-				ar[,,,1] <- countsPlus	
-			}
-			if(!is.null(countListMinus)){
-				ar[,,,2] <- countsMinus	
-			}
+	if((is.null(countsMinus)) & (is.null(countsPlus))){
+		#ar[,,,1] <- countsUnknown
+		assays[["countsPlus"]] <- countsUnknown
+	}else{
+		if(!is.null(countsPlus)){
+			#ar[,,,1] <- countsPlus	
+		assays[["countsPlus"]] <- countsPlus
 		}
-		assays[["acounts"]] <- ar
+		if(!is.null(countsMinus)){
+			#ar[,,,2] <- countsMinus	
+		assays[["countsMinus"]] <- countsMinus
+		}
 	}
 
     # assign mapBiasExpMean
@@ -357,11 +360,13 @@ ASEsetFromArrays <- function(rowRanges, countsUnknown = NULL, countsPlus = NULL,
     }
 
     if (is.null(colData)) {
-        colData <- DataFrame(row.names = dimnames(ar)[[2]])
-    }
-
-    sset <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData=colData,
+		sset <- SummarizedExperiment(assays = assays, rowRanges = rowRanges,
         ...)
+    }else{
+		sset <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData=colData,
+        ...)
+	}
+
     
     rownames(sset) <- rownames(countList)
     

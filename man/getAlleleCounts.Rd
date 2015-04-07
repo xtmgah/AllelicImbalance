@@ -2,7 +2,6 @@
 % Please edit documentation in R/auxillary-methods.R
 \docType{methods}
 \name{getAlleleCounts}
-\alias{BamList}
 \alias{getAlleleCounts}
 \alias{getAlleleCounts,GAlignmentsList-method}
 \title{snp count data}

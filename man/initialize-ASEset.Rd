@@ -8,12 +8,12 @@
 \usage{
 ASEsetFromCountList(rowRanges, countListUnknown = NULL,
   countListPlus = NULL, countListMinus = NULL, colData = NULL,
-  mapBiasExpMean = NULL, phase = NULL, verbose = FALSE, ...)
+  mapBiasExpMean = NULL, phase = NULL, aqual = NULL, verbose = FALSE,
+  ...)
 
 ASEsetFromArrays(rowRanges, countsUnknown = NULL, countsPlus = NULL,
-  countsMinus = NULL, colData = NULL, acounts = NULL,
-  mapBiasExpMean = NULL, phase = NULL, genotype = NULL, verbose = FALSE,
-  ...)
+  countsMinus = NULL, colData = NULL, mapBiasExpMean = NULL,
+  phase = NULL, genotype = NULL, aquals = NULL, verbose = FALSE, ...)
 }
 \arguments{
 \item{rowRanges}{A \code{GenomicRanges object} that contains the variants of
@@ -45,9 +45,9 @@ dimension, samples in the 2nd dimension and variants in the 3rd dimension.}
 
 \item{countsMinus}{An array containing the countinformation}
 
-\item{acounts}{A 4-D array containing the countinformation, see details}
-
 \item{genotype}{matrix}
+
+\item{acounts}{A 4-D array containing the countinformation, see details}
 }
 \value{
 \code{ASEsetFromCountList} returns an \code{ASEset} object.

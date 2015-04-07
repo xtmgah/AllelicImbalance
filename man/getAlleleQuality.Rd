@@ -2,7 +2,6 @@
 % Please edit documentation in R/auxillary-methods.R
 \docType{methods}
 \name{getAlleleQuality}
-\alias{BamList}
 \alias{getAlleleQuality}
 \alias{getAlleleQuality,GAlignmentsList-method}
 \title{snp quality data}
@@ -58,6 +57,13 @@ data(GRvariants)
 
 #get counts at the three positions specified in GRvariants
 alleleQualityArray <- getAlleleQuality(BamList=reads,GRvariants)
+
+#place in ASEset object
+alleleCountsArray <- getAlleleCounts(BamList=reads,GRvariants,
+                     strand='*', return.class="array")
+
+	a <- ASEsetFromArrays(GRvariants, countsUnknown = alleleCountsArray)
+	aquals(a) <- alleleQualityArray
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen

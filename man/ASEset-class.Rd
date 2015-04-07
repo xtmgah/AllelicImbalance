@@ -12,6 +12,10 @@
 \alias{alt,ASEset-method}
 \alias{alt<-}
 \alias{alt<-,ASEset,ANY-method}
+\alias{aquals}
+\alias{aquals,ASEset-method}
+\alias{aquals<-}
+\alias{aquals<-,ASEset-method}
 \alias{arank}
 \alias{arank,ASEset-method}
 \alias{countsPerSample}
@@ -106,6 +110,14 @@ alt(x)
 alt(x) <- value
 
 \S4method{alt}{ASEset,ANY}(x) <- value
+
+aquals(x, ...)
+
+\S4method{aquals}{ASEset}(x)
+
+aquals(x) <- value
+
+\S4method{aquals}{ASEset}(x) <- value
 }
 \arguments{
 \item{x}{ASEset object}

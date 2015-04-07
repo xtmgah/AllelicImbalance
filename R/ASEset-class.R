@@ -167,30 +167,59 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 
 	#check if the ASEset object is missing acounts
 	#propose to update the probably old object
-	if(!"acounts" %in% names(assays(ASEset))){
-		stop(paste("your object is probably outdated,",
-				   " update your object using",
-				   " 'ASEsetFromOldVersion'", sep="")	)
-	}
+#	if(!"acounts" %in% names(assays(ASEset))){
+#		stop(paste("your object is probably outdated,",
+#				   " update your object using",
+#				   " 'ASEsetFromOldVersion'", sep="")	)
+#	}
 
+	#check that strand parameter is correct set
     if (!sum(strand %in% c("+", "-", "*", "both")) > 0) {
         stop("strand parameter has to be either '+', '-', '*' or 'both' ")
     }
-    
+
+	#check if the assays are present
+	if(strand=="+" ){
+		if(!"countsPlus" %in% names(assays(x))){
+			stop(paste("strand",strand,"is not present in ASEset object",sep=""))
+		}
+	}
+	if(strand=="-" ){
+		if(!"countsMinus" %in% names(assays(x))){
+			stop(paste("strand",strand,"is not present in ASEset object",sep=""))
+		}
+	}
+	if(strand=="*" ){
+		if(!("countsMinus" %in% names(assays(x)) | "countsPlus" %in% names(assays(x)))){
+			stop(paste("for strand '*' at least one of '+' or '-' is required to be",
+					   " present in ASEset object",sep=""))
+		}
+	}
+	if(strand=="both" ){
+		if(!"countsMinus" %in% names(assays(x)) & "countsPlus" %in% names(assays(x))){
+			stop(paste("for strand 'both' both '+' and '-' is required to be",
+					   " present in the ASEset object",sep=""))
+		}
+	}
+
+	#access the correct assays
     if (strand == "+") {
-        ar <- assays(x)[["acounts"]][,,,1, drop=FALSE]
-		ar <- adrop(ar,drop=4)
+        #ar <- assays(x)[["acounts"]][,,,1, drop=FALSE]
+		#ar <- adrop(ar,drop=4)
+        ar <- assays(x)[["countsPlus"]]
     } else if (strand == "-") {
-        ar <- assays(x)[["acounts"]][,,,2, drop=FALSE]
-		ar <- adrop(ar,drop=4)
+        #ar <- assays(x)[["acounts"]][,,,2, drop=FALSE]
+		#ar <- adrop(ar,drop=4)
+        ar <- assays(x)[["countsMinus"]]
     } else if (strand == "*") {
-        ar1 <- assays(x)[["acounts"]][,,,1, drop=FALSE] 
-		ar2 <- assays(x)[["acounts"]][,,,2, drop=FALSE]
-		ar1 <- adrop(ar1,drop=4)
-		ar2 <- adrop(ar2,drop=4)
-		ar <- ar1+ar2
+        #ar1 <- assays(x)[["acounts"]][,,,1, drop=FALSE] 
+		#ar2 <- assays(x)[["acounts"]][,,,2, drop=FALSE]
+		#ar1 <- adrop(ar1,drop=4)
+		#ar2 <- adrop(ar2,drop=4)
+		#ar <- ar1+ar2
+        ar <- assays(x)[["countsMinus"]] + assays(x)[["countsPlus"]]
     } else if (strand == "both") {
-        ar <- assays(x)[["acounts"]]
+        ar <- array(c(assays(x)[["countsPlus"]], assays(x)[["countsMinus"]]), dim=c(dim(assays(x)[["countsPlus"]]), 2))
     } else {
         stop("not existing strand option")
     }
