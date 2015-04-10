@@ -519,6 +519,11 @@ DetectedAIFromArray <- function(
 	)
 }
 
+###################
+#
+# Golbal reference frequency analysis
+#
+###################
 
 #' Initialize GlobalAnalysis
 #' 
@@ -560,4 +565,60 @@ GAnalysis <- function(
 	object
 }
 
+#' Initialize riskVariant
+#' 
+#' Functions to construct riskVariant objects
+#' 
+#' produces a class container for reference bias calculations
+#' 
+#' @name initialize-riskVariant
+#' @rdname initialize-riskVariant
+#' @aliases initialize-riskVariant 
+#' @param x \code{ASEset} 
+#' @param gr GRanges object for the SNPs
+#' @param ... internal arguments
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords bias mapbias refBias
+#' @examples
+#'
+#' data(ASEset)
+#' a <- 
+#' 
+NULL
+
+#' @rdname initialize-riskVariant
+#' @export 
+#setMethod("riskVariant","riskVariant", function(
+riskVariantFromArray <- function(
+	x = "array",
+	gr = "array",
+	colData = NULL,
+	...){
+
+	if(is.null(colData)){
+		sset <- SummarizedExperiment(
+					assays = SimpleList(
+						genotype=reference.frequency,
+						), 
+					rowRanges = gr
+				) 
+	}else{
+		sset <- SummarizedExperiment(
+					assays = SimpleList(
+						genotype=reference.frequency,
+						), 
+					rowRanges = gr,
+					colData = coldata
+				) 
+	}
+		rownames(sset) <- rownames(gr)
+
+	#valid
+	#validObject(.Object)
+
+	#Return object
+	new("riskVariant", sset,
+		meta = list(),
+	)
+}
 
