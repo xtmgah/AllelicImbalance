@@ -145,6 +145,21 @@ NULL
 #' 
 #' phase(a) <- p
 #'
+#'
+#' #generate ASEset from array
+#' snps <- 999
+#' samples <-5
+#' ar <-array(rep(unlist(lapply(1:snps,
+#' 			function(x){(sample(c(TRUE,FALSE,TRUE,FALSE), size = 4))})), samples), 
+#' 			dim=c(4,snps,samples))
+#' ar2 <- array(sample(50:300, 4*snps*samples,replace=TRUE), dim=c(4,snps,samples))
+#' ar2[ar] <- 0
+#' ar2 <- aperm(ar2, c(2, 3, 1))
+#' dimnames(ar2) <- list(paste("snp",1:snps,sep=""),paste("sample",1:samples,sep=""),
+#'							c("A","C","G","T"))
+#' a <- ASEsetFromArrays(gr, countsUnknown=ar2)
+#' 
+#'
 #' @exportClass ASEset
 #' @exportMethod alleleCounts alleleCounts<- mapBias fraction arank
 #' frequency genotype genotype<- phase phase<-
