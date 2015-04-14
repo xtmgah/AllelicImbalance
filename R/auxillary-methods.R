@@ -284,7 +284,8 @@ setMethod("defaultPhase", signature("numeric"),
 #' Gives a summary of AI-consistency for a transcript
 #'
 #' From a given set of e.g. transcripts exon ranges the function will return
-#' a summary for the sum of all exons. Phase information is required.
+#' a summary for the sum of all exons. Phase information, reference and alternative
+#' allele is required.
 #'
 #' @name regionSummary
 #' @rdname regionSummary
@@ -292,7 +293,7 @@ setMethod("defaultPhase", signature("numeric"),
 #' @docType methods
 #' @param x ASEset object
 #' @param strand can be "+", "-" or "*"
-#' @param gr GenomicRanges object to summmarize over
+#' @param region GRanges or GRangesList object to summmarize over
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords summary
@@ -312,10 +313,13 @@ setMethod("defaultPhase", signature("numeric"),
 #' #add alternative allele information
 #' mcols(a)[["alt"]] <- inferAltAllele(a)
 #'
-#' # in this example every snp is on its own exon
-#' txGR <- granges(a)
-#' t <- regionSummary(a, txGR)
+#' # in this example all snps in the ASEset defines the region
+#' region <- granges(a)
+#' t <- regionSummary(a, region)
 #'
+#' # in this example two overlapping subsets of snps in the ASEset defines the region
+#' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
+#' t <- regionSummary(a, region)
 NULL
 
 #' @rdname regionSummary
@@ -328,7 +332,7 @@ setGeneric("regionSummary", function(x, ... ){
 #' @rdname regionSummary
 #' @export
 setMethod("regionSummary", signature("ASEset"),
-		function(x, gr, strand="*", ...
+		function(x, region, strand="*", threshold.pvalue=0.05, return.class="list", ...
 	){
 
 		#needs alternative allele
@@ -336,40 +340,36 @@ setMethod("regionSummary", signature("ASEset"),
 			stop("function needs mcols(x)[['alt']] to be set")				
 		}
 
-		#make overlap and subset based on gr
-		hits <- findOverlaps(x,gr)
-		x <- x[queryHits(hits),]
-
-		fr <- fraction(x, strand=strand, top.fraction.criteria="phase")
-
 		#need information of which are heterozygotes and homozygotes
 		if(is.null(genotype(x))){
 			genotype(x) <- inferGenotypes(x, return.allele.allowed="bi")
 		}
-		fr.het.filt <- hetFilt(x)
-		fr.f <- fr
-		fr.f[!t(fr.het.filt)] <- NaN
 
-		maternalAllele <- function(x){
-		
-			mat <- phase(x,return.class="array")[,,1]
-			ref <- mcols(x)[["ref"]]
-			alt <- mcols(x)[["alt"]]
-		
-			apply(t(mat),1,function(y){
-				
-				vec <- rep(NA,length(y))
-				if(any(y == 1)){
-					vec[y == 1] <- ref[y == 1]
-				}
-				if(any(y == 0)){
-					vec[y == 0] <- alt[y == 0]
-				}
-				vec
-			})
-			
+
+		#check class of region
+		if(class(region)=="GRanges"){
+			idx <- rep(1,length(region))
+			ar.dim3 <- 1
+			ar.dim3.names <- "nameless"
+		}else if(class(region)=="GRangesList")	{
+			idx <- togroup(PartitioningByWidth(elementLengths(region)))
+			ar.dim3 <- length(region)
+			ar.dim3.names <- names(region)
 		}
 
+		#make overlap and subset based on gr
+		hits <- findOverlaps(x, region)
+		x <- x[queryHits(hits),]
+
+		fr.f <- fraction(x, strand=strand, top.fraction.criteria="phase")
+
+		fr.het.filt <- hetFilt(x)
+
+		#filter on p-value
+		pv <- binom.test(x,strand)
+		fr.f[!(pv < threshold.pvalue) | !t(fr.het.filt)] <- NA
+
+		#maternal allele
 		mallele <- maternalAllele(x)
 		mbias <- mapBias(x, return.class="array")
 
@@ -384,46 +384,57 @@ setMethod("regionSummary", signature("ASEset"),
 			mbias.values[i,] <- it.mbias[tf]
 		}
 
-		tf <- fr.f > t(mbias.values)
-		tf2 <- fr.f < t(mbias.values)
-		fr.up.filt <- tf
-		fr.down.filt <- tf2
+		fr.up.filt <- fr.f > t(mbias.values)
+		fr.down.filt <- fr.f < t(mbias.values)
 
-		pv <- binom.test(x,strand)
-
-		p.up.filt <- pv
-		p.up.filt[!tf] <- NA
-		p.down.filt <- pv
-		p.down.filt[!tf2] <- NA
-
-		ai.down <- apply(tf2,1,sum, na.rm=TRUE)
-		ai.up <- apply(tf,1,sum, na.rm=TRUE)
-
+		mode(fr.up.filt) <- "integer"
+		mode(fr.down.filt) <- "integer"
+		
+		#calc data
+		ai.down <- t(rowsum(t(fr.down.filt),idx, na.rm=TRUE))
+		ai.up <- t(rowsum(t(fr.up.filt),idx, na.rm=TRUE))
 		fr.d <- abs(fr.f - t(mbias.values))
+		hets <- t(tapply(fr.het.filt, list(idx[row(fr.het.filt)], col(fr.het.filt)), sum, na.rm=TRUE))
+		homs <- t(tapply(!fr.het.filt, list(idx[row(!fr.het.filt)], col(!fr.het.filt)), sum, na.rm=TRUE))
+		mean.fr <- t(tapply(t(fr.f), list(idx[row(t(fr.f))], col(t(fr.f))), mean, na.rm=TRUE))
+		sd.fr <- t(tapply(t(fr.f), list(idx[row(t(fr.f))], col(t(fr.f))), sd, na.rm=TRUE))
+		mean.delta <- t(tapply(t(fr.d), list(idx[row(t(fr.d))], col(t(fr.d))), mean, na.rm=TRUE))
+		sd.delta <- t(tapply(t(fr.d), list(idx[row(t(fr.d))], col(t(fr.d))), sd, na.rm=TRUE))
 
-		hets <- apply(t(fr.het.filt),1,sum)
-		homs <- apply(t(!fr.het.filt),1,sum)
+		#make array
+		ar <- aperm(array(c(hets,homs,mean.fr,sd.fr,mean.delta,sd.delta,ai.up,ai.down),
+			  dim=c(ncol(x),ar.dim3,8),
+			  dimnames=list(
+						colnames(x),
+						ar.dim3.names,
+						c("hets",
+						  "homs",
+						  "mean.fr",
+						  "sd.fr",
+						  "mean.delta",
+						  "sd.delta",
+						  "ai.up",
+						  "ai.down")
+						 )
+		), c(1,3,2))
 
-		mean.fr <- apply(fr.f, 1, mean, na.rm=TRUE)
-		sd.fr <- apply(fr.f, 1, sd, na.rm=TRUE)
-		mean.delta <- apply(fr.d, 1, mean, na.rm=TRUE)
-		sd.delta <- apply(fr.d, 1, sd, na.rm=TRUE)
-
-		#dir.up <- apply(fr.f,1,function(x){sum(mean(x, na.rm=TRUE)>0.5)})
-		#dir.down <- apply(fr.f,1,function(x){sum(mean(x, na.rm=TRUE)<0.5)})
-
-		#return data frame
-		data.frame(
-				het=hets,
-				hom=homs,
-				mean.fr=mean.fr,
-				sd.fr=sd.fr,
-				mean.delta=mean.delta,
-				sd.delta=sd.delta,
-				ai.up=ai.up,
-				ai.down=ai.down
-				)
+		if(return.class=="array"){
+			if(dim(ar)[3]==1){
+				ar[,,1]
+			}else{
+				ar
+			}
+		}else if(return.class=="list"){
+			lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
+			names(lst) <- ar.dim3.names
+			if(length(lst)==1){
+				lst[[1]]
+			}else{
+				lst
+			}
+		}
 })
+
 
 #' scanForHeterozygotes
 #' 

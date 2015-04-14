@@ -876,3 +876,30 @@ setMethod("aquals<-", signature(x = "ASEset"), function(x,value) {
 })
 
 
+#' @rdname ASEset-class
+#' @export 
+setGeneric("maternalAllele", function(x, ...){
+    standardGeneric("maternalAllele")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("maternalAllele", signature(x = "ASEset"), 
+		function(x) {
+
+		mat <- phase(x,return.class="array")[,,1]
+		ref <- mcols(x)[["ref"]]
+		alt <- mcols(x)[["alt"]]
+	
+		apply(t(mat),1,function(y){
+			
+			vec <- rep(NA,length(y))
+			if(any(y == 1)){
+				vec[y == 1] <- ref[y == 1]
+			}
+			if(any(y == 0)){
+				vec[y == 0] <- alt[y == 0]
+			}
+			vec
+		})
+})
