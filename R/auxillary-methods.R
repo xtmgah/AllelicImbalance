@@ -320,6 +320,11 @@ setMethod("defaultPhase", signature("numeric"),
 #' # in this example two overlapping subsets of snps in the ASEset defines the region
 #' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
 #' t <- regionSummary(a, region)
+#'
+#' # use a multilevel list as input (output will keep the list dimensions)
+#' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
+#' region <- list(g1=list(tx1=region,tx2=region),g2=list(tx1=region,tx2=region,tx3=region))
+#' t <- regionSummary(a, region)
 NULL
 
 #' @rdname regionSummary
@@ -332,7 +337,8 @@ setGeneric("regionSummary", function(x, ... ){
 #' @rdname regionSummary
 #' @export
 setMethod("regionSummary", signature("ASEset"),
-		function(x, region, strand="*", threshold.pvalue=0.05, return.class="list", ...
+		function(x, region, strand="*", threshold.pvalue=0.05, 
+				 return.class="list", return.index=TRUE, ...
 	){
 
 		#needs alternative allele
@@ -355,6 +361,46 @@ setMethod("regionSummary", signature("ASEset"),
 			idx <- togroup(PartitioningByWidth(elementLengths(region)))
 			ar.dim3 <- length(region)
 			ar.dim3.names <- names(region)
+		}else if(class(region)=="list") {
+						
+
+			multiUnlist <- function(lst){
+				 if(!is.list(lst)){
+					 return(lst)
+				 }else{
+					  multiUnlist(do.call(c, unname(lst)))
+				 }
+			}
+
+			multiUnlist.index <- function(lst){
+				
+				list.idx.vec <- function(this, i=vector(),vec = vector()) {
+					  if(class(this) == "GRanges") {
+						  return(c(vec,i,length(this)))
+				  } else {
+						return(
+							unlist(lapply(seq_along(this), 
+								   function(y, z, i) { list.idx.vec(y[[i]], i, z)}, y=this, z=c(vec,i))
+							))
+					  }
+				}
+
+				idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
+								  
+				matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
+										   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
+								   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+			}
+
+			idx.mat <- multiUnlist.index(region)	
+			rownames(idx.mat) <- paste("lvl", (nrow(idx.mat)+1):2, sep="")
+			region <- multiUnlist(region)		
+
+			idx <- togroup(PartitioningByWidth(elementLengths(region)))
+			ar.dim3 <- length(region)
+			ar.dim3.names <- 1:ar.dim3
+			populate.list <- TRUE
+
 		}
 
 		#make overlap and subset based on gr
@@ -422,7 +468,12 @@ setMethod("regionSummary", signature("ASEset"),
 			if(dim(ar)[3]==1){
 				ar[,,1]
 			}else{
-				ar
+				#check if indexed should be returned (recommended when wrapping GRangesList in lists )
+				if(return.index){
+					lst(x=ar,ix=idx.mat)
+				}else{
+					ar
+				}
 			}
 		}else if(return.class=="list"){
 			lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
@@ -430,7 +481,20 @@ setMethod("regionSummary", signature("ASEset"),
 			if(length(lst)==1){
 				lst[[1]]
 			}else{
-				lst
+				if(populate.list){
+
+					#populate list function
+					#region.list.populate <- function(ar,idx.mat){
+
+					#	
+
+					#}
+						
+					lst
+
+				}else{
+					lst
+				}
 			}
 		}
 })
