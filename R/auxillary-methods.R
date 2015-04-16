@@ -323,7 +323,8 @@ setMethod("defaultPhase", signature("numeric"),
 #'
 #' # use a multilevel list as input (output will keep the list dimensions)
 #' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
-#' region <- list(g1=list(tx1=region,tx2=region),g2=list(tx1=region,tx2=region,tx3=region))
+#' names(region) <- c("introns", "exons")
+#' region <- list(g1=list(tx1=region, tx2=region), g2=list(tx1=region, tx2=region, tx3=region))
 #' t <- regionSummary(a, region)
 NULL
 
@@ -362,6 +363,14 @@ setMethod("regionSummary", signature("ASEset"),
 			ar.dim3 <- length(region)
 			ar.dim3.names <- names(region)
 		}else if(class(region)=="list") {
+
+			list.depth <- function(this, thisdepth = 0) {
+				  if(!is.list(this)) {
+					return(thisdepth)
+				  }else {
+					return(list.depth(this[[1]], thisdepth = thisdepth+1))
+				  }
+			}
 						
 
 			multiUnlist <- function(lst){
@@ -392,8 +401,39 @@ setMethod("regionSummary", signature("ASEset"),
 								   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
 			}
 
+			multiUnlist.index.names <- function(lst){
+				
+				list.idx.vec <- function(this, i=vector(),vec = vector(), nms=names(this)) {
+					
+					  if(class(this) == "GRanges") {
+						  return(c(vec, nms[i], length(this)))
+					  }else {
+						return(
+							unlist(
+								lapply(seq_along(this), 
+								   function(y, i, z, n) { 
+									   list.idx.vec(y[[i]], i=i, vec=z, nms=n)
+								   },
+								   y=this, z=c(vec, nms[i]), n=names(this)
+								)
+							)
+						)
+					  }
+				}
+
+				list.idx.vec(lst)
+
+				idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
+								  
+				matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
+										   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
+								   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+			}
+
 			idx.mat <- multiUnlist.index(region)	
+			idx.mat.names <- multiUnlist.index.names(region)	
 			rownames(idx.mat) <- paste("lvl", (nrow(idx.mat)+1):2, sep="")
+			rownames(idx.mat.names) <- paste("lvl", (nrow(idx.mat.names)+1):2, sep="")
 			region <- multiUnlist(region)		
 
 			idx <- togroup(PartitioningByWidth(elementLengths(region)))
