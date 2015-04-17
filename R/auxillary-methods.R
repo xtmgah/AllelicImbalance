@@ -381,7 +381,7 @@ setMethod("regionSummary", signature("ASEset"),
 				 }
 			}
 
-			multiUnlist.index <- function(lst){
+			multiUnlist.index <- function(lst, expand.lowest.level=FALSE){
 				
 				list.idx.vec <- function(this, i=vector(),vec = vector()) {
 					  if(class(this) == "GRanges") {
@@ -396,12 +396,16 @@ setMethod("regionSummary", signature("ASEset"),
 
 				idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
 								  
-				matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
-										   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
-								   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+				if(expand.lowest.level){
+					matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
+											   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
+									   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+				}else{
+					idx.mat
+				}
 			}
 
-			multiUnlist.index.names <- function(lst){
+			multiUnlist.index.names <- function(lst, expand.lowest.level=FALSE){
 				
 				list.idx.vec <- function(this, i=vector(),vec = vector(), nms=names(this)) {
 					
@@ -425,9 +429,13 @@ setMethod("regionSummary", signature("ASEset"),
 
 				idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
 								  
-				matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
-										   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
-								   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+				if(expand.lowest.level){
+					matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
+											   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
+									   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
+				}else{
+					idx.mat
+				}
 			}
 
 			idx.mat <- multiUnlist.index(region)	
@@ -516,6 +524,7 @@ setMethod("regionSummary", signature("ASEset"),
 				}
 			}
 		}else if(return.class=="list"){
+			#THE LINES HERE UNDER NEEDS revising
 			lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
 			names(lst) <- ar.dim3.names
 			if(length(lst)==1){
@@ -524,13 +533,33 @@ setMethod("regionSummary", signature("ASEset"),
 				if(populate.list){
 
 					#populate list function
-					#region.list.populate <- function(ar,idx.mat){
+					region.list.populate <- function(ar, idx.mat, idx.mat.names ){
 
-					#	
+						print(idx.mat)
+						print(idx.mat.names)
 
-					#}
+						if(!class(idx.mat) == "matrix") {
+							l <- lapply(unique(idx.mat), 
+								   function(i, a, m){ 
+									   a[,,m==i] 
+								   },
+								   a=ar, m=idx.mat)
+							names(l) <- unique(idx.mat.names) 
+							l
+						}else{
+							l <- lapply(unique(idx.mat[1,]), 
+							   function(i, a, m, m2){ 
+
+								   region.list.populate(a[,,m[1,]==i], m[-1, m[1, ]==i], m2[-1, m[1, ]==i]) 
+
+							   },
+							   a=ar, m=idx.mat, m2=idx.mat.names)
+							names(l) <- unique(idx.mat.names[1,]) 
+							l
+						}
+					}	
 						
-					lst
+					lst <- region.list.populate(ar, idx.mat[-nrow(idx.mat),], idx.mat.names[-nrow(idx.mat.names),])
 
 				}else{
 					lst
