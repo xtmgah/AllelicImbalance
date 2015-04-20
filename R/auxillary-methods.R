@@ -352,7 +352,6 @@ setMethod("regionSummary", signature("ASEset"),
 			genotype(x) <- inferGenotypes(x, return.allele.allowed="bi")
 		}
 
-
 		populate.list <- FALSE
 
 		#check class of region
@@ -520,7 +519,7 @@ setMethod("regionSummary", signature("ASEset"),
 			}else{
 				#check if indexed should be returned (recommended when wrapping GRangesList in lists )
 				if(return.index){
-					lst(x=ar,ix=idx.mat)
+					lst(x=ar,ix=idx.mat,ixn=idx.mat.names)
 				}else{
 					ar
 				}
