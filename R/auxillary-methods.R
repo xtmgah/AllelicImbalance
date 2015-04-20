@@ -353,6 +353,8 @@ setMethod("regionSummary", signature("ASEset"),
 		}
 
 
+		populate.list <- FALSE
+
 		#check class of region
 		if(class(region)=="GRanges"){
 			idx <- rep(1,length(region))
@@ -443,17 +445,17 @@ setMethod("regionSummary", signature("ASEset"),
 			rownames(idx.mat) <- paste("lvl", (nrow(idx.mat)+1):2, sep="")
 			rownames(idx.mat.names) <- paste("lvl", (nrow(idx.mat.names)+1):2, sep="")
 			region <- multiUnlist(region)		
+			populate.list <- TRUE
 
 			idx <- togroup(PartitioningByWidth(elementLengths(region)))
 			ar.dim3 <- length(region)
 			ar.dim3.names <- 1:ar.dim3
-			populate.list <- TRUE
-
 		}
+
 
 		#make overlap and subset based on gr
 		hits <- findOverlaps(x, region)
-		x <- x[queryHits(hits),]
+		x <- x[queryHits(hits)[sort(subjectHits(hits), index.return=TRUE)$ix], ]
 
 		fr.f <- fraction(x, strand=strand, top.fraction.criteria="phase")
 
@@ -524,44 +526,44 @@ setMethod("regionSummary", signature("ASEset"),
 				}
 			}
 		}else if(return.class=="list"){
-			#THE LINES HERE UNDER NEEDS revising
-			lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
-			names(lst) <- ar.dim3.names
+
+			if(populate.list){
+
+				#populate list function
+				region.list.populate <- function(ar, idx.mat, idx.mat.names ){
+
+					if(!class(idx.mat) == "matrix") {
+						l <- lapply(unique(idx.mat), 
+							   function(i, a, m){ 
+								   a[,,m==i] 
+							   },
+							   a=ar, m=idx.mat)
+						names(l) <- unique(idx.mat.names) 
+						l
+					}else{
+						l <- lapply(unique(idx.mat[1,]), 
+						   function(i, a, m, m2){ 
+
+							   region.list.populate(a[,,m[1,]==i], m[-1, m[1, ]==i], m2[-1, m[1, ]==i]) 
+
+						   },
+						   a=ar, m=idx.mat, m2=idx.mat.names)
+						names(l) <- unique(idx.mat.names[1,]) 
+						l
+					}
+				}	
+					
+				lst <- region.list.populate(ar, idx.mat[-nrow(idx.mat),], idx.mat.names[-nrow(idx.mat.names),])
+				lst
+
+			}else{
+
+				lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
+				names(lst) <- ar.dim3.names
+
 			if(length(lst)==1){
 				lst[[1]]
 			}else{
-				if(populate.list){
-
-					#populate list function
-					region.list.populate <- function(ar, idx.mat, idx.mat.names ){
-
-						print(idx.mat)
-						print(idx.mat.names)
-
-						if(!class(idx.mat) == "matrix") {
-							l <- lapply(unique(idx.mat), 
-								   function(i, a, m){ 
-									   a[,,m==i] 
-								   },
-								   a=ar, m=idx.mat)
-							names(l) <- unique(idx.mat.names) 
-							l
-						}else{
-							l <- lapply(unique(idx.mat[1,]), 
-							   function(i, a, m, m2){ 
-
-								   region.list.populate(a[,,m[1,]==i], m[-1, m[1, ]==i], m2[-1, m[1, ]==i]) 
-
-							   },
-							   a=ar, m=idx.mat, m2=idx.mat.names)
-							names(l) <- unique(idx.mat.names[1,]) 
-							l
-						}
-					}	
-						
-					lst <- region.list.populate(ar, idx.mat[-nrow(idx.mat),], idx.mat.names[-nrow(idx.mat.names),])
-
-				}else{
 					lst
 				}
 			}
