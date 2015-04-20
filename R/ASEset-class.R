@@ -891,15 +891,43 @@ setMethod("maternalAllele", signature(x = "ASEset"),
 		ref <- mcols(x)[["ref"]]
 		alt <- mcols(x)[["alt"]]
 	
-		apply(t(mat),1,function(y){
+		apply(t(mat),1,function(y, ref, alt){
 			
 			vec <- rep(NA,length(y))
 			if(any(y == 1)){
-				vec[y == 1] <- ref[y == 1]
+				vec[y == 1] <- alt[y == 1]
 			}
 			if(any(y == 0)){
-				vec[y == 0] <- alt[y == 0]
+				vec[y == 0] <- ref[y == 0]
 			}
 			vec
-		})
+		}, ref=ref, alt=alt)
+})
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("paternalAllele", function(x, ...){
+    standardGeneric("paternalAllele")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("paternalAllele", signature(x = "ASEset"), 
+		function(x) {
+
+		mat <- phase(x,return.class="array")[,,2]
+		ref <- mcols(x)[["ref"]]
+		alt <- mcols(x)[["alt"]]
+	
+		apply(t(mat),1,function(y, ref, alt){
+			
+			vec <- rep(NA,length(y))
+			if(any(y == 1)){
+				vec[y == 1] <- alt[y == 1]
+			}
+			if(any(y == 0)){
+				vec[y == 0] <- ref[y == 0]
+			}
+			vec
+		}, ref=ref, alt=alt)
 })
