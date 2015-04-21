@@ -50,7 +50,7 @@ grp <- matrix(2, nrow=dim(phs)[1], ncol=dim(phs)[2])
 grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1
 grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
 
-lva_internal(rs, grp)
+lva.internal(rs, grp)
 }
 \author{
 Jesper R. Gadin, Lasse Folkersen

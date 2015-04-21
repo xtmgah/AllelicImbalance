@@ -2270,7 +2270,7 @@ function(BamList, GRvariants, fastq.format = "illumina.1.8",
 #' grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1
 #' grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
 #'
-#' lva_internal(rs, grp)
+#' lva.internal(rs, grp)
 #' 
 NULL
 
@@ -2401,11 +2401,11 @@ setMethod("lva", signature(x = "ASEset"),
 		if(return.class=="vector"){
 			pvalues
 		}else if(return.class=="matrix"){
-			if(idx.mat.names %in% names(rs)){
+			if("ixn" %in% names(rs)){
 				rs2.names <- apply(rs$ixn[-nrow(rs$ixn),
 								   subjectHits(hits)],2,paste,collapse="/")
 				region.annotation <- rs2.names
-			}else if(idx.names %in% names(rs)){
+			}else if("idx.names" %in% names(rs)){
 				rs2.names <- rs$idx.names[subjectHits(hits)]
 				region.annotation <- rs2.names
 			}else{

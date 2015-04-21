@@ -157,6 +157,7 @@ NULL
 #' ar2 <- aperm(ar2, c(2, 3, 1))
 #' dimnames(ar2) <- list(paste("snp",1:snps,sep=""),paste("sample",1:samples,sep=""),
 #'							c("A","C","G","T"))
+#' gr <- GRanges(seqnames=c("chr2"), ranges=IRanges(start=1:dim(ar2)[1], width=1), strand="*")
 #' a <- ASEsetFromArrays(gr, countsUnknown=ar2)
 #' 
 #'

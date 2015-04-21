@@ -68,7 +68,7 @@ setMethod("hetFilt", signature(x = "ASEset"), function(x){
 #'
 #' multiAllelicFilt(a)
 #' 
-#' @exportMethod hetFilt
+#' @exportMethod multiAllelicFilt
 NULL
 
 # @rdname multiAllelicFilt
