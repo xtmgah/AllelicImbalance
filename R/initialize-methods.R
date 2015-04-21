@@ -16,6 +16,9 @@ NULL
 #' 
 #' countListPlus, countListMinus and countListUnknown are
 #' i.e. the outputs from the getAlleleCounts function.
+#'
+#' aquals is new for the devel branch and will be changed slighly before the relase 
+#' to include better granularity.
 #' 
 #' @name initialize-ASEset
 #' @rdname initialize-ASEset
@@ -31,7 +34,7 @@ NULL
 #' @param countsPlus An array containing the countinformation
 #' @param countsMinus An array containing the countinformation
 #' @param countsUnknown An array containing the countinformation
-#' @param acounts A 4-D array containing the countinformation, see details
+#' @param aquals A 4-D array containing the countinformation, see details
 #' @param genotype matrix
 #' @param colData A \code{DataFrame} object containing sample specific data
 #' @param phase A \code{matrix} or an \code{array} containing phase information. 
@@ -98,7 +101,7 @@ NULL
 #' @rdname initialize-ASEset
 #' @export 
 ASEsetFromCountList <- function(rowRanges, countListUnknown = NULL, countListPlus = NULL, 
-    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL, aqual = NULL,
+    countListMinus = NULL, colData = NULL, mapBiasExpMean = NULL, phase = NULL, aquals = NULL,
     verbose = FALSE, ...) {
     
     if (verbose) {
@@ -574,8 +577,9 @@ GAnalysis <- function(
 #' @name initialize-riskVariant
 #' @rdname initialize-riskVariant
 #' @aliases initialize-riskVariant 
-#' @param x \code{ASEset} 
-#' @param gr GRanges object for the SNPs
+#' @param x GRanges object for the SNPs
+#' @param genotype matrix
+#' @param colData A \code{DataFrame} object containing sample specific data
 #' @param ... internal arguments
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords bias mapbias refBias

@@ -44,9 +44,6 @@ thresholdPvalue(x, ...)
 
 \item{return.class}{type of class returned eg. "list or ""array".}
 }
-\value{
-An object of class DetectedAI containing logics for thresholds of interest.
-}
 \description{
 Object that holds results from AI detection.
 }

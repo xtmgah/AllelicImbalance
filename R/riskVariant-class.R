@@ -13,6 +13,7 @@ NULL
 #' @docType class
 #' @param x riskVariant object or list of riskVariants
 #' @param return.class type of class returned eg. "list or ""array".
+#' @param value argument used for replacement
 #' @param ... pass arguments to internal functions
 #'
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -33,22 +34,12 @@ setClass("riskVariant", contains = "SummarizedExperiment",
 )
 
 #' @rdname riskVariant-class
-#' @importFrom VariantAnnotation ref
-#' @export 
-setGeneric("ref",package="VariantAnnotaton")
-
-#' @rdname riskVariant-class
 #' @export 
 setMethod("ref", signature(x = "riskVariant"), function(x) {
 
 		mcols(x)[["ref"]]
 	
 })
-
-#' @rdname riskVariant-class
-#' @importFrom VariantAnnotation ref<-
-#' @export 
-setGeneric("ref<-",package="VariantAnnotaton")
 
 #' @rdname riskVariant-class
 #' @export 
@@ -65,10 +56,6 @@ setMethod("ref<-", signature(x = "riskVariant"), function(x, value) {
 	x
 })
 
-#' @rdname riskVariant-class
-#' @importFrom VariantAnnotation alt
-#' @export 
-setGeneric("alt",package="VariantAnnotaton")
 
 #' @rdname riskVariant-class
 #' @export 
@@ -77,11 +64,6 @@ setMethod("alt", signature(x = "riskVariant"), function(x) {
 		mcols(x)[["alt"]]
 	
 })
-
-#' @rdname riskVariant-class
-#' @importFrom VariantAnnotation alt<-
-#' @export 
-setGeneric("alt<-",package="VariantAnnotaton")
 
 #' @rdname riskVariant-class
 #' @export 

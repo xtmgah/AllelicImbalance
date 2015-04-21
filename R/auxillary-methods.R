@@ -296,8 +296,14 @@ setMethod("defaultPhase", signature("numeric"),
 #' @aliases regionSummary,numeric-method
 #' @docType methods
 #' @param x ASEset object
+#' @param region to summmarize over, the object can be a GRanges, GRangesList or 
+#' list containing a GRangesList in the root
 #' @param strand can be "+", "-" or "*"
-#' @param region GRanges or GRangesList object to summmarize over
+#' @param threshold.pvalue used in filter when to count AI as significant
+#' @param return.class "array" or "list".
+#' @param return.meta logical if to return a list with additional metadata
+#' @param drop logical that for TRUE drops the third dimentsion if there is only
+#' one element.
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords summary
@@ -2219,6 +2225,204 @@ function(BamList, GRvariants, fastq.format = "illumina.1.8",
     }
 })
 
+
+
+#' lva.internal
+#' 
+#' make an almlof regression for arrays (internal core function)
+#' 
+#' internal method that takes one array with results from regionSummary
+#' and one matrix with group information for each risk SNP (based on phase)
+#'
+#' @name lva.internal
+#' @rdname lva.internal
+#' @aliases lva.internal,array-method
+#' @docType methods
+#' @param x regionSummary array phased for maternal allele
+#' @param grp group 1-3 (1 for 0:0, 2 for 1:0 or 0:1, and 3 for 1:1)
+#' @param ... arguments to forward to internal functions
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords phase
+#' @examples
+#' 
+#' data(ASEset) 
+#' a <- ASEset
+#' # Add phase
+#' set.seed(1)
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
+#' 
+#' phase(a) <- p
+#' 
+#' #add alternative allele information
+#' mcols(a)[["alt"]] <- inferAltAllele(a)
+#' 
+#' # in this example two overlapping subsets of snps in the ASEset defines the region
+#' region <- split(granges(a)[c(1,2,2,3)], c(1,1,2,2))
+#' rs <- regionSummary(a, region, return.class="array", return.meta=FALSE)
+#'
+#' # use  (change to generated riskSNP phase later)
+#' phs <- array(c(phase(a,return.class="array")[1,,c(1, 2)], 
+#'				 phase(a,return.class="array")[2,,c(1, 2)]), dim=c(20,2,2))
+#' grp <- matrix(2, nrow=dim(phs)[1], ncol=dim(phs)[2])		 
+#' grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1
+#' grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
+#'
+#' lva_internal(rs, grp)
+#' 
+NULL
+
+#' @rdname lva.internal
+#' @export
+setGeneric("lva.internal", function(x, ... 
+	){
+    standardGeneric("lva.internal")
+})
+
+#' @rdname lva.internal
+#' @export
+setMethod("lva.internal", signature(x = "array"),
+		function(x, grp, ...
+	){
+	
+		#only use mean.fr at the moment
+		x2 <- aperm(x,c(1, 3, 2))[ , , 3]
+
+		l <- lapply(1:ncol(x2), function(i,y,x){
+				
+					summary(lm(y[,i]~x[,i]))$coefficients[2,4]
+		}, y=x2, x=grp)
+
+		unlist(l)
+})
+
+#' lva
+#' 
+#' make an almlof regression for arrays
+#' 
+#' internal method that takes one array with results from regionSummary
+#' and one matrix with group information for each risk SNP (based on phase)
+#'
+#' @name lva
+#' @rdname lva
+#' @aliases lva,array-method
+#' @docType methods
+#' @param x ASEset object with phase and 'ref'/'alt' allele information
+#' @param rv riskVariant object with phase and 'ref'/'alt' allele information
+#' @param region riskVariant object with phase and alternative allele information
+#' @param settings riskVariant object with phase and alternative allele information
+#' @param return.class 'vector' or 'matrix'
+#' @param return.meta logical to return a list with metainformation
+#' @param ... arguments to forward to internal functions
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords phase
+#' @examples
+#' 
+#' data(ASEset) 
+#' a <- ASEset
+#' # Add phase
+#' set.seed(1)
+#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
+#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
+#' 	nrow=nrow(a), ncol(a))
+#' 
+#' phase(a) <- p
+#' 
+#' #add alternative allele information
+#' mcols(a)[["alt"]] <- inferAltAllele(a)
+#' 
+#' #init risk variants
+#' ge <- inferGenotypes(ASEset)
+#' rv <- riskVariantFromGRanges(x=GRvariants, genotype=ge)
+#' phase(rv) <- p
+#'
+#' # in this example all snps in the ASEset defines the region
+#' r1 <- granges(a)
+#'
+#' # in this example two overlapping subsets of snps in the ASEset defines the region
+#' r2 <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
+#'
+#' # use a multilevel list as input (output will keep the list dimensions)
+#' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
+#' names(region) <- c("introns", "exons")
+#' r3 <- list(g1=list(tx1=region, tx2=region), g2=list(tx1=region, tx2=region, tx3=region))
+#'
+#' # link variant almlof (lva)
+#' lva(a, rv, r1)
+#' lva(a, rv, r2)
+#' lva(a, rv, r3)
+#' 
+NULL
+
+#' @rdname lva
+#' @export
+setGeneric("lva", function(x, ... 
+	){
+    standardGeneric("lva")
+})
+
+#' @rdname lva
+#' @export
+setMethod("lva", signature(x = "ASEset"),
+		function(x, rv, region, settings=list(),
+				 return.class="matrix", return.meta=FALSE, ...
+	){
+
+		if("threshold.distance" %in% names(settings)){
+			distance <- settings[["threshold.distance"]]
+		}else{
+			distance <- 200000
+		}
+
+		#region summary
+		rs <- regionSummary(x, region, return.class="array", return.meta=TRUE,
+							threshold.pvalue=1, drop=FALSE)
+
+		#match riskVariant to rs granges
+		hits <- findOverlaps(rv, rs$gr + distance)
+
+		rs2 <- rs$x[,,subjectHits(hits)]
+
+		rv2 <- rv[queryHits(hits)]
+
+		#groups
+		phs <- aperm(phase(rv2,return.class="array")[,,c(1, 2)],c(2,1,3))
+		grp <- matrix(2, nrow=dim(phs)[1], ncol=dim(phs)[2])		 
+		grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1                             	
+		grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
+
+		#call internal regression function	
+		pvalues <- lva.internal(rs2, grp)
+
+		#create return object
+		if(return.class=="vector"){
+			pvalues
+		}else if(return.class=="matrix"){
+			if(idx.mat.names %in% names(rs)){
+				rs2.names <- apply(rs$ixn[-nrow(rs$ixn),
+								   subjectHits(hits)],2,paste,collapse="/")
+				region.annotation <- rs2.names
+			}else if(idx.names %in% names(rs)){
+				rs2.names <- rs$idx.names[subjectHits(hits)]
+				region.annotation <- rs2.names
+			}else{
+				region.annotation <- "nosetname"
+			}
+
+			if(return.meta){
+				list(mat=matrix(c(pvalues, rownames(rv2), region.annotation),ncol=3),
+					 GRrv=rowRanges(rv2),
+					 GRrs=rs$gr[subjectHits(hits)])
+			}else{
+				matrix(c(pvalues, rownames(rv2), region.annotation),ncol=3)
+			}
+		}
+})
+
+
 ####' update ASEset
 ####' 
 ####' converts old ASEsets to new ASEset objects
@@ -2344,301 +2548,3 @@ function(BamList, GRvariants, fastq.format = "illumina.1.8",
 #}
 #
 #
-
-
-#' lva.internal
-#' 
-#' make an almlof regression for arrays (internal core function)
-#' 
-#' internal method that takes one array with results from regionSummary
-#' and one matrix with group information for each risk SNP (based on phase)
-#'
-#' @name lva.internal
-#' @rdname lva.internal
-#' @aliases lva.internal,array-method
-#' @docType methods
-#' @param x regionSummary array phased for maternal allele
-#' @param grp group 1-3 (1 for 0:0, 2 for 1:0 or 0:1, and 3 for 1:1)
-#' @param ... arguments to forward to internal functions
-#' @author Jesper R. Gadin, Lasse Folkersen
-#' @keywords phase
-#' @examples
-#' 
-#' data(ASEset) 
-#' a <- ASEset
-#' # Add phase
-#' set.seed(1)
-#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
-#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
-#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
-#' 	nrow=nrow(a), ncol(a))
-#' 
-#' phase(a) <- p
-#' 
-#' #add alternative allele information
-#' mcols(a)[["alt"]] <- inferAltAllele(a)
-#' 
-#' # in this example two overlapping subsets of snps in the ASEset defines the region
-#' region <- split(granges(a)[c(1,2,2,3)], c(1,1,2,2))
-#' rs <- regionSummary(a, region, return.class="array", return.meta=FALSE)
-#'
-#' # use  (change to generated riskSNP phase later)
-#' phs <- array(c(phase(a,return.class="array")[1,,c(1, 2)], 
-#'				 phase(a,return.class="array")[2,,c(1, 2)]), dim=c(20,2,2))
-#' grp <- matrix(2, nrow=dim(phs)[1], ncol=dim(phs)[2])		 
-#' grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1
-#' grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
-#'
-#' lva_internal(rs, grp)
-#' 
-NULL
-
-#' @rdname lva.internal
-#' @export
-setGeneric("lva.internal", function(x, ... 
-	){
-    standardGeneric("lva.internal")
-})
-
-#' @rdname lva.internal
-#' @export
-setMethod("lva.internal", signature(x = "array"),
-		function(x, grp, ...
-	){
-	
-		#only use mean.fr at the moment
-		x2 <- aperm(x,c(1, 3, 2))[ , , 3]
-
-		l <- lapply(1:ncol(x2), function(i,y,x){
-				
-					summary(lm(y[,i]~x[,i]))$coefficients[2,4]
-		}, y=x2, x=grp)
-
-		unlist(l)
-})
-
-#' lva
-#' 
-#' make an almlof regression for arrays
-#' 
-#' internal method that takes one array with results from regionSummary
-#' and one matrix with group information for each risk SNP (based on phase)
-#'
-#' @name lva
-#' @rdname lva
-#' @aliases lva,array-method
-#' @docType methods
-#' @param x regionSummary array phased for maternal allele
-#' @param rv group 1-3 (1 for 0:0, 2 for 1:0 or 0:1, and 3 for 1:1)
-#' @param grp group 1-3 (1 for 0:0, 2 for 1:0 or 0:1, and 3 for 1:1)
-#' @param ... arguments to forward to internal functions
-#' @author Jesper R. Gadin, Lasse Folkersen
-#' @keywords phase
-#' @examples
-#' 
-#' data(ASEset) 
-#' a <- ASEset
-#' # Add phase
-#' set.seed(1)
-#' p1 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
-#' p2 <- matrix(sample(c(1,0),replace=TRUE, size=nrow(a)*ncol(a)),nrow=nrow(a), ncol(a))
-#' p <- matrix(paste(p1,sample(c("|","|","/"), size=nrow(a)*ncol(a), replace=TRUE), p2, sep=""),
-#' 	nrow=nrow(a), ncol(a))
-#' 
-#' phase(a) <- p
-#' 
-#' #add alternative allele information
-#' mcols(a)[["alt"]] <- inferAltAllele(a)
-#' 
-#' #init risk variants
-#' ge <- inferGenotypes(ASEset)
-#' rv <- riskVariantFromGRanges(x=GRvariants, genotype=ge)
-#' phase(rv) <- p
-#'
-#' # in this example all snps in the ASEset defines the region
-#' r1 <- granges(a)
-#'
-#' # in this example two overlapping subsets of snps in the ASEset defines the region
-#' r2 <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
-#'
-#' # use a multilevel list as input (output will keep the list dimensions)
-#' region <- split(granges(a)[c(1,2,2,3)],c(1,1,2,2))
-#' names(region) <- c("introns", "exons")
-#' r3 <- list(g1=list(tx1=region, tx2=region), g2=list(tx1=region, tx2=region, tx3=region))
-#'
-#' # link variant almlof (lva)
-#' lva(a, rv, r1)
-#' lva(a, rv, r2)
-#' lva(a, rv, r3)
-#' 
-NULL
-
-#' @rdname lva
-#' @export
-setGeneric("lva", function(x, ... 
-	){
-    standardGeneric("lva")
-})
-
-#' @rdname lva
-#' @export
-setMethod("lva", signature(x = "ASEset"),
-		function(x, rv, region, settings=list(),
-				 return.class="matrix", return.meta=FALSE, ...
-	){
-
-		if("threshold.distance" %in% names(settings)){
-			distance <- settings[["threshold.distance"]]
-		}else{
-			distance <- 200000
-		}
-
-		#region summary
-		rs <- regionSummary(x, region, return.class="array", return.meta=TRUE,
-							threshold.pvalue=1, drop=FALSE)
-
-		#match riskVariant to rs granges
-		hits <- findOverlaps(rv, rs$gr + distance)
-
-		rs2 <- rs$x[,,subjectHits(hits)]
-
-		rv2 <- rv[queryHits(hits)]
-
-		#groups
-		phs <- aperm(phase(rv2,return.class="array")[,,c(1, 2)],c(2,1,3))
-		grp <- matrix(2, nrow=dim(phs)[1], ncol=dim(phs)[2])		 
-		grp[(phs[,,1] == 0) & (phs[,,2] == 0)] <- 1                             	
-		grp[(phs[,,1] == 1) & (phs[,,2] == 1)] <- 3
-
-		#call internal regression function	
-		pvalues <- lva.internal(rs2, grp)
-
-		#create return object
-		if(return.class=="vector"){
-			pvalues
-		}else if(return.class=="matrix"){
-			if(idx.mat.names %in% names(rs)){
-				rs2.names <- apply(rs$ixn[-nrow(rs$ixn),
-								   subjectHits(hits)],2,paste,collapse="/")
-				region.annotation <- rs2.names
-			}else if(idx.names %in% names(rs)){
-				rs2.names <- rs$idx.names[subjectHits(hits)]
-				region.annotation <- rs2.names
-			}else{
-				region.annotation <- "nosetname"
-			}
-
-			if(return.meta){
-				list(mat=matrix(c(pvalues, rownames(rv2), region.annotation),ncol=3),
-					 GRrv=rowRanges(rv2),
-					 GRrs=rs$gr[subjectHits(hits)])
-			}else{
-				matrix(c(pvalues, rownames(rv2), region.annotation),ncol=3)
-			}
-		}
-})
-
-
-###################
-#
-#  internal List methods
-#  
-###################
-
-list.depth <- function(this, thisdepth = 0) {
-	  if(!is.list(this)) {
-		return(thisdepth)
-	  }else {
-		return(list.depth(this[[1]], thisdepth = thisdepth+1))
-	  }
-}
-			
-
-multiUnlist <- function(lst){
-	 if(!is.list(lst)){
-		 return(lst)
-	 }else{
-		  multiUnlist(do.call(c, unname(lst)))
-	 }
-}
-
-multiUnlist.index <- function(lst, expand.lowest.level=FALSE){
-	
-	list.idx.vec <- function(this, i=vector(),vec = vector()) {
-		  if(class(this) == "GRanges") {
-			  return(c(vec,i,length(this)))
-	  } else {
-			return(
-				unlist(lapply(seq_along(this), 
-					   function(y, z, i) { list.idx.vec(y[[i]], i, z)}, y=this, z=c(vec,i))
-				))
-		  }
-	}
-
-	idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
-					  
-	if(expand.lowest.level){
-		matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
-								   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
-						   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
-	}else{
-		idx.mat
-	}
-}
-
-multiUnlist.index.names <- function(lst, expand.lowest.level=FALSE){
-	
-	list.idx.vec <- function(this, i=vector(),vec = vector(), nms=names(this)) {
-		
-		  if(class(this) == "GRanges") {
-			  return(c(vec, nms[i], length(this)))
-		  }else {
-			return(
-				unlist(
-					lapply(seq_along(this), 
-					   function(y, i, z, n) { 
-						   list.idx.vec(y[[i]], i=i, vec=z, nms=n)
-					   },
-					   y=this, z=c(vec, nms[i]), n=names(this)
-					)
-				)
-			)
-		  }
-	}
-
-	list.idx.vec(lst)
-
-	idx.mat <- matrix(list.idx.vec(lst),nrow=list.depth(lst)+2)
-					  
-	if(expand.lowest.level){
-		matrix(inverse.rle(structure(list(lengths = rep(idx.mat[nrow(idx.mat),],nrow(idx.mat)-1), 
-								   values  = as.vector(t(idx.mat[-nrow(idx.mat),]))), class = "rle"))
-						   ,nrow=nrow(idx.mat)-1, byrow=TRUE)
-	}else{
-		idx.mat
-	}
-}
-
-#populate list function
-region.list.populate <- function(ar, idx.mat, idx.mat.names ){
-
-	if(!class(idx.mat) == "matrix") {
-		l <- lapply(unique(idx.mat), 
-			   function(i, a, m){ 
-				   a[,,m==i] 
-			   },
-			   a=ar, m=idx.mat)
-		names(l) <- unique(idx.mat.names) 
-		l
-	}else{
-		l <- lapply(unique(idx.mat[1,]), 
-		   function(i, a, m, m2){ 
-
-			   region.list.populate(a[,,m[1,]==i], m[-1, m[1, ]==i], m2[-1, m[1, ]==i]) 
-
-		   },
-		   a=ar, m=idx.mat, m2=idx.mat.names)
-		names(l) <- unique(idx.mat.names[1,]) 
-		l
-	}
-}	

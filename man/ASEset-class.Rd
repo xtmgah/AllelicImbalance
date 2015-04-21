@@ -34,6 +34,10 @@
 \alias{mapBias,ASEset-method}
 \alias{mapBias<-}
 \alias{mapBias<-,ASEset-method}
+\alias{maternalAllele}
+\alias{maternalAllele,ASEset-method}
+\alias{paternalAllele}
+\alias{paternalAllele,ASEset-method}
 \alias{phase}
 \alias{phase,ASEset-method}
 \alias{phase<-}
@@ -118,6 +122,14 @@ aquals(x, ...)
 aquals(x) <- value
 
 \S4method{aquals}{ASEset}(x) <- value
+
+maternalAllele(x, ...)
+
+\S4method{maternalAllele}{ASEset}(x)
+
+paternalAllele(x, ...)
+
+\S4method{paternalAllele}{ASEset}(x)
 }
 \arguments{
 \item{x}{ASEset object}

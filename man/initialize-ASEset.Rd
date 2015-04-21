@@ -8,7 +8,7 @@
 \usage{
 ASEsetFromCountList(rowRanges, countListUnknown = NULL,
   countListPlus = NULL, countListMinus = NULL, colData = NULL,
-  mapBiasExpMean = NULL, phase = NULL, aqual = NULL, verbose = FALSE,
+  mapBiasExpMean = NULL, phase = NULL, aquals = NULL, verbose = FALSE,
   ...)
 
 ASEsetFromArrays(rowRanges, countsUnknown = NULL, countsPlus = NULL,
@@ -35,6 +35,8 @@ dimension, samples in the 2nd dimension and variants in the 3rd dimension.}
 
 \item{phase}{A \code{matrix} or an \code{array} containing phase information.}
 
+\item{aquals}{A 4-D array containing the countinformation, see details}
+
 \item{verbose}{Makes function more talkative}
 
 \item{...}{arguments passed on to SummarizedExperiment constructor}
@@ -46,8 +48,6 @@ dimension, samples in the 2nd dimension and variants in the 3rd dimension.}
 \item{countsMinus}{An array containing the countinformation}
 
 \item{genotype}{matrix}
-
-\item{acounts}{A 4-D array containing the countinformation, see details}
 }
 \value{
 \code{ASEsetFromCountList} returns an \code{ASEset} object.
@@ -65,6 +65,9 @@ calculate countListUnknown, which is the sum of the plus and minus strands.
 
 countListPlus, countListMinus and countListUnknown are
 i.e. the outputs from the getAlleleCounts function.
+
+aquals is new for the devel branch and will be changed slighly before the relase
+to include better granularity.
 }
 \note{
 \code{ASEsetFromCountList} requires the same input data as an
