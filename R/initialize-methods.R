@@ -521,7 +521,7 @@ DetectedAIFromArray <- function(
 
 ###################
 #
-# Golbal reference frequency analysis
+# Global reference frequency analysis
 #
 ###################
 
@@ -582,43 +582,47 @@ GAnalysis <- function(
 #' @examples
 #'
 #' data(ASEset)
-#' a <- 
+#' ge <- inferGenotypes(ASEset)
+#' rv <- riskVariantFromGRanges(x=GRvariants, genotype=ge)
+#'
 #' 
 NULL
 
 #' @rdname initialize-riskVariant
 #' @export 
 #setMethod("riskVariant","riskVariant", function(
-riskVariantFromArray <- function(
-	x = "array",
-	gr = "array",
+riskVariantFromGRanges <- function(
+	x,
+	genotype,
 	colData = NULL,
 	...){
 
 	if(is.null(colData)){
 		sset <- SummarizedExperiment(
 					assays = SimpleList(
-						genotype=reference.frequency,
+						genotype=genotype
 						), 
-					rowRanges = gr
+					rowRanges = x
 				) 
 	}else{
 		sset <- SummarizedExperiment(
 					assays = SimpleList(
-						genotype=reference.frequency,
+						genotype=genotype
 						), 
-					rowRanges = gr,
+					rowRanges = x,
 					colData = coldata
 				) 
 	}
-		rownames(sset) <- rownames(gr)
+
+	rownames(sset) <- names(x)
 
 	#valid
 	#validObject(.Object)
 
 	#Return object
 	new("riskVariant", sset,
-		meta = list(),
+		meta = list()
 	)
 }
+
 
