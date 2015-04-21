@@ -287,6 +287,10 @@ setMethod("defaultPhase", signature("numeric"),
 #' a summary for the sum of all exons. Phase information, reference and alternative
 #' allele is required.
 #'
+#' A limitation comes to the strand-specificness. At the moment it is not possible
+#' to call over more than one strand type using the strands in region. This will be
+#' improved before going to release.
+#'
 #' @name regionSummary
 #' @rdname regionSummary
 #' @aliases regionSummary,numeric-method
@@ -386,12 +390,17 @@ setMethod("regionSummary", signature("ASEset"),
 		}
 
 		fr.f <- fraction(x, strand=strand, top.fraction.criteria="phase")
-
 		fr.het.filt <- hetFilt(x)
 
-		#filter on p-value
-		pv <- binom.test(x,strand)
-		fr.f[!(pv < threshold.pvalue) | !t(fr.het.filt)] <- NA
+		#filter on p-value if threshold <1
+		if(threshold.pvalue >= 1){
+			fr.f[!t(fr.het.filt)] <- NA
+		}else if(threshold.pvalue < 1 & threshold.pvalue > 0){
+			pv <- binom.test(x,strand)
+			fr.f[!(pv < threshold.pvalue) | !t(fr.het.filt)] <- NA
+		}else{
+			stop("threshold.pvalue must be a value > 0")
+		}
 
 		#maternal allele
 		mallele <- maternalAllele(x)
@@ -458,20 +467,17 @@ setMethod("regionSummary", signature("ASEset"),
 				}
 			}
 		}else if(return.class=="list"){
-
 			if(populate.list){
-
 				lst <- region.list.populate(ar, idx.mat[-nrow(idx.mat),], idx.mat.names[-nrow(idx.mat.names),])
 				lst
-
 			}else{
 
 				lst <- lapply(seq(dim(ar)[3]), function(x) ar[ , , x])
 				names(lst) <- ar.dim3.names
 
-			if(length(lst)==1 & drop){
-				lst[[1]]
-			}else{
+				if(length(lst)==1 & drop){
+					lst[[1]]
+				}else{
 					lst
 				}
 			}
