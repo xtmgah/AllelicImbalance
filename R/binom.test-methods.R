@@ -33,6 +33,10 @@ NULL
 #'  @export 
 setMethod("binom.test", signature(x = "ASEset", n = "ANY"), function(x, n = "*") {
     
+	if(!("genotype" %in% names(assays(x)))){
+		genotype(x) <- inferGenotypes(x)
+	}
+
     strand <- n
 
 	fr <- refFraction(x, strand=strand,

@@ -4,6 +4,35 @@
 #  
 ###################
 
+#' general list methods
+#' 
+#' general list methods that supports flatteing and indexing of lists
+#' 
+#' This is a collection of supportive list methods. The documentation will
+#' be improved before next release.
+#' 
+#' @name general-list
+#' @rdname general-list
+#' @aliases general-list list.depth multiUnlist multiUnlist.index multiUlist.index.names
+#' @param this a list
+#' @param thisdepth, start value for recursion
+#' @param lst, the single snp name to plot
+#' @param expand.lowest.level logical
+#' @param ar array to use for repopulation
+#' @param idx.mat array to use for repopulation
+#' @param idx.mat.names array to use for repopulation
+#' @param ... pass on variables internally
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords list
+#' @examples
+#' 
+#' #some example code here
+#' 
+#' 
+NULL
+
+#' @rdname general-list
+#' @export
 list.depth <- function(this, thisdepth = 0) {
 	  if(!is.list(this)) {
 		return(thisdepth)
@@ -13,7 +42,9 @@ list.depth <- function(this, thisdepth = 0) {
 }
 			
 
-multiUnlist <- function(lst){
+#' @rdname general-list
+#' @export
+multiUnlist <- function(lst, ...){
 	 if(!is.list(lst)){
 		 return(lst)
 	 }else{
@@ -21,6 +52,8 @@ multiUnlist <- function(lst){
 	 }
 }
 
+#' @rdname general-list
+#' @export
 multiUnlist.index <- function(lst, expand.lowest.level=FALSE){
 	
 	list.idx.vec <- function(this, i=vector(),vec = vector()) {
@@ -45,6 +78,8 @@ multiUnlist.index <- function(lst, expand.lowest.level=FALSE){
 	}
 }
 
+#' @rdname general-list
+#' @export
 multiUnlist.index.names <- function(lst, expand.lowest.level=FALSE){
 	
 	list.idx.vec <- function(this, i=vector(),vec = vector(), nms=names(this)) {
@@ -78,7 +113,8 @@ multiUnlist.index.names <- function(lst, expand.lowest.level=FALSE){
 	}
 }
 
-#populate list function
+#' @rdname general-list
+#' @export
 region.list.populate <- function(ar, idx.mat, idx.mat.names ){
 
 	if(!class(idx.mat) == "matrix") {

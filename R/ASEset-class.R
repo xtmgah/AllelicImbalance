@@ -181,14 +181,6 @@ setGeneric("alleleCounts", function(x, strand = "*", return.class="list") {
 setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 	return.class="list") {
 
-	#check if the ASEset object is missing acounts
-	#propose to update the probably old object
-#	if(!"acounts" %in% names(assays(ASEset))){
-#		stop(paste("your object is probably outdated,",
-#				   " update your object using",
-#				   " 'ASEsetFromOldVersion'", sep="")	)
-#	}
-
 	#check that strand parameter is correct set
     if (!sum(strand %in% c("+", "-", "*", "both")) > 0) {
         stop("strand parameter has to be either '+', '-', '*' or 'both' ")
@@ -220,20 +212,18 @@ setMethod("alleleCounts", signature(x = "ASEset"), function(x, strand = "*",
 
 	#access the correct assays
     if (strand == "+") {
-        #ar <- assays(x)[["acounts"]][,,,1, drop=FALSE]
-		#ar <- adrop(ar,drop=4)
         ar <- assays(x)[["countsPlus"]]
     } else if (strand == "-") {
-        #ar <- assays(x)[["acounts"]][,,,2, drop=FALSE]
-		#ar <- adrop(ar,drop=4)
         ar <- assays(x)[["countsMinus"]]
     } else if (strand == "*") {
-        #ar1 <- assays(x)[["acounts"]][,,,1, drop=FALSE] 
-		#ar2 <- assays(x)[["acounts"]][,,,2, drop=FALSE]
-		#ar1 <- adrop(ar1,drop=4)
-		#ar2 <- adrop(ar2,drop=4)
-		#ar <- ar1+ar2
-        ar <- assays(x)[["countsMinus"]] + assays(x)[["countsPlus"]]
+
+		if(!("countsMinus" %in% names(assays(x)))){
+			ar <- assays(x)[["countsPlus"]]
+		}else if(!("countsPlus" %in% names(assays(x)))){
+			ar <- assays(x)[["countsMinus"]]
+		}else{
+			ar <- assays(x)[["countsMinus"]] + assays(x)[["countsPlus"]]
+		}
     } else if (strand == "both") {
         ar <- array(c(assays(x)[["countsPlus"]], assays(x)[["countsMinus"]]), dim=c(dim(assays(x)[["countsPlus"]]), 2))
     } else {
