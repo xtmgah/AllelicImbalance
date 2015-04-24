@@ -5,6 +5,7 @@ date: "`r Sys.Date()`"
 output:
   BiocStyle::pdf_document:
     toc: true
+    fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{AllelicImbalance Vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,6 +14,25 @@ vignette: >
 ```{r style, echo = FALSE, results = 'asis'}
 BiocStyle::markdown()
 ```
+
+```{r functions, include=FALSE}
+# A function for captioning and referencing images
+fig <- local({
+    i <- 0
+    ref <- list()
+    list(
+        cap=function(refName, text) {
+            i <<- i + 1
+            ref[[refName]] <<- i
+            #paste("Figure ", i, ": ", text, sep="")
+            paste(text, sep="")
+        },
+        ref=function(refName) {
+            ref[[refName]]
+        })
+})
+```
+
 #Introduction
 This `r Biocpkg("AllelicImbalance")` package contains functions for investigating
 allelic imbalance effects in RNA-seq data. Maternal and paternal
@@ -309,32 +329,38 @@ chisq.test(a2,"-")
 
 # Base graphics
 ## Plotting of an ASEset object
-The barplot function for ASEset objects
-plots the read count of each allele in each sample. This is useful for getting a very
-detailed view of individual SNPs in few samples. As can be seen below, four
-samples from the HapMap data contains a strong imbalance at the chr17:79478331
-position on the plus strand. By default the p-value is calculated by a
-chi-square test. To use other test results the arguments testValue and
-testValue2 can be used. When the counts for one allele are below 5 for
-one allele the chi-square test returns NA. This is why there is no P-value above the first bar in the example below.
+The barplot function for ASEset objects plots the read count of each allele in each sample. This is useful for getting a detailed view of individual SNPs in few samples. 
 
-```{r echo=TRUE, eval=TRUE}
-barplot(a.stranded[1], strand="+", xlab.text="", legend.interspace=2)
+```{r echo=TRUE, eval=TRUE, fig.cap=fig$cap("barplotPlusStrandDefault", "The red bars show how many reads with the G-allele that overlaps the snp at position chr17:79478331, and the green bars show many reads with the T allele that overlaps.")}
+barplot(a.stranded[2], strand="+", xlab.text="", legend.interspace=2)
+```
 
+As can be seen in figure `r fig$ref("barplotPlusStrandDefault")` several samples from the HapMap data show a strong imbalance at the chr17:79478331 position on the plus strand. By default the p-value is calculated by a chi-square test, and when the counts for one allele are below 5 for one allele the chi-square test returns NA, which is why there is no P-value above the first bar in the figure `r fig$ref("barplotPlusStrandDefault")`. The default p-values can be substitued by other test results via the arguments testValue and testValue2. 
+
+```{r echo=TRUE, eval=TRUE, fig.cap=fig$cap("barplotPlusStrandPsub", "Here the default chi-square p-values have been replaced by p-values from binomial tests.")}
 #use another source of p-values
 btp <- binom.test(a.stranded[1],"+")
-barplot(a.stranded[1], strand="+", testValue=btp, xlab.text="", legend.interspace=2)
+barplot(a.stranded[2], strand="+", testValue=t(btp), xlab.text="", legend.interspace=2)
 ```
 
-Another example of plotting that is useful is the one invoked with the plotting
-type argument "fraction". This plotting mechanism is
-useful to illustrate more SNPs and more samples in less space than the standard
-plot. As can be seen here several other samples are not heterozygote at the
-chr17:79478331 location.
+In the figure`r fig$ref("barplotPlusStrandPsub")` the binomial test has been used instead of the default chi-square test. For low read counts what is declared significant can differ, but as can be seen in the table below the difference matters less with more read counts. 
 
 ```{r echo=TRUE, eval=TRUE}
-barplot(a.simple[1], type="fraction", cex.main = 0.7)
+init <- c(15,20)
+for(i in c(1,2,4,6)){
+	bp <- binom.test(init*i, p=0.5)$p.value
+	cp <- chisq.test(init*i, p=c(0.5,0.5))$p.value 
+	print(paste("A: ", init[1]*i , " B: ", init[2]*i, " binom p: ", bp, "chisq p: ", cp), sep="")
+}
 ```
+
+Another type of barplot is the one invoked with the argument type="fraction". This plotting mechanism is useful to illustrate more SNPs and more samples, using less space than the standard barplot with the default type="counts". 
+
+```{r echo=TRUE, eval=TRUE, fig.cap=fig$cap("barplotFraction", "caption text")}
+barplot(a.simple[2], type="fraction", cex.main = 0.7)
+```
+As can be seen here several other samples are not heterozygote at the
+chr17:79478331 location.
 
 A typical question would be to ask why certain heterozygote samples have allele
 specific expression. The arguments sampleColour.top and sampleColour.bot allows for
@@ -397,11 +423,11 @@ data(ASEset)
 
 #using reference and alternative allele information
 alt(ASEset) <- inferAltAllele(ASEset)
-barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="ref")
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="ref", cex.main=0.7)
 
 #using phase information
 phase(ASEset) <- phase.mat 
-barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="phase")
+barplot(ASEset[1], type="fraction", strand="+", xlab.text="", top.fraction.criteria="phase", cex.main=0.7)
 ```
 
 # Grid graphics
@@ -482,8 +508,8 @@ The regionSummary function can be used to investigate if there is a consistent i
 
 ```{r echo=TRUE, eval=TRUE, message=FALSE}
 # in this example every snp is on separate exons
-txGR <- granges(ASEset)
-rs <- regionSummary(ASEset, txGR)
+region <- granges(ASEset)
+rs <- regionSummary(ASEset, region)
 head(rs)
 ```
 
