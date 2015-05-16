@@ -4,12 +4,19 @@
 
 #generate example
 #data(ASEset)
-#object <- detectAI(ASEset, 
+# a <- ASEset
+#object <- detectAI(a, 
 #			threshold.count.sample=1:50,
 #			threshold.frequency=seq(0,0.5,by=0.01),
 #			threshold.delta.frequency=seq(0,0.5,by=0.01),
 #			threshold.pvalue=rev(seq(0.001,0.05, by=0.005))
 #)
+#
+# frequency_vs_threshold_variable_summary(object)
+
+#
+# load real 500000 snp data
+# load("/mnt/kelewan/pappewaio/Documents/PHD/projects/2014-09-22-ASEset-all-genotyped-snps-in-gene-region/data/2014-09-20-ASEset-genotyped-liver.rdata")
 
 frequency_vs_threshold_variable_summary <- function(object,var="threshold.count.sample"){
 
