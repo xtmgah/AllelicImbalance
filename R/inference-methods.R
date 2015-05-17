@@ -256,6 +256,8 @@ setMethod("inferGenotypes", signature(x = "ASEset"), function(x, strand="*", ret
 #' @docType methods
 #' @param x \code{matrix} see examples 
 #' @param return.class class of returned object
+#' @param allele.source 'arank' or 'genotype'
+#' @param verbose make function more talkative 
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords phase
@@ -271,32 +273,53 @@ setMethod("inferGenotypes", signature(x = "ASEset"), function(x, strand="*", ret
 NULL
 
 
-setGeneric("inferAltAllele", function(x, strand="*", return.class="vec"
+setGeneric("inferAltAllele", function(x, ...
 	){ standardGeneric("inferAltAllele")})
 					   
-setMethod("inferAltAllele", signature(x = "ASEset"), function(x, strand="*", return.class="vec"
+setMethod("inferAltAllele", signature(x = "ASEset"), function(x, strand="*", allele.source="arank", return.class="vec", verbose=TRUE
 	){ 
 
-	#check if ref exists
-	if(!"ref" %in% colnames(mcols(x))){
-		stop("there is no metadata column for mcols() with the name 'ref'")
+
+	#
+	if(allele.source=="arank"){
+
+		#check if ref exists
+		if(!"ref" %in% colnames(mcols(x))){
+			stop("there is no metadata column for mcols() with the name 'ref'")
+		}
+
+		#to be able to infer alternative allele, we need to know the reference allele
+		ref <- mcols(x)[,"ref"]
+		ar <- arank(x, strand=strand, return.class="matrix")[,c(1,2)]
+
+		tf <- ar == matrix(ref, nrow=nrow(x), ncol=2)
+
+		#when ref was not found from the 2 higliest ranked alleles
+		#then set the 1st ranked allele there. shout a warning.
+		ap0 <- apply(tf,1,function(x){sum(x)==0})
+		if(any(ap0)){
+			warning(sum(ap0),"SNP reference alleles, were not among the two most expressed alleles")
+			tf[ap0,1] <- TRUE
+		}
+
+		ar[!tf]
+		
+	}else if(allele.source=="genotype"){
+		if(verbose){cat("using the second allele in the genotype matrix as alt allele")}
+
+		if(!"genotype" %in% names(assays(x))){
+			stop("there is assay named genotype")
+		}
+
+		g <- genotype(x)
+		allele2 <- sub(".*/","",as.character(g))
+		mat2 <- matrix(allele2, nrow=nrow(x),ncol=ncol(x),byrow=FALSE)
+
+		alleles <- apply(mat2, 1, 
+					 function(x){(as.character(names(sort(table(x), decreasing=TRUE))))[1]})
+
+		alleles
 	}
-
-	#to be able to infer alternative allele, we need to know the reference allele
-	ref <- mcols(x)[,"ref"]
-	ar <- arank(x, strand=strand, return.class="matrix")[,c(1,2)]
-
-	tf <- ar == matrix(ref, nrow=nrow(x), ncol=2)
-
-	#when ref was not found from the 2 higliest ranked alleles
-	#then set the 1st ranked allele there. shout a warning.
-	ap0 <- apply(tf,1,function(x){sum(x)==0})
-	if(any(ap0)){
-		warning(sum(ap0),"SNP reference alleles, were not among the two most expressed alleles")
-		tf[ap0,1] <- TRUE
-	}
-	
-	ar[!tf]
 
 })
 
