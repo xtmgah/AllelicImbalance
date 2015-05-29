@@ -256,7 +256,7 @@ setMethod("inferGenotypes", signature(x = "ASEset"), function(x, strand="*", ret
 #' @docType methods
 #' @param x \code{matrix} see examples 
 #' @param return.class class of returned object
-#' @param allele.source 'arank' or 'genotype'
+#' @param allele.source 'arank' 
 #' @param verbose make function more talkative 
 #' @param ... arguments to forward to internal functions
 #' @author Jesper R. Gadin, Lasse Folkersen
@@ -292,34 +292,60 @@ setMethod("inferAltAllele", signature(x = "ASEset"), function(x, strand="*", all
 		ref <- mcols(x)[,"ref"]
 		ar <- arank(x, strand=strand, return.class="matrix")[,c(1,2)]
 
-		tf <- ar == matrix(ref, nrow=nrow(x), ncol=2)
-
-		#when ref was not found from the 2 higliest ranked alleles
-		#then set the 1st ranked allele there. shout a warning.
-		ap0 <- apply(tf,1,function(x){sum(x)==0})
-		if(any(ap0)){
-			warning(sum(ap0),"SNP reference alleles, were not among the two most expressed alleles")
-			tf[ap0,1] <- TRUE
-		}
-
-		ar[!tf]
 		
-	}else if(allele.source=="genotype"){
-		if(verbose){cat("using the second allele in the genotype matrix as alt allele")}
-
-		if(!"genotype" %in% names(assays(x))){
-			stop("there is assay named genotype")
-		}
-
-		g <- genotype(x)
-		allele2 <- sub(".*/","",as.character(g))
-		mat2 <- matrix(allele2, nrow=nrow(x),ncol=ncol(x),byrow=FALSE)
-
-		alleles <- apply(mat2, 1, 
-					 function(x){(as.character(names(sort(table(x), decreasing=TRUE))))[1]})
-
-		alleles
 	}
+#	}else if(allele.source=="genotype"){
+#
+#		# Inferring from the genotype matrix is not completely straight forward, because it relies on
+#		# th presence of the two alleles among the genotyped individuals. If one is missing, which is
+#		# common when samples are few or allele is rare, handle that automatically by picking e.g a
+#		# random variable might be too invasive, and not necessarily the correct way of handling the 
+#		# problem. 
+#
+#		if(verbose){cat("using the second allele in the genotype matrix as alt allele\n")}
+#
+#		if(!"genotype" %in% names(assays(x))){
+#			stop("there is assay named genotype")
+#		}
+#
+#		g <- genotype(x)
+#		#allele2 <- sub(".*/","",as.character(g))
+#		#mat2 <- matrix(allele2, nrow=nrow(x),ncol=ncol(x),byrow=FALSE)
+#		allele1 <- sub("/.*","",as.character(g))
+#		allele2 <- sub(".*/","",as.character(g))
+#
+#		mat <- matrix(c(allele1, allele2), nrow=nrow(x), ncol=ncol(x)*2, byrow=FALSE)
+#
+#		ar <- t(apply(mat, 1, 
+#					 function(x){(c(as.character(names(sort(table(x), decreasing=TRUE))), NA, NA))[c(1,2)]}))
+#		#alleles2 <- apply(mat2, 1, 
+#		#			 function(x){(as.character(names(sort(table(x), decreasing=TRUE))))[1]})
+#
+#		#ar <- t(alleles)
+#
+#		if(any(is.na(ar[,1])) | any(is.na(ar[,2]))){
+#			warning(paste(sum(is.na(ar[,1]) | is.na(ar[,2])), 
+#						  "SNPs, had NA as genotype, is replaced with two most expressed alleles"))
+#
+#			ar.m <- arank(x, strand=strand, return.class="matrix")[,c(1,2)]
+#
+#			#replace with character x for unknown
+#			ar[is.na(ar[,1]),1] <- ar.m[is.na(ar[,1]),1]
+#			ar[is.na(ar[,2]),2]	<- ar.m[is.na(ar[,2]),2]
+#		}
+#
+#	}
+
+	tf <- ar == matrix(ref, nrow=nrow(x), ncol=2)
+
+	ap0 <- apply(tf,1,function(x){sum(x)==0})
+	if(any(ap0)){
+		warning(sum(ap0),"SNP reference alleles, were not among the two most expressed alleles")
+		tf[ap0,1] <- TRUE
+		tf[ap0,2] <- FALSE
+	}
+
+	ar[!tf]
 
 })
 
