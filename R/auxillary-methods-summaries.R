@@ -1,44 +1,76 @@
+#' DetectedAI summary
+#' 
+#' Summary helper functions for the DetectedAI-class
+#' 
+#' Summary helper functions. The documentation will
+#' be improved before next release.
+#' 
+#' @name DetectedAI-summary
+#' @rdname DetectedAI-summary
+#' @aliases frequency_vs_threshold_variable_summary frequency_vs_threshold_variable_summary,DetectedAI-method detectedAI_vs_threshold_variable_summary detectedAI_vs_threshold_variable_summary,DetectedAI-method
+#' @param x detectedAI object 
+#' @param var string, see details for available options
+#' @param ... pass on variables internally
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords list
+#' @examples
+#' 
+#' #some example code here
+#' generate example
+#' data(ASEset)
+#' a <- ASEset
+#' object <- detectAI(a, 
+#' 			threshold.count.sample=1:50,
+#' 			threshold.frequency=seq(0,0.5,by=0.01),
+#' 			threshold.delta.frequency=seq(0,0.5,by=0.01),
+#' 			threshold.pvalue=rev(seq(0.001,0.05, by=0.005))
+#' )
+#' 
+#' frequency_vs_threshold_variable_summary(object)
+#' 
+#' 
+NULL
 
-#function to summarize selected variable combinations.
-#x against all other variables
+#' @rdname DetectedAI-summary
+#' @export
+setGeneric("frequency_vs_threshold_variable_summary", function(x, ... 
+	){
+    standardGeneric("frequency_vs_threshold_variable_summary")
+})
 
-#generate example
-#data(ASEset)
-# a <- ASEset
-#object <- detectAI(a, 
-#			threshold.count.sample=1:50,
-#			threshold.frequency=seq(0,0.5,by=0.01),
-#			threshold.delta.frequency=seq(0,0.5,by=0.01),
-#			threshold.pvalue=rev(seq(0.001,0.05, by=0.005))
-#)
-#
-# frequency_vs_threshold_variable_summary(object)
+#' @rdname DetectedAI-summary
+#' @export
+setMethod("frequency_vs_threshold_variable_summary", signature(x = "DetectedAI"),
+		function(x,var="threshold.count.sample", ...){
 
-#
-# load real 500000 snp data
-# load("/mnt/kelewan/pappewaio/Documents/PHD/projects/2014-09-22-ASEset-all-genotyped-snps-in-gene-region/data/2014-09-20-ASEset-genotyped-liver.rdata")
+		#check if assay is present
+		fr <- assays(object)[["reference.frequency"]]
+		ar.var <- assays(object)[[var]]
+		ar.fr <- array(fr,dim=c(nrow(fr),ncol(fr),dim(ar.var)[3]),
+					  dimnames=list(rownames(object),colnames(object),NULL) )
 
-frequency_vs_threshold_variable_summary <- function(object,var="threshold.count.sample"){
+		is.na(ar.var) <- FALSE 
+		ar.fr[!ar.var] <- NA
+
+		#colSums(ar.fr,na.rm=TRUE)
+		apply(ar.fr,c(2, 3),mean,na.rm=TRUE)
+})
+
+#' @rdname DetectedAI-summary
+#' @export
+setGeneric("detectedAI_vs_threshold_variable_summary", function(x, ... 
+	){
+    standardGeneric("detectedAI_vs_threshold_variable_summary")
+})
+
+#' @rdname DetectedAI-summary
+#' @export
+setMethod("detectedAI_vs_threshold_variable_summary", signature(x = "DetectedAI"),
+		function(x, var="threshold.count.sample"){
 
 	#check if assay is present
-	fr <- assays(object)[["reference.frequency"]]
-	ar.var <- assays(object)[[var]]
-	ar.fr <- array(fr,dim=c(nrow(fr),ncol(fr),dim(ar.var)[3]),
-				  dimnames=list(rownames(object),colnames(object),NULL) )
-
-	is.na(ar.var) <- FALSE 
-	ar.fr[!ar.var] <- NA
-
-	#colSums(ar.fr,na.rm=TRUE)
-	apply(ar.fr,c(2, 3),mean,na.rm=TRUE)
-}
-
-detectedAI_vs_threshold_variable_summary <- function(object,var="threshold.count.sample"){
-
-	#check if assay is present
-
 	apply(assays(object)[[var]],c(2, 3),sum,na.rm=TRUE)
 
-}
+})
 
 
