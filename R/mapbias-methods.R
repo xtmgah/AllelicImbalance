@@ -203,7 +203,7 @@ setGeneric("defaultMapBias", function(x,... ){
 
 #' @rdname defaultMapBias
 #' @export
-setMethod("defaultMapBias", signature(x = "ASEset"), function(x){
+setMethod("defaultMapBias", signature(x = "ASEset"), function(x, return.class="array"){
 
 		if (!("genotype" %in% names(assays(x)))) {
 			stop(paste("genotype matrix is not present as assay in",
@@ -233,8 +233,12 @@ setMethod("defaultMapBias", signature(x = "ASEset"), function(x){
 		ar[,,"T"][allele2.nona=="T"] <- ar[,,"T"][allele2.nona=="T"] + 0.5
 		ar[,,"G"][allele2.nona=="G"] <- ar[,,"G"][allele2.nona=="G"] + 0.5
 
-		assays(x)[["mapBias"]] <- ar
-		x
+		if(return.class=="array"){
+			ar
+		}else if(return.class=="ASEset"){
+			assays(x)[["mapBias"]] <- ar
+			x
+		}
 })
 
 #' Random ref allele from genotype

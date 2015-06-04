@@ -44,9 +44,11 @@ setGeneric("frequency_vs_threshold_variable_plot", function(x, ...
 #' @rdname DetectedAI-plot
 #' @export
 setMethod("frequency_vs_threshold_variable_plot", signature(x = "DetectedAI"),
-	function(x,var="threshold.count.sample",smoothscatter=FALSE){
+	function(x,var="threshold.count.sample", hetOverlay=TRUE, smoothscatter=FALSE){
 
 	mat <- frequency_vs_threshold_variable_summary(x, var)
+	#mean.het <- apply(mat,2,function(x){sum(!is.na(x))})
+	mean.het <- apply(usedSNPs_vs_threshold_variable_summary(x, var), 2, mean)
 
 	#mean for every variable
 	vec <- apply(mat,2,mean,na.rm=TRUE)
@@ -57,6 +59,7 @@ setMethod("frequency_vs_threshold_variable_plot", signature(x = "DetectedAI"),
 	}
 
 	data <- data.frame(refFreq=vec, variable=labels)
+	data2 <- data.frame(meanHetSNPs=mean.het, variable=labels)
 
 	if(smoothscatter){
 		#include points for all samples
@@ -75,9 +78,20 @@ setMethod("frequency_vs_threshold_variable_plot", signature(x = "DetectedAI"),
 		
 	}else{
 
-		xyplot(refFreq ~ variable,data,grid=TRUE, lwd=2, pch=16,type=c("p","l"),
-				xlab=var,ylab="Reference Frequency",
+		a <- xyplot(refFreq ~ variable,data,grid=TRUE, lwd=2, pch=16,type=c("p","l"),
+				xlab=var,ylab="Reference Frequency Mean", col="blue"
 		)
+
+		if(hetOverlay==TRUE){
+
+			library(latticeExtra)
+			b <- xyplot(meanHetSNPs ~ variable, data2,grid=TRUE, lwd=2, pch=16,type=c("p","l"),
+				xlab="",ylab="Nr. of Het SNPs Left", add=TRUE, col="green")
+
+			doubleYScale(a, b, style1 = 0, style2 = 3, add.ylab2 = TRUE)
+			    
+		}
+		
 	}
 })
 
@@ -91,9 +105,10 @@ setGeneric("detectedAI_vs_threshold_variable_plot", function(x, ...
 #' @rdname DetectedAI-plot
 #' @export
 setMethod("detectedAI_vs_threshold_variable_plot", signature(x = "DetectedAI"),
-	function(x, var="threshold.count.sample", summaryOverSamples="sum", smoothscatter=FALSE){
+	function(x, var="threshold.count.sample", summaryOverSamples="sum", hetOverlay=TRUE, smoothscatter=FALSE){
 
 	mat <- detectedAI_vs_threshold_variable_summary(x, var)
+	mean.het <- apply(usedSNPs_vs_threshold_variable_summary(x, var), 2, mean)
 
 	summaryOverSamplesFun <- function(mat,opt=summaryOverSamples){
 		if(opt=="sum"){
@@ -112,6 +127,7 @@ setMethod("detectedAI_vs_threshold_variable_plot", signature(x = "DetectedAI"),
 	}
 
 	data <- data.frame(detectedAI=vec, variable=labels)
+	data2 <- data.frame(meanHetSNPs=mean.het, variable=labels)
 
 	if(smoothscatter){
 		#include points for all samples
@@ -130,11 +146,70 @@ setMethod("detectedAI_vs_threshold_variable_plot", signature(x = "DetectedAI"),
 
 	}else{
 
-		xyplot(detectedAI ~ variable, data,grid=TRUE, lwd=2, pch=16,type=c("p","l"),
+		a <- xyplot(detectedAI ~ variable, data,grid=TRUE, lwd=2, pch=16,type=c("p","l"),
 				xlab=var,ylab="Detected AI"
 		)
+
+		if(hetOverlay){
+
+			library(latticeExtra)
+			b <- xyplot(meanHetSNPs ~ variable, data2,grid=TRUE, lwd=2, pch=16,type=c("h"),
+				xlab=var,ylab="", add=TRUE, col="green")
+
+			doubleYScale(a, b, style1 = 0, style2 = 3, add.ylab2 = TRUE)
+			    
+		}
 	}
 })
+
+#' @rdname DetectedAI-plot
+#' @export
+setGeneric("reference_frequency_density_vs_threshold_variable_plot", function(x, ... 
+	){
+    standardGeneric("reference_frequency_density_vs_threshold_variable_plot")
+})
+
+#' @rdname DetectedAI-plot
+#' @export
+setMethod("reference_frequency_density_vs_threshold_variable_plot", signature(x = "DetectedAI"),
+	function(x, var="threshold.count.sample"){
+
+	fr <- frequency_vs_threshold_variable_summary(x, var, return.class="array")
+
+	labels <- slot(x, paste(var,".names", sep=""))
+	labels <- as.numeric(labels)
+	if(var=="threshold.pvalue"){
+		labels <- -log10(labels)
+	}
+
+	labels <- aperm(array(labels, dim=dim(fr)[c(3,2,1)]), c(3,2,1))
+
+	#calculate density
+	nbins <- dim(fr)[3] 
+	x.bin <- seq(min(labels), max(labels), length=nbins)
+	y.bin <- seq(0, 1, length=nbins)
+
+	mat.i <- matrix(NA, ncol=2, nrow=length(fr))
+	mat.i[,1] <- findInterval(labels, x.bin)
+	mat.i[,2] <- findInterval(fr, y.bin)
+	mat.i <- mat.i[!is.na(mat.i[,2]),]
+
+	df.long <- as.data.frame(table(mat.i[,2],mat.i[,1]))
+	colnames(df.long) <- c("refFreq","threshold", "z")
+	
+	#data to long format
+	#df.long <- data.frame(refFreq=as.vector(fr))
+	#df.long[["threshold"]] <- as.vector()
+
+
+	levelplot(z ~ refFreq*threshold, data = df.long,
+			    xlab = var, ylab = "frequency",
+				  main = "density of ref allele frequency",
+				    col.regions = rev(heat.colors(100))
+				)
+})
+
+
 
 #' @rdname DetectedAI-plot
 #' @export
@@ -153,9 +228,9 @@ setMethod("detectedAI_vs_threshold_variable_multigraph_plot", signature(x = "Det
 	graphs <- c("threshold.frequency", "threshold.count.sample",
 	"threshold.delta.frequency", "threshold.pvalue" ) 
 
-	pl <- lapply(graphs, function(x,object){
-			detectedAI_vs_threshold_variable_plot(object, var=x, ...)
-		}, object
+	pl <- lapply(graphs, function(y,x ){
+			detectedAI_vs_threshold_variable_plot(x, var=y, ...)
+		}, x
 	)
 	do.call(grid.arrange, c(pl, ncol=2))
 
@@ -171,16 +246,41 @@ setGeneric("frequency_vs_threshold_variable_multigraph_plot", function(x, ...
 #' @rdname DetectedAI-plot
 #' @export
 setMethod("frequency_vs_threshold_variable_multigraph_plot", signature(x = "DetectedAI"),
-	function(x, ncol=2){
+	function(x, ncol=2, ...){
 
 	require(gridExtra)
 	
 	graphs <- c("threshold.frequency", "threshold.count.sample",
 	"threshold.delta.frequency", "threshold.pvalue" ) 
 
-	pl <- lapply(graphs, function(x,object){
-			frequency_vs_threshold_variable_plot(object, var=x)
-		}, object
+	pl <- lapply(graphs, function(y,x){
+			frequency_vs_threshold_variable_plot(x, var=y)
+		}, x
+	)
+	do.call(grid.arrange, c(pl, ncol=2))
+
+})
+
+#' @rdname DetectedAI-plot
+#' @export
+setGeneric("reference_frequency_density_vs_threshold_variable_multigraph_plot", function(x, ... 
+	){
+    standardGeneric("reference_frequency_density_vs_threshold_variable_multigraph_plot")
+})
+
+#' @rdname DetectedAI-plot
+#' @export
+setMethod("reference_frequency_density_vs_threshold_variable_multigraph_plot", signature(x = "DetectedAI"),
+	function(x, ncol=2, ...){
+
+	require(gridExtra)
+	
+	graphs <- c("threshold.frequency", "threshold.count.sample",
+	"threshold.delta.frequency", "threshold.pvalue" ) 
+
+	pl <- lapply(graphs, function(y,x){
+			reference_frequency_density_vs_threshold_variable_plot(x, var=y)
+		}, x
 	)
 	do.call(grid.arrange, c(pl, ncol=2))
 

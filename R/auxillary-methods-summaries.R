@@ -41,7 +41,7 @@ setGeneric("frequency_vs_threshold_variable_summary", function(x, ...
 #' @rdname DetectedAI-summary
 #' @export
 setMethod("frequency_vs_threshold_variable_summary", signature(x = "DetectedAI"),
-		function(x,var="threshold.count.sample", ...){
+		function(x,var="threshold.count.sample", return.class="matrix", ...){
 
 		#check if assay is present
 		fr <- assays(object)[["reference.frequency"]]
@@ -53,7 +53,13 @@ setMethod("frequency_vs_threshold_variable_summary", signature(x = "DetectedAI")
 		ar.fr[!ar.var] <- NA
 
 		#colSums(ar.fr,na.rm=TRUE)
-		apply(ar.fr,c(2, 3),mean,na.rm=TRUE)
+
+		if(return.class=="matrix"){
+			apply(ar.fr,c(2, 3),mean,na.rm=TRUE)
+		}else if(return.class=="array"){
+			ar.fr	
+		}
+
 })
 
 #' @rdname DetectedAI-summary
@@ -69,7 +75,28 @@ setMethod("detectedAI_vs_threshold_variable_summary", signature(x = "DetectedAI"
 		function(x, var="threshold.count.sample"){
 
 	#check if assay is present
-	apply(assays(object)[[var]],c(2, 3),sum,na.rm=TRUE)
+	apply(assays(x)[[var]],c(2, 3),sum,na.rm=TRUE)
+
+})
+
+#' @rdname DetectedAI-summary
+#' @export
+setGeneric("usedSNPs_vs_threshold_variable_summary", function(x, ... 
+	){
+    standardGeneric("usedSNPs_vs_threshold_variable_summary")
+})
+
+#' @rdname DetectedAI-summary
+#' @export
+setMethod("usedSNPs_vs_threshold_variable_summary", signature(x = "DetectedAI"),
+		function(x, var="threshold.count.sample"){
+
+	# filter variable for heterozygotes used in calculation
+	# based on non NA:s in the reference.frequency assay and threshold variable
+
+	tf <- array(!is.na(assays(x)[["reference.frequency"]]) & !(assays(x)[["reference.frequency"]]==1) & !(assays(x)[["reference.frequency"]]==0), dim=dim(assays(x)[[var]])) & assays(x)[[var]]
+
+	apply(tf,c(2, 3),sum,na.rm=TRUE)
 
 })
 
