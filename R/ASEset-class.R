@@ -6,9 +6,10 @@ NULL
 #' Object that holds allele counts, genomic positions and map-bias for a set of
 #' SNPs
 #' 
-#' An ASEset object differs from a regular SummarizedExperiment object in that
-#' the assays contains an array instead of matrix. This array has ranges on the
-#' rows, sampleNames on the columns and variants in the third dimension.
+#' An ASEset object differs from a regular RangedSummarizedExperiment object
+#' in that the assays contains an array instead of matrix. This array has
+#' ranges on the rows, sampleNames on the columns and variants in the third
+#' dimension.
 #' 
 #' It is possible to use the commands barplot and locationplot on an ASEset
 #' object see more details in \code{\link{barplot}} and
@@ -54,7 +55,8 @@ NULL
 #' @return An object of class ASEset containing location information and allele
 #' counts for a number of SNPs measured in a number of samples on various
 #' strand, as well as mapBias information. All data is stored in a manner
-#' similar to the \code{\link[GenomicRanges]{SummarizedExperiment}} class.
+#' similar to the \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
+#' class.
 #' @section Table: table(...)
 #' 
 #' \describe{
@@ -100,8 +102,8 @@ NULL
 #'
 #'
 #' @author Jesper R. Gadin, Lasse Folkersen
-#' @seealso \itemize{ \item The
-#' \code{\link[GenomicRanges]{SummarizedExperiment}} for ranges operations.  }
+#' @seealso \itemize{ \item
+#' \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}} objects. }
 #' @keywords class ASEset
 #' @examples
 #' 
@@ -167,7 +169,7 @@ NULL
 #' 
 #' @export 
 
-setClass("ASEset", contains = "SummarizedExperiment", 
+setClass("ASEset", contains = "RangedSummarizedExperiment", 
 	representation(variants = "vector"))
 
 #' @rdname ASEset-class
@@ -763,13 +765,6 @@ setMethod("mapBias<-", signature(x = "ASEset"), function(x,value) {
 	x
 })
 
-
-
-#' @rdname ASEset-class
-#' @importFrom VariantAnnotation ref
-#' @export 
-setGeneric("ref",package="VariantAnnotaton")
-
 #' @rdname ASEset-class
 #' @export 
 setMethod("ref", signature(x = "ASEset"), function(x) {
@@ -777,11 +772,6 @@ setMethod("ref", signature(x = "ASEset"), function(x) {
 		mcols(x)[["ref"]]
 	
 })
-
-#' @rdname ASEset-class
-#' @importFrom VariantAnnotation ref<-
-#' @export 
-setGeneric("ref<-",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
@@ -799,22 +789,12 @@ setMethod("ref<-", signature(x = "ASEset"), function(x, value) {
 })
 
 #' @rdname ASEset-class
-#' @importFrom VariantAnnotation alt
-#' @export 
-setGeneric("alt",package="VariantAnnotaton")
-
-#' @rdname ASEset-class
 #' @export 
 setMethod("alt", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["alt"]]
 	
 })
-
-#' @rdname ASEset-class
-#' @importFrom VariantAnnotation alt<-
-#' @export 
-setGeneric("alt<-",package="VariantAnnotaton")
 
 #' @rdname ASEset-class
 #' @export 
@@ -922,3 +902,4 @@ setMethod("paternalAllele", signature(x = "ASEset"),
 			vec
 		}, ref=ref, alt=alt)
 })
+

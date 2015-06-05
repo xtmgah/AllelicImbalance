@@ -43,7 +43,7 @@ NULL
 
 #' @rdname ReferenceBias-class
 #' @exportClass ReferenceBias
-setClass("ReferenceBias", contains = "SummarizedExperiment",
+setClass("ReferenceBias", contains = "RangedSummarizedExperiment",
 	representation(strands = "vector"))
 
 #' @rdname ReferenceBias-class
@@ -150,5 +150,4 @@ setMethod("hetPerSnp", signature(x = "ReferenceBias"), function(x,
 	}
 	vec
 })
-
 

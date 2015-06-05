@@ -8,9 +8,7 @@
 \alias{alleleCounts,ASEset-method}
 \alias{alleleCounts<-}
 \alias{alleleCounts<-,ASEset-method}
-\alias{alt}
 \alias{alt,ASEset-method}
-\alias{alt<-}
 \alias{alt<-,ASEset,ANY-method}
 \alias{aquals}
 \alias{aquals,ASEset-method}
@@ -42,9 +40,7 @@
 \alias{phase,ASEset-method}
 \alias{phase<-}
 \alias{phase<-,ASEset-method}
-\alias{ref}
 \alias{ref,ASEset-method}
-\alias{ref<-}
 \alias{ref<-,ASEset,ANY-method}
 \title{ASEset objects}
 \usage{
@@ -99,19 +95,11 @@ mapBias(x) <- value
 
 \S4method{mapBias}{ASEset}(x) <- value
 
-ref(x)
-
 \S4method{ref}{ASEset}(x)
-
-ref(x) <- value
 
 \S4method{ref}{ASEset,ANY}(x) <- value
 
-alt(x)
-
 \S4method{alt}{ASEset}(x)
-
-alt(x) <- value
 
 \S4method{alt}{ASEset,ANY}(x) <- value
 
@@ -152,16 +140,17 @@ paternalAllele(x, ...)
 An object of class ASEset containing location information and allele
 counts for a number of SNPs measured in a number of samples on various
 strand, as well as mapBias information. All data is stored in a manner
-similar to the \code{\link[GenomicRanges]{SummarizedExperiment}} class.
+similar to the \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}
+class.
 }
 \description{
 Object that holds allele counts, genomic positions and map-bias for a set of
 SNPs
 }
 \details{
-An ASEset object differs from a regular SummarizedExperiment object in that
-the assays contains an array instead of matrix. This array has ranges on the
-rows, sampleNames on the columns and variants in the third dimension.
+An ASEset object differs from a regular RangedSummarizedExperiment object in
+that the assays contains an array instead of matrix. This array has ranges on
+the rows, sampleNames on the columns and variants in the third dimension.
 
 It is possible to use the commands barplot and locationplot on an ASEset
 object see more details in \code{\link{barplot}} and
@@ -294,8 +283,8 @@ a <- ASEsetFromArrays(gr, countsUnknown=ar2)
 Jesper R. Gadin, Lasse Folkersen
 }
 \seealso{
-\itemize{ \item The
-\code{\link[GenomicRanges]{SummarizedExperiment}} for ranges operations.  }
+\itemize{ \item
+\code{\link[SummarizedExperiment]{RangedSummarizedExperiment}} objects. }
 }
 \keyword{ASEset}
 \keyword{class}
