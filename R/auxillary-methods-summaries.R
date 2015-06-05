@@ -11,22 +11,23 @@
 #' @param x detectedAI object 
 #' @param var string, see details for available options
 #' @param ... pass on variables internally
+#' @param return.class 'matrix' or 'array'
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords list
 #' @examples
 #' 
 #' #some example code here
-#' generate example
+#' #generate example
 #' data(ASEset)
 #' a <- ASEset
-#' object <- detectAI(a, 
+#' dai <- detectAI(a, 
 #' 			threshold.count.sample=1:50,
 #' 			threshold.frequency=seq(0,0.5,by=0.01),
 #' 			threshold.delta.frequency=seq(0,0.5,by=0.01),
 #' 			threshold.pvalue=rev(seq(0.001,0.05, by=0.005))
 #' )
 #' 
-#' frequency_vs_threshold_variable_summary(object)
+#' frequency_vs_threshold_variable_summary(dai)
 #' 
 #' 
 NULL
@@ -44,10 +45,10 @@ setMethod("frequency_vs_threshold_variable_summary", signature(x = "DetectedAI")
 		function(x,var="threshold.count.sample", return.class="matrix", ...){
 
 		#check if assay is present
-		fr <- assays(object)[["reference.frequency"]]
-		ar.var <- assays(object)[[var]]
+		fr <- assays(x)[["reference.frequency"]]
+		ar.var <- assays(x)[[var]]
 		ar.fr <- array(fr,dim=c(nrow(fr),ncol(fr),dim(ar.var)[3]),
-					  dimnames=list(rownames(object),colnames(object),NULL) )
+					  dimnames=list(rownames(x),colnames(x),NULL) )
 
 		is.na(ar.var) <- FALSE 
 		ar.fr[!ar.var] <- NA

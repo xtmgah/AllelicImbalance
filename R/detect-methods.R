@@ -41,6 +41,7 @@
 #' @param random.ref set the reference as random if you dont know. Affects interpretation of results.
 #' @param verbose makes function more talkative
 #' @param gc use garbage collection when possible to save space
+#' @param biasMatrix use biasMatrix in ASEset, or use default expected frequency of 0.5 for all sites
 #' @param ... internal arguments 
 #' @author Jesper R. Gadin
 #' @keywords detection

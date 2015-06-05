@@ -11,26 +11,29 @@
 #' @param x detectedAI object
 #' @param var string, see details for available options
 #' @param smoothscatter boolean, smoothscatter over the means
+#' @param hetOverlay logical, if TRUE show nr of het SNPs used to calculate the reference allele frequency mean
+#' @param summaryOverSamples 'mean' or 'sum'
+#' @param ncol nr of columns for multiplots
 #' @param ... pass on variables internally
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords list
 #' @examples
 #' 
 #' #some example code here
-#' generate example
+#' #generate example
 #' data(ASEset)
 #' a <- ASEset
-#' object <- detectAI(a, 
+#'dai <- detectAI(a, 
 #' 			threshold.count.sample=1:50,
 #' 			threshold.frequency=seq(0,0.5,by=0.01),
 #' 			threshold.delta.frequency=seq(0,0.5,by=0.01),
 #' 			threshold.pvalue=rev(seq(0.001,0.05, by=0.005))
 #' )
 #' 
-#' frequency_vs_threshold_variable_plot(object)
-#' detectedAI_vs_threshold_variable_plot(object)
-#' detectedAI_vs_threshold_variable_multigraph_plot(object)
-#' frequency_vs_threshold_variable_multigraph_plot(object)
+#' frequency_vs_threshold_variable_plot(dai)
+#' detectedAI_vs_threshold_variable_plot(dai)
+#' detectedAI_vs_threshold_variable_multigraph_plot(dai)
+#' frequency_vs_threshold_variable_multigraph_plot(dai)
 #'
 NULL
 
