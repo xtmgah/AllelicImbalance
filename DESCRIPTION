@@ -2,7 +2,7 @@ Package: AllelicImbalance
 Type: Package
 Title: Investigates allele specific expression
 Version: 1.7.9
-Date: 2015-06-05
+Date: 2015-06-06
 Author: Jesper R Gadin, Lasse Folkersen
 Maintainer: Jesper R Gadin <j.r.gadin@gmail.com>
 Description: Provides a framework for allelic specific expression
@@ -20,8 +20,7 @@ Depends:
     grid,
     GenomicRanges,
     SummarizedExperiment (>= 0.1.1),
-    GenomicAlignments,
-    Gviz
+    GenomicAlignments
 Imports:
     methods,
     BiocGenerics,
@@ -32,6 +31,7 @@ Imports:
     IRanges,
     Rsamtools,
     GenomicFeatures,
+    Gviz,
     lattice,
     seqinr,
     GenomeInfoDb
