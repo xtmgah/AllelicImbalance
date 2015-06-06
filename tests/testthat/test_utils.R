@@ -4,26 +4,44 @@ test_that(paste("test trailing slash remover"), {
 
 
 	dir1 <- system.file('extdata/ERP000101_subset', package='AllelicImbalance')
-	file1 <- "ERR009113.bam" 
-
 	dir2 <- paste(dir,"/",sep="")	
-	file2 <- paste(file,"/",sep="")	
-	file3 <- paste("/", file,sep="")	
+
+	files1 <- c("ERR009113.bam","ERR009147.bam", "ERR009159.bam" )
+	files2 <- paste(files1,"/",sep="")	
+	files3 <- paste("/", files1,sep="")	
 
 
 	#prepare result string
-	res <- paste("/mnt/kelewan/pappewaio/Documents/PHD/repos/AllelicImbalance",
+	res <- c(
+			 paste("/mnt/kelewan/pappewaio/Documents/PHD/repos/AllelicImbalance",
 				 "/bioCgit/AllelicImbalance/inst/extdata/ERP000101_subset/",
 				 "ERR009113.bam",
+				 sep=""),
+			 paste("/mnt/kelewan/pappewaio/Documents/PHD/repos/AllelicImbalance",
+				 "/bioCgit/AllelicImbalance/inst/extdata/ERP000101_subset/",
+				 "ERR009147.bam",
+				 sep=""),
+			 paste("/mnt/kelewan/pappewaio/Documents/PHD/repos/AllelicImbalance",
+				 "/bioCgit/AllelicImbalance/inst/extdata/ERP000101_subset/",
+				 "ERR009159.bam",
 				 sep="")
+		)
 
-	#check 
-    expect_that(res, equals(.mergeDirAndFilename(dir1, file1)))
-    expect_that(res, equals(.mergeDirAndFilename(dir1, file2)))
-    expect_that(res, equals(.mergeDirAndFilename(dir1, file3)))
-    expect_that(res, equals(.mergeDirAndFilename(dir2, file1)))
-    expect_that(res, equals(.mergeDirAndFilename(dir2, file2)))
-    expect_that(res, equals(.mergeDirAndFilename(dir2, file3)))
+	#check single file
+    expect_that(res[1], equals(.mergeDirAndFilename(dir1, files1[1])))
+    expect_that(res[1], equals(.mergeDirAndFilename(dir1, files2[1])))
+    expect_that(res[1], equals(.mergeDirAndFilename(dir1, files3[1])))
+    expect_that(res[1], equals(.mergeDirAndFilename(dir2, files1[1])))
+    expect_that(res[1], equals(.mergeDirAndFilename(dir2, files2[1])))
+    expect_that(res[1], equals(.mergeDirAndFilename(dir2, files3[1])))
+
+	#check multiple files
+    expect_that(res, equals(.mergeDirAndFilename(dir1, files1)))
+    expect_that(res, equals(.mergeDirAndFilename(dir1, files2)))
+    expect_that(res, equals(.mergeDirAndFilename(dir1, files3)))
+    expect_that(res, equals(.mergeDirAndFilename(dir2, files1)))
+    expect_that(res, equals(.mergeDirAndFilename(dir2, files2)))
+    expect_that(res, equals(.mergeDirAndFilename(dir2, files3)))
 
 })
 
