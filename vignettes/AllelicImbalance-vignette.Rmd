@@ -89,6 +89,7 @@ The Vcf file is a text file that stores information about positions in the genom
 In the `r Biocpkg("VariantAnnotation")` package there is a lot of useful tools to handle  Vcf files. The readVcf function reads Vcf data into R, which can be subset to only ranges by granges to get a GRanges object that is the object type required by the getAlleleCounts function. 
 
 ```{r echo = TRUE, eval = TRUE, warning = FALSE}
+library(VariantAnnotation)
 pathToVcf <- paste(pathToFiles,"/ERP000101.vcf",sep="")
 VCF <- readVcf(pathToVcf,"hg19") 
 gr <- granges(VCF) 
@@ -188,7 +189,7 @@ phase(a.simple) <- phase.mat
 ```
 
 ```{r echo=TRUE, eval=TRUE}
-#use the phase information from a Vcf file
+#load VariantAnnotation and use the phase information from a Vcf file
 pathToVcf <- system.file("extdata/ERP000101_subset/ERP000101.vcf", 
 							package = "AllelicImbalance")
 p <- readGT(pathToVcf)

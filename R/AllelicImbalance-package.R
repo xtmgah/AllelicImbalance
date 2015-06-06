@@ -82,6 +82,10 @@
 # @export readVcf
 # @importFrom VariantAnnotation readGT
 # @export readGT
+#' @importFrom VariantAnnotation alt
+#' @importFrom VariantAnnotation ref
+#' @importFrom VariantAnnotation 'alt<-'
+#' @importFrom VariantAnnotation 'ref<-'
 #'
 #' @importFrom lattice barchart
 #' @importFrom lattice xyplot
