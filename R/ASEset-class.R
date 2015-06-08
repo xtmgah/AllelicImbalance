@@ -577,6 +577,117 @@ setMethod("frequency", signature(x = "ASEset"), function(x,
 		stop("return.class has to be 'array' or 'list'")
 	}
 })
+#' @rdname ASEset-class
+#' @export 
+setGeneric("genotype2", function(x, ...){
+    standardGeneric("genotype2")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("genotype2", signature(x = "ASEset"), function(x,
+			return.class="matrix"){
+
+    if (!("genotype2" %in% names(assays(x)))) {
+		stop(paste("genotypes are not present in assays in",
+				   " ASEset object, see '?inferGenotypes' "))
+    }
+
+	p <- assays(x)[["phase"]]
+	mat <- matrix(alt(x), nrow(x), ncol(x))
+	pat <- matrix(alt(x), nrow(x), ncol(x))
+	mat[p[,,1]==1] <- matrix(ref(x), nrow(x), ncol(x))[p[,,1]==1]
+	pat[p[,,2]==1] <- matrix(ref(x), nrow(x), ncol(x))[p[,,2]==1]
+
+	if(return.class=="matrix"){
+
+		matrix(paste(mat,"/",pat, sep=""), nrow(x), ncol(x),
+				dimnames=list(rownames(x), colnames(x)))
+
+	}else if(return.class=="array"){
+				
+		array(c(mat, pat), dim=c(dim(x),2), 
+			  dimnames=list(rownames(x), colnames(x), c("mat","pat")))
+
+	}else{ stop("return.class type doesnt exist")}
+
+})
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("genotype2<-", function(x,value){
+    standardGeneric("genotype2<-")
+})
+
+#' @rdname ASEset-class
+#' @export 
+setMethod("genotype2<-", signature(x = "ASEset"), function(x,value){
+	
+	#check dimensions
+	if(!nrow(x)==nrow(value)){
+		stop("nrow(x) is not equal to nrow(value)")	
+	}
+	if(!ncol(x)==ncol(value)){
+		stop("ncol(x) is not equal to ncol(value)")	
+	}
+
+	#write check here to check for tri-allelic genotypes (whoch is not permitted)
+	#to be written
+
+	ar <- array(unlist(strsplit(gm,"/")),dim=c( 2, nrow(x), ncol(x)))
+	ap2 <- apply(matrix(aperm(ar, c(2,1,3)), nrow(x), ncol(x)*2 ), 1, function(x){ unique(x)[1:2]})
+
+	#check if ref and alt
+	if(!names(mcols(a))=="ref"){
+		#use randomly one of the two alleles
+
+		#calc ref
+		ref <- apply(ap2, 2, sample,1)
+
+		#calc alt (if no information on alt allele, set a random base)
+		tf <- t(ap2) == ref
+		no.het <- apply(tf,1,sum)==2
+		if(any(no.het)){
+			warning(paste(no.het, "SNPs had only one allele in genotype, alt allele was therefor not possible to infer",
+						  "using a random nucleotide for alternatice allele"))
+		}
+
+		nucl <- c("A","T","G","C")
+		nucmat <- matrix(nucl, nrow = sum(no.het), ncol = 4, byrow=TRUE)
+		ap2[2, no.het] <- apply(matrix(nucmat[!nucmat == ref[no.het]], nrow = sum(no.het), ncol = 3 ),1,sample,1)
+
+		alt <- t(ap2)[!t(ap2)==ref]
+
+		ref(x) <- ref
+		alt(x) <- alt
+
+	}else if(!names(mcols(a))=="alt"){
+		ref <- ref(x)
+		tf <- t(ap2) == ref
+		no.het <- apply(tf,1,sum)==2
+		if(any(no.het)){
+			warning(paste(no.het, "SNPs had only one allele in genotype, alt allele was therefor not possible to infer",
+						  "using a random nucleotide for alternatice allele"))
+		}
+
+		nucl <- c("A","T","G","C")
+		nucmat <- matrix(nucl, nrow = sum(no.het), ncol = 4, byrow=TRUE)
+		ap2[2, no.het] <- apply(matrix(nucmat[!nucmat == ref[no.het]], nrow = sum(no.het), ncol = 3 ),1,sample,1)
+
+		alt <- t(ap2)[!t(ap2)==ref]
+		alt(x) <- alt
+	}
+
+	ar2 <- aperm(ar, c(2,3,1))
+	matpat <- (ar2 == ref(x))*1 
+	p <-  array(c(matpat, rep(0, length(ar2[,,1]))),dim= c(nrow(x), ncol(x), 3))
+
+	assays(x)[["phase"]] <- p	
+	x
+})
+
+
+
 
 #' @rdname ASEset-class
 #' @export 
