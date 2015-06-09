@@ -2422,6 +2422,126 @@ setMethod("lva", signature(x = "ASEset"),
 		}
 })
 
+#' genoMatrix2phaseArray
+#' 
+#' used to convert the genomatrix from the visually friendly matrix to  phase array.
+#' 
+#' A more effectice way of store the phase data in the ASEset object.
+#' Does not allow tri-allelic SNPs, and if present the least common allele from the 
+#' the genotype matrix will be lost. 
+#'
+#' @name genoMatrix2phaseArray
+#' @rdname genoMatrix2phaseArray
+#' @aliases genoMatrix2phaseArray,matrix-method
+#' @docType methods
+#' @param x matrix see examples 
+#' @param ASEset ASEset object
+#' @param ... pass on additional param
+#' @author Jesper R. Gadin, Lasse Folkersen
+#' @keywords phase
+#' @examples
+#' 
+#' #load example data
+#' data(genomatrix) 
+#' data(ASEset) 
+#' p <- genoMatrix2phaseArray(genomatrix, ASEset)
+#' 
+NULL
+
+#' @rdname genoMatrix2phaseArray
+#' @export
+setGeneric("genoMatrix2phaseArray", function(x, ... 
+	){
+    standardGeneric("genoMatrix2phaseArray")
+})
+
+#' @rdname phaseMatrix2Array
+#' @export
+setMethod("genoMatrix2phaseArray", signature(x = "matrix"),
+		function(x, ASEset=NULL, ...
+	){
+
+	#variable change (change later to optim. memory usage)
+	gm <- x
+	x <- ASEset
+
+
+	.SplitGenotypeRank <- 
+		function(x, levels=c("A", "T", "G", "C"), return.ranknames=TRUE,
+									 RefIsAlleleMostPresent, ...)
+	){
+		mat <- matrix(aperm(x, c(2,1,3)), nrow(x), ncol(x)*2 )
+		ap2 <- t(apply(mat, 1, function(x){names(sort(table(factor(x, levels=levels)))) }))
+		if(return.ranknames){
+			colnames(ap2) <- paste("rank",1:length(levels),sep="")
+		}
+		ap2
+	}
+
+	sgm <- .splitGenotypeMatrix(genomatrix=gm)
+	ap2 <- .splitGenotypeRank(sgm)[, 1:2]
+
+	if(!is.null(x)){
+
+		#check if ref and alt
+		if(!names(mcols(x))=="ref"){
+			#use randomly one of the two alleles
+
+			#calc ref
+			ref <- apply(ap2, 2, sample,1)
+
+			#calc alt (if no information on alt allele, set a random base)
+			tf <- t(ap2) == ref
+			no.het <- apply(tf,1,sum)==2
+			if(any(no.het)){
+				warning(paste(no.het, "SNPs had only one allele in genotype, alt allele was therefor not possible to infer",
+							  "using a random nucleotide for alternatice allele"))
+			
+
+				nucl <- c("A","T","G","C")
+				nucmat <- matrix(nucl, nrow = sum(no.het), ncol = 4, byrow=TRUE)
+				ap2[2, no.het] <- apply(matrix(nucmat[!nucmat == ref[no.het]], nrow = sum(no.het), ncol = 3 ),1,sample,1)
+			}
+
+			alt <- t(ap2)[!t(ap2)==ref]
+
+			ref(x) <- ref
+			alt(x) <- alt
+
+		}else if(!names(mcols(x))=="alt"){
+			ref <- ref(x)
+			tf <- t(ap2) == ref
+			no.het <- apply(tf,1,sum)==2
+			if(any(no.het)){
+				warning(paste(no.het, "SNPs had only one allele in genotype, alt allele was therefor not possible to infer",
+							  "using a random nucleotide for alternatice allele"))
+			
+
+				nucl <- c("A","T","G","C")
+				nucmat <- matrix(nucl, nrow = sum(no.het), ncol = 4, byrow=TRUE)
+				ap2[2, no.het] <- apply(matrix(nucmat[!nucmat == ref[no.het]], nrow = sum(no.het), ncol = 3 ),1,sample,1)
+			}
+
+			alt <- t(ap2)[!t(ap2)==ref]
+			alt(x) <- alt
+		}
+	}
+
+	ar2 <- aperm(ar, c(2,3,1))
+	matpat <- (ar2 == ref(gm))*1 
+	p <-  array(c(matpat, rep(0, length(ar2[,,1]))),dim= c(nrow(gm), ncol(gm), 3))
+
+})
+
+#internal functions important to genoMatrix2phaseArray
+
+.splitGenotypeMatrix <- 
+	function(genomatrix, ...)	{
+	aperm(array(unlist(strsplit(genomatrix,"/")),dim=c(2, nrow(genomatrix), ncol(genomatrix))),c(2,3,1))
+}
+
+
+
 ##
 ## DNAStringSet2character
 ## 
