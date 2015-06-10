@@ -639,10 +639,7 @@ setMethod("genotype2<-", signature(x = "ASEset"), function(x,value){
 		stop("ncol(x) is not equal to ncol(value)")	
 	}
 
-	#write check here to check for tri-allelic genotypes (whoch is not permitted)
-	#to be written
-
-	assays(x)[["phase"]] <- genoMatrix2phaseArray(value, x)	
+	assays(x)[["phase"]] <- genoMatrix2phase(value, ref(x))	
 	x
 })
 

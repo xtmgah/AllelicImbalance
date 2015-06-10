@@ -14,18 +14,40 @@ test_that(paste("checking .splitGenotypeMatrix"), {
 	a2 <- c("T", "A", "A", "T",
 			"C", "C", "C", "G",
 			"G", "G", "C", "C")
-	mat1 <- matrix(paste(a1,"/",a2,sep=""), nrow=3, ncol=4, byrow=TRUE)
-	exp1 <- aperm(array(c(a1, a2), c(4,3,2)),c(2,1,3))
+	mat <- matrix(paste(a1,"/",a2,sep=""), nrow=3, ncol=4, byrow=TRUE)
+	exp <- aperm(array(c(a1, a2), c(4,3,2)),c(2,1,3))
 			
 	#run tests
-	res1 <- .splitGenotypeMatrix(mat1)
+	res <- .splitGenotypeMatrix(mat)
 	
 	#test equality
-    expect_that(exp1, equals(res1))
+    expect_that(exp, equals(res))
+
+	#####################
+	#prepare testdata
+	#####################
+	#A matrix with two genotypes missing
+	#Dim: 3 SNPs 4 Samples
+	a1 <- c("A", "A", "T", "T",
+			"G", "G", "C", "C",
+			"C", "G", "C", "G")
+	a2 <- c("T", "A", "A", "T",
+			"C", "C", "C", "G",
+			"G", "G", "C", "C")
+	mat <- matrix(paste(a1,"/",a2,sep=""), nrow=3, ncol=4, byrow=TRUE)
+	mat[c(1,6)] <- NA
+	exp <- aperm(array(c(a1, a2), c(4,3,2)),c(2,1,3))
+	exp[c(1,6,1+12,6+12)] <- NA
+			
+	#run tests
+	res <- .splitGenotypeMatrix(mat)
+	
+	#test equality
+    expect_that(exp, equals(res))
 
 })
 
-test_that(paste("checking .splitGenotypeRank"), {
+test_that(paste("checking .splitGenotypeCount"), {
 
 	#####################
 	#prepare testdata
@@ -38,22 +60,38 @@ test_that(paste("checking .splitGenotypeRank"), {
 	a2 <- c("T", "A", "A", "T",
 			"C", "C", "C", "G",
 			"G", "G", "C", "C")
-	mat1 <- matrix(paste(a1,"/",a2,sep=""), nrow=3, ncol=4, byrow=TRUE)
-	exp1 <- c("A", "T", "C", "G",
-			"C", "G", "C", "G",
-			"G", "G", "C", "C")
+	ar <- aperm(array(c(a1, a2), c(4,3,2)),c(2,1,3))
+	exp <- matrix(c(4, 0, 0, 4, 
+					0, 5, 3, 0,
+					0, 4, 4, 0), nrow=3, byrow=TRUE)
+	colnames(exp) <- c("A","C","G","T")
+			
 	#run tests
-	res1 <- .splitGenotypeMatrix(mat1, return.ranknames=FALSE)
+	res <- .splitGenotypeCount(ar)
 	
 	#test equality
-    expect_that(exp1, equals(res1))
+    expect_that(exp, equals(res))
 
+})
 
-    expect_that(colnames(plus), equals(colnames(arp)))
-    expect_that(rownames(minus), equals(rownames(arm)))
-    expect_that(colnames(minus), equals(colnames(arm)))
-	expect_identical(plus, arp)
-	expect_identical(minus, arm)
+test_that(paste("checking .splitGenotypeRank"), {
+
+	#####################
+	#prepare testdata
+	#####################
+	#A matrix with both alleles present in all samples (simplest case)
+	#Dim: 3 SNPs 4 Samples
+	mat <- matrix(c(4, 0, 0, 4, 
+					0, 5, 3, 0,
+					0, 4, 4, 0), nrow=3, byrow=TRUE)
+	colnames(mat) <- c("A","C","G","T")
+			
+	#run tests
+	res <- .splitGenotypeRank(mat)
+	
+	#test equality
+    expect_that(exp, equals(res))
+
 })
 
 
