@@ -4,7 +4,7 @@ context("internal functions for genoMatrix2PhaseArray")
 test_that(paste("checking .splitGenotypeMatrix"), {
 
 	#####################
-	#prepare testdata
+	# Test 1
 	#####################
 	#A matrix with both alleles present in all samples (simplest case)
 	#Dim: 3 SNPs 4 Samples
@@ -24,7 +24,7 @@ test_that(paste("checking .splitGenotypeMatrix"), {
     expect_that(exp, equals(res))
 
 	#####################
-	#prepare testdata
+	# Test 2
 	#####################
 	#A matrix with two genotypes missing
 	#Dim: 3 SNPs 4 Samples
@@ -50,7 +50,7 @@ test_that(paste("checking .splitGenotypeMatrix"), {
 test_that(paste("checking .splitGenotypeCount"), {
 
 	#####################
-	#prepare testdata
+	# Test 1
 	#####################
 	#A matrix with both alleles present in all samples (simplest case)
 	#Dim: 3 SNPs 4 Samples
@@ -77,7 +77,7 @@ test_that(paste("checking .splitGenotypeCount"), {
 test_that(paste("checking .splitGenotypeRank"), {
 
 	#####################
-	#prepare testdata
+	# Test1
 	#####################
 	#A matrix with both alleles present in all samples (simplest case)
 	#Dim: 3 SNPs 4 Samples
@@ -85,6 +85,10 @@ test_that(paste("checking .splitGenotypeRank"), {
 					0, 5, 3, 0,
 					0, 4, 4, 0), nrow=3, byrow=TRUE)
 	colnames(mat) <- c("A","C","G","T")
+	exp <- matrix(c("A", "T", "C", "G",
+					"C", "G", "A", "T",
+					"C", "G", "A", "T"), nrow=3, byrow=TRUE)
+	colnames(exp) <- c("r1","r2","r3","r4")
 			
 	#run tests
 	res <- .splitGenotypeRank(mat)

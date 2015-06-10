@@ -2436,6 +2436,9 @@ setMethod("lva", signature(x = "ASEset"),
 #' amount of indels among the genotypes. As conclusion, it is preferable to send in 
 #' reference genome when converting to phase.
 #'
+#' levels information is only important if the reference allele has to be guessed,
+#' and so if reference information is provided, the levels argument can be ignored. 
+#'
 #' @name genoMatrix2phase
 #' @rdname genoMatrix2phase
 #' @aliases genoMatrix2phase,matrix-method
@@ -2443,6 +2446,7 @@ setMethod("lva", signature(x = "ASEset"),
 #' @param x matrix see examples 
 #' @param ref reference alleles
 #' @param return.class 'array' or 'list'
+#' @param levels vector of expected alleles
 #' @param ... pass on additional param
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords phase
