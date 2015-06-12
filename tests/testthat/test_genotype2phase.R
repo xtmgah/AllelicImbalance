@@ -1,5 +1,5 @@
 
-context("internal functions for genoMatrix2PhaseArray")
+context("internal functions for genotype2phase")
 
 test_that(paste("checking .splitGenotypeMatrix"), {
 

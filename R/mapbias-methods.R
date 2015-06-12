@@ -264,7 +264,7 @@ setMethod("defaultMapBias", signature(x = "ASEset"), function(x, return.class="a
 #' data(ASEset.sim)
 #' a <- ASEset.sim
 #'
-#' mcols(a)[["ref"]] <- randomRef(a, inferGenotypes=TRUE) 
+#' ref(a) <- randomRef(a, inferGenotypes=TRUE) 
 #'
 NULL
 

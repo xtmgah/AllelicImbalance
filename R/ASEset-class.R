@@ -370,14 +370,14 @@ setGeneric("fraction", function(x, ...) {
 #' @rdname ASEset-class
 #' @export 
 setMethod("fraction", signature(x = "ASEset"), function(x, strand = "*", 
-    top.fraction.criteria="maxcount", verbose = FALSE) {
+    top.fraction.criteria="maxcount", verbose = FALSE, ...) {
     
     if (!sum(strand %in% c("+", "-", "*")) > 0) {
         stop("strand parameter has to be either '+', '-', '*' ")
     }
     
 	#core function
-	fr <- frequency(x, strand=strand, return.class="array")
+	fr <- frequency(x, strand=strand, return.class="array", ...)
 
 	#check and use top.fraction.criteria=="phase"
 	if(top.fraction.criteria=="phase"){
@@ -592,44 +592,28 @@ setMethod("genotype", signature(x = "ASEset"), function(x,
 		stop(paste("phase are not present in assays in",
 				   " ASEset object, see '?inferGenotypes' "))
     }
-	if("ref" %in% !names(mcols(x))){
-		stop(paste("ref is not present in assays in",
+	if(!("ref" %in% names(mcols(x)))){
+		stop(paste("ref is not present in mcols in",
 				   " ASEset object, see '?ASEset' "))
 	}
-	if("alt" %in% !names(mcols(x))){
-		stop(paste("alt is not present in assays in",
-				   " ASEset object, see '?ASEset' "))
+	if(!("alt" %in% names(mcols(x)))){
+		stop(paste("alt allele is not present in mcols in",
+				   " ASEset object, see '?inferAltAllele' "))
 	}
 
-	p <- assays(x)[["phase"]]
-	mat <- matrix(alt(x), nrow(x), ncol(x))
-	pat <- matrix(alt(x), nrow(x), ncol(x))
-	mat[p[,,1]==1] <- matrix(ref(x), nrow(x), ncol(x))[p[,,1]==1]
-	pat[p[,,2]==1] <- matrix(ref(x), nrow(x), ncol(x))[p[,,2]==1]
-
-	if(return.class=="matrix"){
-
-		matrix(paste(mat,"/",pat, sep=""), nrow(x), ncol(x),
-				dimnames=list(rownames(x), colnames(x)))
-
-	}else if(return.class=="array"){
-				
-		array(c(mat, pat), dim=c(dim(x),2), 
-			  dimnames=list(rownames(x), colnames(x), c("mat","pat")))
-
-	}else{ stop("return.class type doesnt exist")}
+	phase2genotype(phase(x, return.class="array"), ref(x), alt(x), return.class=return.class)
 
 })
 
 #' @rdname ASEset-class
 #' @export 
-setGeneric("genotype<-", function(x,value){
+setGeneric("genotype<-", function(x, value){
     standardGeneric("genotype<-")
 })
 
 #' @rdname ASEset-class
 #' @export 
-setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
+setMethod("genotype<-", signature(x = "ASEset"), function(x, value){
 	
 	#check dimensions
 	if(!nrow(x)==nrow(value)){
@@ -638,8 +622,12 @@ setMethod("genotype<-", signature(x = "ASEset"), function(x,value){
 	if(!ncol(x)==ncol(value)){
 		stop("ncol(x) is not equal to ncol(value)")	
 	}
+	#check prexence of ref
+	if(!"ref" %in% names(mcols(x))){
+		stop("ref() is not set in ASEset")	
+	}
 
-	assays(x)[["phase"]] <- genoMatrix2phase(value, ref(x))	
+	assays(x)[["phase"]] <- genotype2phase(value, ref(x))	
 	x
 })
 
@@ -704,7 +692,7 @@ setMethod("phase", signature(x = "ASEset"), function(x,
 	return.class = "matrix" ) {
 
 	if(return.class=="matrix"){
-		mat <- phaseArray2Matrix(assays(x)[["phase"]])
+		mat <- phaseArray2phaseMatrix(assays(x)[["phase"]])
 		colnames(mat) <- colnames(x)
 		rownames(mat) <- rownames(x)
 		mat
@@ -758,11 +746,19 @@ setMethod("mapBias<-", signature(x = "ASEset"), function(x,value) {
 
 #' @rdname ASEset-class
 #' @export 
+setGeneric("ref")
+
+#' @rdname ASEset-class
+#' @export 
 setMethod("ref", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["ref"]]
 	
 })
+
+#' @rdname ASEset-class
+#' @export 
+setGeneric("ref<-")
 
 #' @rdname ASEset-class
 #' @export 
@@ -781,6 +777,10 @@ setMethod("ref<-", signature(x = "ASEset"), function(x, value) {
 
 #' @rdname ASEset-class
 #' @export 
+setGeneric("alt")
+
+#' @rdname ASEset-class
+#' @export 
 setMethod("alt", signature(x = "ASEset"), function(x) {
 
 		mcols(x)[["alt"]]
@@ -789,7 +789,10 @@ setMethod("alt", signature(x = "ASEset"), function(x) {
 
 #' @rdname ASEset-class
 #' @export 
-#could be renamed to countsAllAlleles
+setGeneric("alt<-")
+
+#' @rdname ASEset-class
+#' @export 
 setMethod("alt<-", signature(x = "ASEset"), function(x, value) {
 
 	if(class(value)=="character") {
@@ -893,4 +896,5 @@ setMethod("paternalAllele", signature(x = "ASEset"),
 			vec
 		}, ref=ref, alt=alt)
 })
+
 
