@@ -589,11 +589,11 @@ setMethod("genotype", signature(x = "ASEset"), function(x,
 			return.class="matrix"){
 
     if (!("phase" %in% names(assays(x)))) {
-		stop(paste("phase are not present in assays in",
+		stop(paste("phase is not present in assays in",
 				   " ASEset object, see '?inferGenotypes' "))
     }
 	if(!("ref" %in% names(mcols(x)))){
-		stop(paste("ref is not present in mcols in",
+		stop(paste("ref allele is not present in mcols in",
 				   " ASEset object, see '?ASEset' "))
 	}
 	if(!("alt" %in% names(mcols(x)))){
