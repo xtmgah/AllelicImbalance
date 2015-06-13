@@ -15,7 +15,7 @@ randomRef(x, ...)
 
 \item{...}{internal arguments}
 
-\item{source}{'alleleCounts' or 'refAndAlt'}
+\item{source}{'alleleCounts'}
 }
 \description{
 Create a vector of random reference alleles

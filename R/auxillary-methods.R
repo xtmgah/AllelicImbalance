@@ -2610,9 +2610,6 @@ NULL
 setGeneric("phase2genotype", function(x, ... 
 	){
     standardGeneric("phase2genotype")
-
-	.genotypeArray2genotypeMatrix(x, ...)
-
 })
 
 #' @rdname phase2genotype

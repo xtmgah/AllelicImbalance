@@ -259,7 +259,7 @@ setMethod("defaultMapBias", signature(x = "ASEset"), function(x, return.class="a
 #' @docType methods
 #' @param x \code{ASEset} object
 #' @param ... internal arguments
-#' @param source 'alleleCounts' or 'refAndAlt'
+#' @param source 'alleleCounts'
 #' @author Jesper R. Gadin, Lasse Folkersen
 #' @keywords mapbias
 #' @examples
@@ -290,19 +290,19 @@ setMethod("randomRef", signature(x = "ASEset"),
 
 	if(source=="alleleCounts"){
 		apply(arank(x, return.class="matrix")[,1:2],1,sample,1)
-	}else if(source=="refAndAlt"){
-		
-		if(!("ref" %in% names(mcols(x)))){
-			stop(paste("ref allele is not present in mcols in",
-					   " ASEset object, see '?ASEset' "))
-		}
-		if(!("alt" %in% names(mcols(x)))){
-			stop(paste("alt allele is not present in mcols in",
-					   " ASEset object, see '?inferAltAllele' "))
-		}
-
-		matrix(c(ref(x),alt(x)), nrow(x),ncol=2)
-
+#	}else if(source=="refAndAlt"){
+#		
+#		if(!("ref" %in% names(mcols(x)))){
+#			stop(paste("ref allele is not present in mcols in",
+#					   " ASEset object, see '?ASEset' "))
+#		}
+#		if(!("alt" %in% names(mcols(x)))){
+#			stop(paste("alt allele is not present in mcols in",
+#					   " ASEset object, see '?inferAltAllele' "))
+#		}
+#
+#		matrix(c(ref(x),alt(x)), nrow(x),ncol=2)
+#
 	}else{
 		stop("selected source is not available")
 	}
